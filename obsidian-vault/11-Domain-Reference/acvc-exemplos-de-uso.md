@@ -89,8 +89,9 @@ O servidor do produto fala MCP no stdio e reexecuta o mesmo binário. Não abre 
 acvc mcp
 ```
 
-Cada verbo do CLI é uma ferramenta: init, campaign_create, campaign_list, seed, materialize, status, record, score, reject, compare, file_diff, frontier, recall, why, backtrack, pack, serve, push, fetch, promote e tui. O argumento repo vira --repo. Se o CLI sai com erro, o texto da ferramenta é o JSON de erro, com error e context, e isError fica verdadeiro.
+Cada verbo do CLI é uma ferramenta: init, campaign_create, campaign_list, seed, materialize, status, record, score, reject, compare, file_diff, frontier, recall, why, backtrack, pack, serve, push, fetch, promote, tui e web. O argumento repo vira --repo. Se o CLI sai com erro, o texto da ferramenta é o JSON de erro, com error e context, e isError fica verdadeiro.
 
+No Cursor o servidor usa o comando acvc e o argumento mcp.
 ## Página
 A página lê o mesmo CLI. Não abre o log nem o SQLite.
 
