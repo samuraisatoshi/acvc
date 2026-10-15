@@ -25,8 +25,7 @@ O objeto principal é a variante: uma hipótese com premissa, árvore de código
 - Pasta de trabalho: o diretório que o agente já está editando. O marcador guarda o repositório, a campanha e a variante corrente, para o próximo registro achar o pai sem o agente lembrar o hash.
 
 ## Fronteiras
-
 - Git não é o núcleo. Promover só deposita a variante vencedora num diretório ou num checkout Git que já existe.
-- Este corte não tem protocolo remoto, MCP do produto, merge de texto implícito, reescrita de história, packfile nem UI web.
+- Merge de texto implícito e reescrita de história continuam fora do produto.
 - Hardlink é proibido: escrever na pasta de trabalho não pode corromper o armazenamento.
-- O primeiro visor humano é a TUI. VS Code e Obsidian falam com o CLI em JSON, sem abrir o armazenamento por FFI.
+- A TUI é o visor nativo. A página web mostra o mesmo grafo. VS Code e Obsidian falam com o CLI em JSON, sem abrir o armazenamento por FFI. O servidor MCP reexecuta o mesmo binário.
