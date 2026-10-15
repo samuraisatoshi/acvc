@@ -15,6 +15,10 @@ impl App {
         self.ports.campaigns.list_campaigns()
     }
 
+    pub fn schema(&self, campaign: &str) -> Result<Vec<MetricSpec>> {
+        self.ports.campaigns.schema_of(campaign)
+    }
+
     pub fn resolve(&self, prefix: &str) -> Result<Hash> {
         self.ports.variants.resolve(prefix)
     }

@@ -42,10 +42,21 @@ pub fn dispatch(cli: Cli) -> Result<()> {
         Command::Campaign {
             action: CampaignCommand::List,
         } => {
-            let names = from_repo(repo)?.campaigns()?;
+            let app = from_repo(repo)?;
+            let names = app.campaigns()?;
+            let mut schemas = Vec::new();
+            for name in &names {
+                let metrics = app.schema(name)?.into_iter().map(|spec| {
+                    serde_json::json!({
+                        "name": spec.name,
+                        "direction": spec.direction.as_str(),
+                    })
+                });
+                schemas.push(serde_json::json!({ "campaign": name, "metrics": metrics.collect::<Vec<_>>() }));
+            }
             emit(
                 format,
-                serde_json::json!({ "campaigns": names }),
+                serde_json::json!({ "campaigns": names, "schemas": schemas }),
                 names.join("\n"),
             );
         }

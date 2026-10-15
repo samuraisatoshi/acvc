@@ -100,6 +100,12 @@ fn route(
             let right = required(query, "right")?;
             json_or_cli(repo, &["compare", &left, &right])
         }
+        "/api/file-diff" => {
+            let left = required(query, "left")?;
+            let right = required(query, "right")?;
+            let path = required(query, "path")?;
+            json_or_cli(repo, &["file-diff", &left, &right, "--path", &path])
+        }
         _ => Ok((404, "text/plain; charset=utf-8", "not found".to_string())),
     }
 }

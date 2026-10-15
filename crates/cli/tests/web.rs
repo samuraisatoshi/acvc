@@ -130,8 +130,14 @@ fn page_shows_frontier_premise_and_metrics_without_opening_the_store() {
     assert_eq!(status, 200);
     assert!(page.contains("Premissa"));
     assert!(page.contains("Métricas"));
+    assert!(page.contains("abriu a campanha"));
+    assert!(page.contains("melhor ou igual"));
     assert!(!page.contains("sqlite"));
     assert!(!page.contains("objects.log"));
+
+    let (status, listed) = http(&addr, "/api/campaigns");
+    assert_eq!(status, 200, "{listed}");
+    assert!(listed.contains("\"direction\":\"higher\""), "{listed}");
 
     let (status, body) = http(&addr, "/api/frontier?campaign=engine");
     assert_eq!(status, 200, "{body}");
