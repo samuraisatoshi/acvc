@@ -1,0 +1,46 @@
+{
+  "name": "acvc-vscode",
+  "displayName": "ACVC",
+  "description": "Frontier, lineage, file diff, and recall for an ACVC repository. Shells out to the acvc executable.",
+  "version": "0.1.0",
+  "publisher": "acvc",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "acvc.open",
+        "title": "ACVC: Open viewer"
+      }
+    ],
+    "configuration": {
+      "title": "ACVC",
+      "properties": {
+        "acvc.binary": {
+          "type": "string",
+          "default": "acvc",
+          "description": "Path to the acvc executable. The editor does not need Cargo or Rust."
+        },
+        "acvc.repo": {
+          "type": "string",
+          "default": "",
+          "description": "Repository folder containing .acvc. Empty uses the workspace folder."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.95.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0"
+  }
+}

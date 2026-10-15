@@ -1,0 +1,6 @@
+.acvc-view { padding: 8px; }
+.acvc-bar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.acvc-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+.acvc-row span { flex: 1; }
+.acvc-error { color: var(--text-error); }
+.acvc-view pre { white-space: pre-wrap; }

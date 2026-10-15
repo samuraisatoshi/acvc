@@ -1,0 +1,12 @@
+[package]
+name = "acvc-app"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+acvc-domain.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"

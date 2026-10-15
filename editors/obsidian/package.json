@@ -1,0 +1,14 @@
+{
+  "name": "acvc-obsidian",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --outfile=main.js --external:obsidian --format=cjs --platform=node --target=es2022",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.8.0"
+  }
+}
