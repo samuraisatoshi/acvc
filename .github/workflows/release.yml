@@ -68,7 +68,12 @@ jobs:
             dist/*.tar.gz
             dist/SHA256SUMS
           body: |
-            First release of ACVC (Agent Code Variant Control).
+            ACVC 0.1.1.
+
+            Since 0.1.0:
+            - The JSON `status` field is a stable code in every language: `on_frontier`, `superseded`, `rejected`, `unmeasured`. The sentence a person reads still follows the computer locale.
+            - `acvc assistant` is the orientation for an LLM agent, on the CLI and on the MCP server (`acvc mcp`).
+            - The sponsor button points only at the Bitcoin, Solana, and Liquid deposit addresses.
 
             ACVC records an agent's hypotheses, trials, and the Pareto frontier outside Git. Git still stores the variant a person chooses to record.
 

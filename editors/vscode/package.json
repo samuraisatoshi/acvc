@@ -2,7 +2,7 @@
   "name": "acvc-vscode",
   "displayName": "ACVC",
   "description": "Frontier, lineage, file diff, and recall for an ACVC repository. Shells out to the acvc executable.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "acvc",
   "engines": {
     "vscode": "^1.85.0"
