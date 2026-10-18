@@ -52,9 +52,9 @@ export function fill(key: string, vars: Record<string, string>, lang?: Lang): st
 }
 
 export function statusLabel(code: string, lang?: Lang): string {
-  if (code === "na fronteira") return text("status_frontier", lang);
-  if (code === "superada") return text("status_beaten", lang);
-  if (code === "rejeitada") return text("status_rejected", lang);
-  if (code === "sem medição") return text("no_measurement", lang);
+  if (code === "on_frontier") return text("status_frontier", lang);
+  if (code === "superseded") return text("status_beaten", lang);
+  if (code === "rejected") return text("status_rejected", lang);
+  if (code === "unmeasured") return text("no_measurement", lang);
   return code;
 }

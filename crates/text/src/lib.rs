@@ -114,10 +114,10 @@ pub fn fill(key: &str, pairs: &[(&str, &str)]) -> String {
 
 pub fn status_label(code: &str) -> String {
     match code {
-        "na fronteira" => tr("status_frontier").to_string(),
-        "superada" => tr("status_beaten").to_string(),
-        "rejeitada" => tr("status_rejected").to_string(),
-        "sem medição" => tr("no_measurement").to_string(),
+        "on_frontier" => tr("status_frontier").to_string(),
+        "superseded" => tr("status_beaten").to_string(),
+        "rejected" => tr("status_rejected").to_string(),
+        "unmeasured" => tr("no_measurement").to_string(),
         other => other.to_string(),
     }
 }
@@ -199,6 +199,6 @@ mod tests {
         assert_eq!(tr("motive_unrecorded"), "Motivo não gravado.");
         install(Lang::Fr);
         assert_eq!(tr("on_frontier"), "Sur la frontière.");
-        assert_eq!(status_label("na fronteira"), tr("status_frontier"));
+        assert_eq!(status_label("on_frontier"), tr("status_frontier"));
     }
 }

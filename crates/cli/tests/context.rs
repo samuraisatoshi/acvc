@@ -74,7 +74,7 @@ fn context_reads_origin_branch_and_tokens() {
     assert_eq!(report.variants, 2);
     assert_eq!(report.graph.len(), 1);
     assert_eq!(report.graph[0].claim, "o teste não ficava na campanha");
-    assert_eq!(report.graph[0].status, "superada");
+    assert_eq!(report.graph[0].status, "superseded");
     assert_eq!(
         report.graph[0].beaten_by[0].claim,
         "cada sessão grava a hipótese antes de seguir"
@@ -85,7 +85,7 @@ fn context_reads_origin_branch_and_tokens() {
         report.graph[0].children[0].claim,
         "cada sessão grava a hipótese antes de seguir"
     );
-    assert_eq!(report.graph[0].children[0].status, "na fronteira");
+    assert_eq!(report.graph[0].children[0].status, "on_frontier");
     assert!(report.graph[0].assumptions[0].contains("sessão"));
     let parent = app.why(&seeded.variant).unwrap();
     assert!(!parent.on_frontier);
@@ -116,7 +116,7 @@ fn context_reads_origin_branch_and_tokens() {
     )
     .unwrap();
     let again = app.context("engine").unwrap();
-    assert_eq!(again.graph[0].children[0].status, "na fronteira");
+    assert_eq!(again.graph[0].children[0].status, "on_frontier");
     assert_eq!(
         again.graph[0].children[0].metrics.get("tests_passed"),
         Some(&2.0)
@@ -126,14 +126,14 @@ fn context_reads_origin_branch_and_tokens() {
         .iter()
         .find(|hit| hit.variant == child.variant)
         .unwrap();
-    assert_eq!(hit.status, "na fronteira");
+    assert_eq!(hit.status, "on_frontier");
     assert_eq!(hit.parents[0].claim, "o teste não ficava na campanha");
     let origin = app.recall("engine", "teste").unwrap();
     let origin = origin
         .iter()
         .find(|hit| hit.variant == seeded.variant)
         .unwrap();
-    assert_eq!(origin.status, "superada");
+    assert_eq!(origin.status, "superseded");
     assert!(origin.parents.is_empty());
     assert!(app.recall("engine", "xyzzy").unwrap().is_empty());
 }

@@ -156,8 +156,8 @@ fn page_shows_frontier_premise_and_metrics_without_opening_the_store() {
     assert_eq!(status, 200, "{body}");
     assert!(page.contains("Origem e ramificações"), "{page}");
     assert!(body.contains("premissa rapida"), "{body}");
-    assert!(body.contains("na fronteira"), "{body}");
-    assert!(body.contains("superada"), "{body}");
+    assert!(body.contains("on_frontier"), "{body}");
+    assert!(body.contains("superseded"), "{body}");
     assert!(body.contains("beaten_by"), "{body}");
     assert!(page.contains("superada por"), "{page}");
     assert!(body.contains("Nenhum token"), "{body}");

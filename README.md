@@ -19,7 +19,7 @@ install -m 755 target/release/acvc ~/.local/bin/acvc
 
 Release archives, when published, are Linux x86_64 and macOS Apple Silicon. Each archive contains the binary and `LICENSE`.
 
-The default output is JSON. Add `--format text` when you want sentences. Human sentences follow the computer locale (`LC_ALL`, then `LC_MESSAGES`, then `LANG`). English is the fallback. These four JSON status values do not change: `na fronteira`, `superada`, `rejeitada`, `sem medição`.
+The default output is JSON. Add `--format text` when you want sentences. Human sentences follow the computer locale (`LC_ALL`, then `LC_MESSAGES`, then `LANG`). English is the fallback. These four JSON status values do not change with language: `on_frontier`, `superseded`, `rejected`, `unmeasured`.
 
 ## LLM agents
 
@@ -37,7 +37,7 @@ acvc assistant --part como-usar
 
 The default is JSON. `lang` is the locale (`en-US` when the language is missing or unknown). `documents` is the contract: each item has `id`, `source`, `text`, and `metadata`. `index` tells an agent that also has the ASB MCP to submit that `documents` array to `rag.index` once. Later search uses `rag.search`. `--part` returns one document. An unknown part is an error (`unknown assistant document`).
 
-Work goes through the same binary. `seed`, `record`, `score`, `frontier`, `why`, `recall`, `compare`, `reject`, and `promote` are the verbs. Do not open `.acvc/graph.sqlite`, the log, or the pack. In JSON, read the field `status`. The four values stay `na fronteira`, `superada`, `rejeitada`, and `sem medição`. The translated sentence is for a person.
+Work goes through the same binary. `seed`, `record`, `score`, `frontier`, `why`, `recall`, `compare`, `reject`, and `promote` are the verbs. Do not open `.acvc/graph.sqlite`, the log, or the pack. In JSON, read the field `status`. The four values stay `on_frontier`, `superseded`, `rejected`, and `unmeasured`. The translated sentence is for a person.
 
 ### MCP
 

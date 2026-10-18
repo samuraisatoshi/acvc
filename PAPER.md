@@ -64,7 +64,7 @@ Spend, a side ledger of tokens, is append-only and is not a metric. It does not 
 
 ### 3.4 Rejection
 
-Dominance writes no rejection. `reject` stores one motive for a variant. Until that motive exists, a variant that fell off the frontier is described as beaten, with the winner and the metric, and the text says the motive was not recorded. The JSON status values are fixed Portuguese tokens (`na fronteira`, `superada`, `rejeitada`, `sem medição`). Prose follows the locale of the computer.
+Dominance writes no rejection. `reject` stores one motive for a variant. Until that motive exists, a variant that fell off the frontier is described as beaten, with the winner and the metric, and the text says the motive was not recorded. The JSON status values are fixed codes (`on_frontier`, `superseded`, `rejected`, `unmeasured`). Prose follows the locale of the computer.
 
 The explicit premise revision is inspired by the habit, in the philosophy of science, of treating a failed assumption as a change of hypothesis rather than as a silent edit [14]. The software does not test falsifiability. It only refuses to let that change hide inside an ordinary mutation: the edge is different, and the hash follows.
 

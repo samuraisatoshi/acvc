@@ -98,7 +98,7 @@ impl App {
         }
         let winners: Vec<(Hash, String, BTreeMap<String, f64>)> = rows
             .iter()
-            .filter(|(_, row)| row.status == "na fronteira")
+            .filter(|(_, row)| row.status == acvc_domain::ON_FRONTIER)
             .map(|(id, row)| (*id, row.claim.clone(), row.metrics.clone()))
             .collect();
         let winner_refs: Vec<(Hash, &str, &BTreeMap<String, f64>)> = winners
@@ -106,7 +106,7 @@ impl App {
             .map(|(id, claim, metrics)| (*id, claim.as_str(), metrics))
             .collect();
         for (id, row) in rows.iter_mut() {
-            if row.status != "superada" {
+            if row.status != acvc_domain::SUPERSEDED {
                 continue;
             }
             row.beaten_by = who_beats(&schema, Some(&row.metrics), &winner_refs)?
@@ -163,13 +163,13 @@ impl App {
 
 fn status_of(rejected: bool, frontier: bool, measured: bool) -> &'static str {
     if rejected {
-        "rejeitada"
+        acvc_domain::REJECTED
     } else if frontier {
-        "na fronteira"
+        acvc_domain::ON_FRONTIER
     } else if measured {
-        "superada"
+        acvc_domain::SUPERSEDED
     } else {
-        "sem medição"
+        acvc_domain::UNMEASURED
     }
 }
 

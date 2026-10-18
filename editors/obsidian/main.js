@@ -351,7 +351,10 @@ var el_default = {
   only_first: "\u03BC\u03CC\u03BD\u03BF \u03C3\u03C4\u03B7\u03BD \u03C0\u03C1\u03CE\u03C4\u03B7  {path}",
   changed_path: "\u03AC\u03BB\u03BB\u03B1\u03BE\u03B5  {path}",
   the_other: "\u0397 \u03AC\u03BB\u03BB\u03B7",
-  after_named: "\u03A4\u03B9 \u03AE\u03C1\u03B8\u03B5 \u03BC\u03B5\u03C4\u03AC: {names}"
+  after_named: "\u03A4\u03B9 \u03AE\u03C1\u03B8\u03B5 \u03BC\u03B5\u03C4\u03AC: {names}",
+  assistant_pack: "\u03A4\u03BF \u03C3\u03C5\u03BC\u03B2\u03CC\u03BB\u03B1\u03B9\u03BF \u03B3\u03B9\u03B1 \u03AC\u03BB\u03BB\u03BF\u03BD \u03C0\u03C1\u03AC\u03BA\u03C4\u03BF\u03C1\u03B1 \u03B2\u03B3\u03B1\u03AF\u03BD\u03B5\u03B9 \u03B1\u03C0\u03CC \u03C4\u03BF `acvc assistant`, \u03C3\u03C4\u03B7 \u03B3\u03BB\u03CE\u03C3\u03C3\u03B1 \u03B1\u03C5\u03C4\u03BF\u03CD \u03C4\u03BF\u03C5 \u03C5\u03C0\u03BF\u03BB\u03BF\u03B3\u03B9\u03C3\u03C4\u03AE. \u038C\u03C0\u03BF\u03B9\u03BF\u03C2 \u03AD\u03C7\u03B5\u03B9 \u03C4\u03BF MCP \u03C4\u03BF\u03C5 ASB \u03C3\u03C4\u03AD\u03BB\u03BD\u03B5\u03B9 \u03C4\u03BF\u03BD \u03C0\u03AF\u03BD\u03B1\u03BA\u03B1 documents \u03C3\u03C4\u03BF rag.index \u03BA\u03B1\u03B9 \u03BC\u03B5\u03C4\u03AC \u03C8\u03AC\u03C7\u03BD\u03B5\u03B9 \u03BC\u03B5 rag.search.",
+  assistant_index: "\u0391\u03BD \u03B1\u03C5\u03C4\u03AE \u03B7 \u03C3\u03C5\u03BD\u03B5\u03B4\u03C1\u03AF\u03B1 \u03AD\u03C7\u03B5\u03B9 \u03C4\u03BF MCP \u03C4\u03BF\u03C5 ASB, \u03C3\u03C4\u03B5\u03AF\u03BB\u03C4\u03B5 \u03C4\u03BF\u03BD \u03C0\u03AF\u03BD\u03B1\u03BA\u03B1 documents \u03C3\u03C4\u03BF rag.index \u03BC\u03AF\u03B1 \u03C6\u03BF\u03C1\u03AC. \u0397 \u03B5\u03C0\u03CC\u03BC\u03B5\u03BD\u03B7 \u03B1\u03BD\u03B1\u03B6\u03AE\u03C4\u03B7\u03C3\u03B7 \u03C7\u03C1\u03B7\u03C3\u03B9\u03BC\u03BF\u03C0\u03BF\u03B9\u03B5\u03AF rag.search.",
+  when_assistant: "\u0395\u03C0\u03B9\u03C3\u03C4\u03C1\u03AD\u03C6\u03B5\u03B9 \u03C4\u03BF \u03BB\u03B5\u03B9\u03C4\u03BF\u03C5\u03C1\u03B3\u03B9\u03BA\u03CC \u03C3\u03C5\u03BC\u03B2\u03CC\u03BB\u03B1\u03B9\u03BF \u03C3\u03C4\u03B7 \u03B3\u03BB\u03CE\u03C3\u03C3\u03B1 \u03B1\u03C5\u03C4\u03BF\u03CD \u03C4\u03BF\u03C5 \u03C5\u03C0\u03BF\u03BB\u03BF\u03B3\u03B9\u03C3\u03C4\u03AE, \u03AD\u03C4\u03BF\u03B9\u03BC\u03BF \u03B3\u03B9\u03B1 rag.index."
 };
 
 // ../../locales/en-US.json
@@ -547,7 +550,10 @@ var en_US_default = {
   only_first: "only in the first  {path}",
   changed_path: "changed  {path}",
   the_other: "The other",
-  after_named: "What came after: {names}"
+  after_named: "What came after: {names}",
+  assistant_pack: "The contract for another agent comes from `acvc assistant`, in this computer's language. An agent with the ASB MCP submits the documents array to rag.index and later searches with rag.search.",
+  assistant_index: "If this session has the ASB MCP, submit the documents array to rag.index once. Later search uses rag.search.",
+  when_assistant: "Returns the operational contract in this computer's language, ready for rag.index."
 };
 
 // ../../locales/es.json
@@ -743,7 +749,10 @@ var es_default = {
   only_first: "solo en la primera  {path}",
   changed_path: "cambi\xF3  {path}",
   the_other: "La otra",
-  after_named: "Lo que vino despu\xE9s: {names}"
+  after_named: "Lo que vino despu\xE9s: {names}",
+  assistant_pack: "El contrato para otro agente sale de `acvc assistant`, en el idioma de este computador. Quien tiene el MCP de ASB env\xEDa el array documents a rag.index y despu\xE9s busca con rag.search.",
+  assistant_index: "Si esta sesi\xF3n tiene el MCP de ASB, env\xEDe el array documents a rag.index una vez. La b\xFAsqueda siguiente usa rag.search.",
+  when_assistant: "Devuelve el contrato operacional en el idioma de este computador, listo para rag.index."
 };
 
 // ../../locales/fr.json
@@ -939,7 +948,10 @@ var fr_default = {
   only_first: "seulement dans la premi\xE8re  {path}",
   changed_path: "a chang\xE9  {path}",
   the_other: "L'autre",
-  after_named: "Ce qui est venu ensuite : {names}"
+  after_named: "Ce qui est venu ensuite : {names}",
+  assistant_pack: "Le contrat pour un autre agent sort de `acvc assistant`, dans la langue de cet ordinateur. Un agent qui a le MCP d'ASB envoie le tableau documents \xE0 rag.index, puis cherche avec rag.search.",
+  assistant_index: "Si cette session a le MCP d'ASB, envoyez le tableau documents \xE0 rag.index une fois. La recherche suivante utilise rag.search.",
+  when_assistant: "Renvoie le contrat op\xE9rationnel dans la langue de cet ordinateur, pr\xEAt pour rag.index."
 };
 
 // ../../locales/nl.json
@@ -1135,7 +1147,10 @@ var nl_default = {
   only_first: "alleen in de eerste  {path}",
   changed_path: "gewijzigd  {path}",
   the_other: "De andere",
-  after_named: "Wat daarna kwam: {names}"
+  after_named: "Wat daarna kwam: {names}",
+  assistant_pack: "Het contract voor een andere agent komt uit `acvc assistant`, in de taal van deze computer. Een agent met de ASB-MCP stuurt de array documents naar rag.index en zoekt daarna met rag.search.",
+  assistant_index: "Als deze sessie de ASB-MCP heeft, stuur de array documents \xE9\xE9n keer naar rag.index. Zoeken daarna gaat met rag.search.",
+  when_assistant: "Geeft het operationele contract terug in de taal van deze computer, klaar voor rag.index."
 };
 
 // ../../locales/pl.json
@@ -1331,7 +1346,10 @@ var pl_default = {
   only_first: "tylko w pierwszej  {path}",
   changed_path: "zmieni\u0142o si\u0119  {path}",
   the_other: "Druga",
-  after_named: "Co przysz\u0142o potem: {names}"
+  after_named: "Co przysz\u0142o potem: {names}",
+  assistant_pack: "Umowa dla innego agenta wychodzi z `acvc assistant`, w j\u0119zyku tego komputera. Agent z MCP ASB wysy\u0142a tablic\u0119 documents do rag.index, a potem szuka przez rag.search.",
+  assistant_index: "Je\u015Bli ta sesja ma MCP ASB, wy\u015Blij tablic\u0119 documents do rag.index raz. P\xF3\u017Aniejsze szukanie u\u017Cywa rag.search.",
+  when_assistant: "Zwraca umow\u0119 operacyjn\u0105 w j\u0119zyku tego komputera, gotow\u0105 dla rag.index."
 };
 
 // ../../locales/pt-BR.json
@@ -1527,7 +1545,10 @@ var pt_BR_default = {
   only_first: "s\xF3 na primeira  {path}",
   changed_path: "mudou  {path}",
   the_other: "A outra",
-  after_named: "O que veio depois: {names}"
+  after_named: "O que veio depois: {names}",
+  assistant_pack: "O contrato para outro agente sai de `acvc assistant`, no idioma deste computador. Quem tem o MCP do ASB envia o array documents para rag.index e depois busca com rag.search.",
+  assistant_index: "Se esta sess\xE3o tem o MCP do ASB, envie o array documents para rag.index uma vez. A busca seguinte usa rag.search.",
+  when_assistant: "Devolve o contrato operacional no idioma deste computador, pronto para rag.index."
 };
 
 // ../../locales/ru.json
@@ -1723,7 +1744,10 @@ var ru_default = {
   only_first: "\u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u043F\u0435\u0440\u0432\u043E\u0439  {path}",
   changed_path: "\u0438\u0437\u043C\u0435\u043D\u0438\u043B\u043E\u0441\u044C  {path}",
   the_other: "\u0414\u0440\u0443\u0433\u0430\u044F",
-  after_named: "\u0427\u0442\u043E \u0431\u044B\u043B\u043E \u043F\u043E\u0442\u043E\u043C: {names}"
+  after_named: "\u0427\u0442\u043E \u0431\u044B\u043B\u043E \u043F\u043E\u0442\u043E\u043C: {names}",
+  assistant_pack: "\u041A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 \u0434\u043B\u044F \u0434\u0440\u0443\u0433\u043E\u0433\u043E \u0430\u0433\u0435\u043D\u0442\u0430 \u0432\u044B\u0434\u0430\u0451\u0442 `acvc assistant`, \u043D\u0430 \u044F\u0437\u044B\u043A\u0435 \u044D\u0442\u043E\u0433\u043E \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0430. \u0410\u0433\u0435\u043D\u0442 \u0441 MCP ASB \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442 \u043C\u0430\u0441\u0441\u0438\u0432 documents \u0432 rag.index, \u0430 \u043F\u043E\u0442\u043E\u043C \u0438\u0449\u0435\u0442 \u0447\u0435\u0440\u0435\u0437 rag.search.",
+  assistant_index: "\u0415\u0441\u043B\u0438 \u0432 \u044D\u0442\u043E\u0439 \u0441\u0435\u0441\u0441\u0438\u0438 \u0435\u0441\u0442\u044C MCP ASB, \u043E\u0442\u043F\u0440\u0430\u0432\u044C\u0442\u0435 \u043C\u0430\u0441\u0441\u0438\u0432 documents \u0432 rag.index \u043E\u0434\u0438\u043D \u0440\u0430\u0437. \u0414\u0430\u043B\u044C\u043D\u0435\u0439\u0448\u0438\u0439 \u043F\u043E\u0438\u0441\u043A \u0438\u0434\u0451\u0442 \u0447\u0435\u0440\u0435\u0437 rag.search.",
+  when_assistant: "\u0412\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\u043E\u043D\u043D\u044B\u0439 \u043A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 \u043D\u0430 \u044F\u0437\u044B\u043A\u0435 \u044D\u0442\u043E\u0433\u043E \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0430, \u0433\u043E\u0442\u043E\u0432\u044B\u0439 \u0434\u043B\u044F rag.index."
 };
 
 // ../client/src/locale.ts
@@ -1765,10 +1789,10 @@ function fill(key, vars, lang) {
   return sentence;
 }
 function statusLabel(code, lang) {
-  if (code === "na fronteira") return text("status_frontier", lang);
-  if (code === "superada") return text("status_beaten", lang);
-  if (code === "rejeitada") return text("status_rejected", lang);
-  if (code === "sem medi\xE7\xE3o") return text("no_measurement", lang);
+  if (code === "on_frontier") return text("status_frontier", lang);
+  if (code === "superseded") return text("status_beaten", lang);
+  if (code === "rejected") return text("status_rejected", lang);
+  if (code === "unmeasured") return text("no_measurement", lang);
   return code;
 }
 
@@ -1822,7 +1846,7 @@ function recallText(report, lang) {
     const parents = hit.parents ?? [];
     const from = parents.length === 0 ? text("opened_campaign", lang) : fill("came_from", { names: parents.map((parent) => parent.claim).join("; ") }, lang);
     return `${hit.claim}
-${statusLabel(hit.status || "sem medi\xE7\xE3o", lang)}
+${statusLabel(hit.status || "unmeasured", lang)}
 ${from}`;
   }).join("\n\n");
 }

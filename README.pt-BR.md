@@ -19,7 +19,7 @@ install -m 755 target/release/acvc ~/.local/bin/acvc
 
 Os arquivos de release, quando publicados, são Linux x86_64 e macOS Apple Silicon. Cada arquivo traz o binário e o `LICENSE`.
 
-A saída padrão é JSON. Use `--format text` quando quiser frases. As frases seguem o idioma do computador (`LC_ALL`, depois `LC_MESSAGES`, depois `LANG`). O inglês é o recurso quando o idioma não é identificado. Estes quatro valores de status no JSON não mudam: `na fronteira`, `superada`, `rejeitada`, `sem medição`.
+A saída padrão é JSON. Use `--format text` quando quiser frases. As frases seguem o idioma do computador (`LC_ALL`, depois `LC_MESSAGES`, depois `LANG`). O inglês é o recurso quando o idioma não é identificado. Estes quatro valores de status no JSON não dependem do idioma: `on_frontier`, `superseded`, `rejected`, `unmeasured`.
 
 ## Agents LLM
 
@@ -37,7 +37,7 @@ acvc assistant --part como-usar
 
 O padrão é JSON. `lang` é o idioma (`en-US` quando a língua falta ou é desconhecida). `documents` é o contrato: cada item tem `id`, `source`, `text` e `metadata`. `index` diz a um agent que também tem o MCP do ASB para enviar esse array `documents` ao `rag.index` uma vez. A busca seguinte usa `rag.search`. `--part` devolve um documento. Uma parte desconhecida é erro (`unknown assistant document`).
 
-O trabalho passa pelo mesmo binário. `seed`, `record`, `score`, `frontier`, `why`, `recall`, `compare`, `reject` e `promote` são os verbos. Não abra `.acvc/graph.sqlite`, o log nem o pack. No JSON, leia o campo `status`. Os quatro valores continuam `na fronteira`, `superada`, `rejeitada` e `sem medição`. A frase traduzida é para uma pessoa.
+O trabalho passa pelo mesmo binário. `seed`, `record`, `score`, `frontier`, `why`, `recall`, `compare`, `reject` e `promote` são os verbos. Não abra `.acvc/graph.sqlite`, o log nem o pack. No JSON, leia o campo `status`. Os quatro valores continuam `on_frontier`, `superseded`, `rejected` e `unmeasured`. A frase traduzida é para uma pessoa.
 
 ### MCP
 

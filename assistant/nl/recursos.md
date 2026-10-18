@@ -8,10 +8,10 @@ Kanten: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
 
 Status, als JSON-waarden:
 
-- `na fronteira` — gemeten, en geen andere hypothese overtreft haar.
-- `superada` — gemeten, en een andere op de grens is beter.
-- `rejeitada` — iemand legde het motief vast.
-- `sem medição` — er is nog geen volledige proef voor het schema van de campagne.
+- `on_frontier` — gemeten, en geen andere hypothese overtreft haar.
+- `superseded` — gemeten, en een andere op de grens is beter.
+- `rejected` — iemand legde het motief vast.
+- `unmeasured` — er is nog geen volledige proef voor het schema van de campagne.
 
 De grens verlaten legt geen afwijzing vast. Als er geen motief is, noemt de lezing wie won, de maat, en dat het motief niet is vastgelegd. In nl is die zin `Het motief is niet vastgelegd.`
 

@@ -292,7 +292,7 @@ function mapNode(node) {
   button.className = "choice";
   const meta = document.createElement("span");
   const branches = { seed: L.branch_seed, mutate: L.branch_mutate, revert: L.branch_revert, revise_premise: L.branch_revise, synthesize: L.branch_synthesize };
-  const statusLabel = { "na fronteira": L.status_frontier, "superada": L.status_beaten, "rejeitada": L.status_rejected, "sem medição": L.no_measurement };
+  const statusLabel = { "on_frontier": L.status_frontier, "superseded": L.status_beaten, "rejected": L.status_rejected, "unmeasured": L.no_measurement };
   const cause = (node.assumptions || []).join(" · ");
   const beaten = (node.beaten_by || []).map((item) => fill("beaten_inline", { claim: item.claim })).join("; ");
   meta.textContent = (statusLabel[node.status] || node.status) + " · " + (node.agent || L.agent_word) + " · " + (branches[node.edge] || node.edge) + " · " + summary(node.metrics) + (cause ? " · " + cause : "") + (beaten ? " · " + beaten : "");
@@ -351,7 +351,7 @@ document.querySelector("#search").addEventListener("click", async () => {
   for (const hit of hits) {
     remember(hit.variant, hit.claim);
     const parent = hit.parents && hit.parents[0] ? hit.parents[0].claim : "";
-    const statusLabel = { "na fronteira": L.status_frontier, "superada": L.status_beaten, "rejeitada": L.status_rejected, "sem medição": L.no_measurement };
+    const statusLabel = { "on_frontier": L.status_frontier, "superseded": L.status_beaten, "rejected": L.status_rejected, "unmeasured": L.no_measurement };
     const origin = parent ? fill("came_from_inline", { claim: parent }) : L.opened_short;
     body.append(choice(hit.claim, (statusLabel[hit.status] || hit.status || L.no_measurement) + " · " + origin, hit.variant));
   }
