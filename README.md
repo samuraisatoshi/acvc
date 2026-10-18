@@ -21,6 +21,41 @@ Release archives, when published, are Linux x86_64 and macOS Apple Silicon. Each
 
 The default output is JSON. Add `--format text` when you want sentences. Human sentences follow the computer locale (`LC_ALL`, then `LC_MESSAGES`, then `LANG`). English is the fallback. These four JSON status values do not change: `na fronteira`, `superada`, `rejeitada`, `sem medição`.
 
+## LLM agents
+
+An agent learns ACVC from the executable, not from this README. At the start of a session, before explaining the tool or calling another verb, it runs `acvc assistant`. That command returns the operational contract in the computer's language. The same contract is the MCP tool `assistant`.
+
+The contract has eight parts: `indice`, `objetivo`, `recursos`, `como-usar`, `boas-praticas`, `exemplos`, `mau-uso`, `trade-offs`. Read them in that order and stop when the question already has an answer.
+
+### CLI
+
+```bash
+acvc assistant
+acvc --format text assistant
+acvc assistant --part como-usar
+```
+
+The default is JSON. `lang` is the locale (`en-US` when the language is missing or unknown). `documents` is the contract: each item has `id`, `source`, `text`, and `metadata`. `index` tells an agent that also has the ASB MCP to submit that `documents` array to `rag.index` once. Later search uses `rag.search`. `--part` returns one document. An unknown part is an error (`unknown assistant document`).
+
+Work goes through the same binary. `seed`, `record`, `score`, `frontier`, `why`, `recall`, `compare`, `reject`, and `promote` are the verbs. Do not open `.acvc/graph.sqlite`, the log, or the pack. In JSON, read the field `status`. The four values stay `na fronteira`, `superada`, `rejeitada`, and `sem medição`. The translated sentence is for a person.
+
+### MCP
+
+`acvc mcp` speaks MCP on stdio. It does not open the store. Each tool starts the `acvc` binary again and returns that process's output.
+
+```json
+{
+  "mcpServers": {
+    "acvc": {
+      "command": "acvc",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Call the tool `assistant` first, with an optional argument `part`. The other tools are the CLI verbs. Pass `repo` when the campaign is not in the server's current directory. A page, a TUI, or an editor that wants the data calls this executable. It does not reimplement the graph.
+
 ## One campaign
 
 ```bash
