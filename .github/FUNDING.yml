@@ -1,0 +1,9 @@
+# Spontaneous donations are crypto deposits only.
+# Send the transaction id to samuraisatoshi@cryptoworld.8shield.net.
+# Bitcoin (Native SegWit): bc1qzc427krz6zlvpdpz4x7h87y0qmf4u79aktx8c8
+# Solana: D92qzo3ati5YEzbTboXbwm1PpgkWu5BeXSV1j4X6tEGR
+# Liquid (L-BTC, L-USDT): lq1qqgj94smm95wuh4wdsea5jnpvjj7qv7g422zy4g2k5yyllhunr3zzpa75hjpgq6s0aw3mpts7x5y6gkvjxwx756xer8rwx8yyq
+custom:
+  - "https://mempool.space/address/bc1qzc427krz6zlvpdpz4x7h87y0qmf4u79aktx8c8"
+  - "https://explorer.solana.com/address/D92qzo3ati5YEzbTboXbwm1PpgkWu5BeXSV1j4X6tEGR"
+  - "https://blockstream.info/liquid/address/lq1qqgj94smm95wuh4wdsea5jnpvjj7qv7g422zy4g2k5yyllhunr3zzpa75hjpgq6s0aw3mpts7x5y6gkvjxwx756xer8rwx8yyq"
