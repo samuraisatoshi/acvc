@@ -15,6 +15,7 @@ mod recall;
 mod recall_store;
 mod scan;
 mod schema;
+mod spends;
 mod trials;
 mod variants;
 mod workspaces;

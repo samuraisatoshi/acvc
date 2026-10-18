@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import { Acvc, AcvcError } from "../../client/src/api.ts";
-import { compareText, diffPaths, frontierLabel, recallText, whyText, type DiffPath } from "../../client/src/format.ts";
+import { compareText, diffPaths, frontierLabel, pathLabel, recallText, whyText, type DiffPath } from "../../client/src/format.ts";
 import { pageHtml } from "./page.ts";
 
 interface ViewState {
   campaigns: string[];
   campaign: string;
-  frontier: { variant: string; label: string }[];
-  left: string;
-  right: string;
-  paths: DiffPath[];
+  frontier: { variant: string; claim: string; label: string }[];
+  one: string;
+  other: string;
+  paths: (DiffPath & { label: string })[];
   body: string;
   error: string;
 }
@@ -17,7 +17,7 @@ interface ViewState {
 type Inbound =
   | { type: "campaign"; name: string }
   | { type: "why"; variant: string }
-  | { type: "mark"; side: "left" | "right"; variant: string }
+  | { type: "mark"; side: "one" | "other"; variant: string }
   | { type: "compare" }
   | { type: "file"; path: string }
   | { type: "recall"; query: string };
@@ -26,8 +26,8 @@ const empty: ViewState = {
   campaigns: [],
   campaign: "",
   frontier: [],
-  left: "",
-  right: "",
+  one: "",
+  other: "",
   paths: [],
   body: "",
   error: "",
@@ -55,12 +55,16 @@ function open(context: vscode.ExtensionContext): void {
 
 class Viewer {
   private state: ViewState = { ...empty };
+  private oneId = "";
+  private otherId = "";
 
   constructor(private readonly panel: vscode.WebviewPanel) {}
 
   async loadCampaigns(): Promise<void> {
     try {
       const campaigns = await this.client().campaigns();
+      this.oneId = "";
+      this.otherId = "";
       this.state = { ...empty, campaigns, campaign: campaigns[0] ?? "" };
       if (this.state.campaign) await this.loadFrontier();
       else this.post();
@@ -80,8 +84,14 @@ class Viewer {
         this.state.body = whyText(await this.client().why(message.variant));
         this.post();
       } else if (message.type === "mark") {
-        if (message.side === "left") this.state.left = message.variant;
-        else this.state.right = message.variant;
+        const claim = this.state.frontier.find((row) => row.variant === message.variant)?.claim ?? "";
+        if (message.side === "one") {
+          this.oneId = message.variant;
+          this.state.one = claim;
+        } else {
+          this.otherId = message.variant;
+          this.state.other = claim;
+        }
         this.post();
       } else if (message.type === "compare") {
         await this.compare();
@@ -100,33 +110,37 @@ class Viewer {
     const report = await this.client().frontier(this.state.campaign);
     this.state.frontier = report.variants.map((row) => ({
       variant: row.variant,
+      claim: row.claim,
       label: frontierLabel(row),
     }));
-    this.state.body = this.state.frontier.length === 0 ? "frontier is empty" : "";
+    this.state.body = this.state.frontier.length === 0 ? "Nenhuma hipótese na fronteira." : "";
     this.post();
   }
 
   private async compare(): Promise<void> {
-    if (!this.state.left || !this.state.right) {
-      this.state.error = "mark two variants before compare";
+    if (!this.oneId || !this.otherId) {
+      this.state.error = "Escolha duas hipóteses.";
       this.post();
       return;
     }
-    const report = await this.client().compare(this.state.left, this.state.right);
-    this.state.paths = diffPaths(report);
+    const report = await this.client().compare(this.oneId, this.otherId);
+    this.state.paths = diffPaths(report).map((entry) => ({
+      ...entry,
+      label: pathLabel(entry.kind, entry.path),
+    }));
     this.state.body = compareText(report);
     this.post();
   }
 
   private async file(file: string): Promise<void> {
-    const report = await this.client().fileDiff(this.state.left, this.state.right, file);
+    const report = await this.client().fileDiff(this.oneId, this.otherId, file);
     this.state.body = report.diff;
     this.post();
   }
 
   private client(): Acvc {
     const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!folder) throw new AcvcError("open a folder before using ACVC", {});
+    if (!folder) throw new AcvcError("Abra uma pasta antes de usar o ACVC.", {});
     const config = vscode.workspace.getConfiguration("acvc");
     const repo = config.get<string>("repo")?.trim();
     return new Acvc({

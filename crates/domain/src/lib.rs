@@ -16,6 +16,7 @@ mod pareto;
 mod plan;
 mod ports;
 mod premise;
+mod spend;
 mod tree;
 mod trial;
 mod variant;
@@ -33,9 +34,10 @@ pub use pareto::{ScoreRelation, ScoredVariant, compare_scores, frontier};
 pub use plan::{ListedFile, Plan, plan_changes};
 pub use ports::{
     BlobCache, CampaignStore, CheckoutWrite, Clock, DirectoryScan, GitPort, IndexIo, MarkerIo,
-    ObjectStore, PackReport, RecallStore, TrialStore, VariantStore, WorkspaceRegistry,
+    ObjectStore, PackReport, RecallStore, SpendStore, TrialStore, VariantStore, WorkspaceRegistry,
 };
 pub use premise::Premise;
+pub use spend::Spend;
 pub use tree::{
     EXEC_MODE, EntryKind, FILE_MODE, TREE_MODE, TreeEntry, TreeFile, canonical_tree, decode_tree,
     lookup_file, tree_hash, valid_relative, walk_files,

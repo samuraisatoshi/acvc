@@ -51,6 +51,10 @@ export interface Why {
   children: string[];
   trials: { id: string; metrics: Record<string, number> }[];
   rejection: string | null;
+  on_frontier?: boolean;
+  beaten_by?: { claim: string; gaps: { name: string; direction: string; winner: number; loser: number }[] }[];
+  parent_claims?: string[];
+  child_claims?: string[];
 }
 
 export interface Compare {
@@ -59,12 +63,14 @@ export interface Compare {
   added: string[];
   removed: string[];
   modified: string[];
-  metrics: { name: string; left: number | null; right: number | null }[];
+  metrics: { name: string; direction?: string; left: number | null; right: number | null }[];
   dominance: string;
+  left_claim?: string;
+  right_claim?: string;
 }
 
 export interface Recall {
-  hits: { variant: string; claim: string }[];
+  hits: { variant: string; claim: string; status?: string; parents?: { variant: string; claim: string }[] }[];
 }
 
 export interface FileDiff {

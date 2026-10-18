@@ -162,7 +162,7 @@ impl Model {
             }
             KeyCode::Enter => {
                 let Some(campaign) = self.selected_campaign().map(str::to_string) else {
-                    self.message = "select a campaign".into();
+                    self.message = acvc_text::tr("pick_campaign").into();
                     return Command::None;
                 };
                 Command::Recall {
@@ -216,12 +216,17 @@ impl Model {
 
     fn mark_diff(&mut self) -> Command {
         let Some(id) = self.selected_variant() else {
-            self.message = "no variant selected".into();
+            self.message = acvc_text::tr("none_chosen").into();
             return Command::None;
         };
         if self.diff_left.is_none() {
             self.diff_left = Some(id);
-            self.message = format!("diff left {}", short(&id));
+            let claim = self.claim_of(&id);
+            self.message = if claim.is_empty() {
+                acvc_text::tr("first_marked").into()
+            } else {
+                acvc_text::fill("first_named", &[("claim", claim.as_str())])
+            };
             return Command::None;
         }
         self.diff_right = Some(id);
@@ -281,6 +286,35 @@ impl Model {
         ids.extend(detail.children.iter().copied());
         ids.get(self.lineage_idx).copied()
     }
+
+    fn claim_of(&self, id: &Hash) -> String {
+        if let Some(row) = self.frontier.iter().find(|row| row.variant == *id) {
+            return row.claim.clone();
+        }
+        if let Some(hit) = self.recall_hits.iter().find(|hit| hit.variant == *id) {
+            return hit.claim.clone();
+        }
+        if let Some(detail) = &self.detail {
+            if detail.variant == *id {
+                return detail.claim.clone();
+            }
+            if let Some(index) = detail.parents.iter().position(|parent| parent == id) {
+                return detail.parent_claims.get(index).cloned().unwrap_or_default();
+            }
+            if let Some(index) = detail.children.iter().position(|child| child == id) {
+                return detail.child_claims.get(index).cloned().unwrap_or_default();
+            }
+        }
+        if let Some(compare) = &self.compare {
+            if compare.left == *id {
+                return compare.left_claim.clone();
+            }
+            if compare.right == *id {
+                return compare.right_claim.clone();
+            }
+        }
+        String::new()
+    }
 }
 
 fn next_screen(screen: Screen) -> Screen {
@@ -305,10 +339,6 @@ fn prev_screen(screen: Screen) -> Screen {
     }
 }
 
-pub fn short(hash: &Hash) -> String {
-    hash.to_hex().chars().take(12).collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -324,5 +354,26 @@ mod tests {
         assert_eq!(model.campaign_idx, 1);
         model.on_key(KeyCode::Char('k'));
         assert_eq!(model.campaign_idx, 0);
+    }
+
+    #[test]
+    fn diff_mark_names_the_premise() {
+        acvc_text::install(acvc_text::Lang::PtBr);
+        let mut model = Model::empty();
+        model.screen = Screen::Frontier;
+        model.frontier = vec![FrontierRow {
+            variant: Hash::parse(
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            )
+            .unwrap(),
+            claim: "frase humana".into(),
+            metrics: Default::default(),
+        }];
+        assert_eq!(model.on_key(KeyCode::Char('d')), Command::None);
+        assert_eq!(model.message, "Primeira: frase humana. Aperte d na outra.");
+        model.typing = true;
+        model.campaigns.clear();
+        model.on_key(KeyCode::Enter);
+        assert_eq!(model.message, "Escolha uma campanha.");
     }
 }

@@ -6,12 +6,13 @@ members = [
   "crates/store",
   "crates/cli",
   "crates/tui",
+  "crates/text",
 ]
 
 [workspace.package]
 edition = "2024"
 version = "0.1.0"
-license = "MIT"
+license = "LicenseRef-ACVC-NonCommercial"
 publish = false
 
 [workspace.dependencies]
@@ -19,6 +20,7 @@ acvc-domain = { path = "crates/domain" }
 acvc-app = { path = "crates/app" }
 acvc-store = { path = "crates/store" }
 acvc-tui = { path = "crates/tui" }
+acvc-text = { path = "crates/text" }
 blake3 = "1.5"
 rusqlite = { version = "0.40", default-features = false, features = ["bundled"] }
 reflink-copy = "0.1"

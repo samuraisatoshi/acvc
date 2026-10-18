@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { Acvc } from "../src/api.ts";
+import { whyText } from "../src/format.ts";
 
 const root = path.resolve(import.meta.dirname, "../../..");
 
@@ -59,14 +60,21 @@ test("the json cli serves frontier, lineage, diff, and recall", async () => {
     assert.equal(frontier.variants[0]?.variant, faster.variant);
 
     const hits = await acvc.recall("speed", "faster");
-    assert.ok(hits.hits.some((hit) => hit.variant === faster.variant));
+    assert.equal(hits.hits.find((hit) => hit.variant === faster.variant)?.status, "na fronteira");
 
     const why = await acvc.why(faster.variant);
     assert.deepEqual(why.parents, [seeded.variant]);
     assert.equal(why.claim, "faster cache");
+    assert.deepEqual(why.parent_claims, ["baseline"]);
+    assert.match(whyText(why, "pt-BR"), /Veio de: baseline/);
+    assert.doesNotMatch(whyText(why, "pt-BR"), /edge /);
 
     const compared = await acvc.compare(faster.variant, slower.variant);
     assert.equal(compared.dominance, "left");
+    assert.equal(compared.left_claim, "faster cache");
+    const directions = Object.fromEntries(compared.metrics.map((delta) => [delta.name, delta.direction]));
+    assert.equal(directions.tests_passed, "higher");
+    assert.equal(directions.latency_ms, "lower");
     assert.ok(compared.modified.includes("a/one.txt"));
 
     const diff = await acvc.fileDiff(faster.variant, slower.variant, "a/one.txt");

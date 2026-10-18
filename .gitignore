@@ -3,3 +3,9 @@ editors/**/node_modules
 .acvc/
 .acvc-workspace
 .acvc-index
+.claude/
+.cursor/
+AGENTS.md
+CLAUDE.md
+.domain-and-rag-ignore
+obsidian-vault/

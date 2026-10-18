@@ -14,7 +14,7 @@
     "commands": [
       {
         "command": "acvc.open",
-        "title": "ACVC: Open viewer"
+        "title": "ACVC: Abrir o visor"
       }
     ],
     "configuration": {

@@ -8,6 +8,7 @@ publish.workspace = true
 [dependencies]
 acvc-domain.workspace = true
 acvc-app.workspace = true
+acvc-text.workspace = true
 ratatui.workspace = true
 
 [lints.rust]

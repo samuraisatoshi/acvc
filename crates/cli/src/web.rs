@@ -1,16 +1,16 @@
 use std::collections::BTreeMap;
 use std::io::{Read, Write};
-use std::time::Duration;
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::Duration;
 
 use acvc_domain::{Error, Result};
 use serde_json::{Map, Value, json};
 
 use crate::args::Format;
 use crate::present;
-use crate::web_page::PAGE;
+use crate::web_page::page;
 
 pub fn listen(repo: Option<&Path>, bind: &str, format: Format) -> Result<()> {
     let listener =
@@ -77,7 +77,7 @@ fn route(
     query: &BTreeMap<String, String>,
 ) -> Result<(u16, &'static str, String)> {
     match path {
-        "/" => Ok((200, "text/html; charset=utf-8", PAGE.to_string())),
+        "/" => Ok((200, "text/html; charset=utf-8", page())),
         "/api/campaigns" => json_or_cli(repo, &["campaign", "list"]),
         "/api/frontier" => {
             let campaign = required(query, "campaign")?;
@@ -99,6 +99,10 @@ fn route(
             let left = required(query, "left")?;
             let right = required(query, "right")?;
             json_or_cli(repo, &["compare", &left, &right])
+        }
+        "/api/context" => {
+            let campaign = required(query, "campaign")?;
+            json_or_cli(repo, &["context", "--campaign", &campaign])
         }
         "/api/file-diff" => {
             let left = required(query, "left")?;

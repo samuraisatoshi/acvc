@@ -8,9 +8,9 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
-use acvc_app::SeedRequest;
+use acvc_app::{RecordRequest, SeedRequest};
 use acvc_cli::{init_at, open_at};
-use acvc_domain::{Direction, MetricSpec};
+use acvc_domain::{Direction, EdgeKind, MetricSpec};
 use serde_json::Value;
 
 fn scratch(name: &str) -> PathBuf {
@@ -68,15 +68,12 @@ fn page_shows_frontier_premise_and_metrics_without_opening_the_store() {
     )
     .unwrap();
     let slow_dir = root.join("slow");
-    let fast_dir = root.join("fast");
     fs::create_dir_all(&slow_dir).unwrap();
-    fs::create_dir_all(&fast_dir).unwrap();
     fs::write(slow_dir.join("a.txt"), "slow").unwrap();
-    fs::write(fast_dir.join("b.txt"), "fast").unwrap();
     let slow = app
         .seed(SeedRequest {
             campaign: "engine".into(),
-            path: slow_dir,
+            path: slow_dir.clone(),
             claim: "premissa lenta".into(),
             assumptions: Vec::new(),
             intent: String::new(),
@@ -84,14 +81,17 @@ fn page_shows_frontier_premise_and_metrics_without_opening_the_store() {
         })
         .unwrap()
         .variant;
+    fs::write(slow_dir.join("a.txt"), "fast").unwrap();
     let fast = app
-        .seed(SeedRequest {
-            campaign: "engine".into(),
-            path: fast_dir,
+        .record(RecordRequest {
+            workspace: slow_dir,
+            edge: EdgeKind::Mutate,
             claim: "premissa rapida".into(),
             assumptions: Vec::new(),
+            revises: None,
             intent: String::new(),
             agent: "agent".into(),
+            parents: Vec::new(),
         })
         .unwrap()
         .variant;
@@ -102,6 +102,7 @@ fn page_shows_frontier_premise_and_metrics_without_opening_the_store() {
         .unwrap();
 
     let mut child = Command::new(env!("CARGO_BIN_EXE_acvc"))
+        .env("LC_ALL", "pt_BR.UTF-8")
         .arg("--repo")
         .arg(&repo)
         .arg("web")
@@ -150,5 +151,15 @@ fn page_shows_frontier_premise_and_metrics_without_opening_the_store() {
         "{body}"
     );
     assert!(rows.iter().all(|row| row["claim"] != "premissa lenta"));
+
+    let (status, body) = http(&addr, "/api/context?campaign=engine");
+    assert_eq!(status, 200, "{body}");
+    assert!(page.contains("Origem e ramificações"), "{page}");
+    assert!(body.contains("premissa rapida"), "{body}");
+    assert!(body.contains("na fronteira"), "{body}");
+    assert!(body.contains("superada"), "{body}");
+    assert!(body.contains("beaten_by"), "{body}");
+    assert!(page.contains("superada por"), "{page}");
+    assert!(body.contains("Nenhum token"), "{body}");
     drop(server);
 }

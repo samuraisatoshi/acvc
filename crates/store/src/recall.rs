@@ -28,7 +28,7 @@ pub(crate) fn fts_query(query: &str) -> Result<String> {
         .map(|token| {
             token
                 .chars()
-                .filter(|ch| ch.is_ascii_alphanumeric() || *ch == '_' || *ch == '-')
+                .filter(|ch| ch.is_alphanumeric() || *ch == '_' || *ch == '-')
                 .collect::<String>()
         })
         .filter(|token| !token.is_empty())
@@ -85,4 +85,38 @@ pub(crate) fn upsert_recall(
     )
     .map_err(|err| sql_err(err, "recall index"))?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{fts_query, upsert_recall};
+    use crate::schema::SCHEMA;
+    use rusqlite::Connection;
+
+    #[test]
+    fn accented_word_matches_the_indexed_premise() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(SCHEMA).unwrap();
+        let variant = "ab".repeat(32);
+        upsert_recall(&conn, &variant, "engine", "cada sessão grava a hipótese\n").unwrap();
+        let query = fts_query("sessão").unwrap();
+        let hit: String = conn
+            .query_row(
+                "SELECT d.variant FROM recall_doc d JOIN recall_fts ON recall_fts.rowid = d.id WHERE recall_fts MATCH ?1",
+                [query],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(hit, variant);
+        assert!(fts_query("!!").is_err());
+        let missing = fts_query("xyzzy").unwrap();
+        let count: i64 = conn
+            .query_row(
+                "SELECT count(*) FROM recall_doc d JOIN recall_fts ON recall_fts.rowid = d.id WHERE recall_fts MATCH ?1",
+                [missing],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(count, 0);
+    }
 }

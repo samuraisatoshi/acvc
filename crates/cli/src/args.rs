@@ -138,11 +138,34 @@ pub enum Command {
         #[arg(long)]
         git: Option<PathBuf>,
     },
+    Context {
+        #[arg(long)]
+        campaign: Option<String>,
+    },
+    Guide,
+    Assistant {
+        #[arg(long)]
+        part: Option<String>,
+    },
+    Spend {
+        #[arg(long)]
+        campaign: Option<String>,
+        #[arg(long)]
+        tokens: u64,
+        #[arg(long, default_value = "")]
+        note: String,
+        #[arg(long, default_value = "agent")]
+        agent: String,
+    },
     Tui,
     Mcp,
     Web {
         #[arg(long, default_value = "127.0.0.1:9420")]
         bind: String,
+    },
+    Obsidian {
+        #[arg(long)]
+        vault: Option<PathBuf>,
     },
 }
 

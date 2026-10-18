@@ -27,6 +27,11 @@ const TOOLS: &[&str] = &[
     "promote",
     "tui",
     "web",
+    "obsidian",
+    "context",
+    "guide",
+    "assistant",
+    "spend",
 ];
 
 struct Client {
@@ -68,32 +73,16 @@ impl Client {
             "params": params
         }))
         .unwrap();
-        write!(self.stdin, "Content-Length: {}\r\n\r\n", body.len()).unwrap();
         self.stdin.write_all(&body).unwrap();
+        self.stdin.write_all(b"\n").unwrap();
         self.stdin.flush().unwrap();
-        read_frame(&mut self.stdout)
-    }
-}
-
-fn read_frame(reader: &mut impl BufRead) -> Value {
-    let mut length = None;
-    loop {
         let mut line = String::new();
         assert!(
-            reader.read_line(&mut line).unwrap() > 0,
+            self.stdout.read_line(&mut line).unwrap() > 0,
             "mcp closed stdout"
         );
-        if line == "\n" || line == "\r\n" {
-            break;
-        }
-        if let Some(rest) = line.to_ascii_lowercase().strip_prefix("content-length:") {
-            length = rest.trim().parse::<usize>().ok();
-        }
+        serde_json::from_str(line.trim()).unwrap()
     }
-    let length = length.expect("content length");
-    let mut body = vec![0u8; length];
-    reader.read_exact(&mut body).unwrap();
-    serde_json::from_slice(&body).unwrap()
 }
 
 #[test]
