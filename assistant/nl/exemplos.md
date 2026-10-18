@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create zoek --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign zoek --path ./hypothese --premise "de cache past op schijf" --assumption "de schijf is lokaal" --intent "minder leesacties" --agent julio
+acvc seed --repo . --campaign zoek --path ./hypothese --premise "de cache past op schijf" --assumption "de schijf is lokaal" --intent "minder leesacties" --agent researcher
 ```
 
 De JSON van seed brengt de variant, de boom, hoeveel bestanden binnenkwamen en welke zwaarder wogen.
@@ -13,7 +13,7 @@ De JSON van seed brengt de variant, de boom, hoeveel bestanden binnenkwamen en w
 ## De volgende hypothese
 
 ```text
-acvc record --repo . --workspace ./hypothese --parent PREFIX --premise "de index is een boom" --assumption "de sleutels zijn gesorteerd" --intent "een kortere zoekactie" --agent julio --edge mutate
+acvc record --repo . --workspace ./hypothese --parent PREFIX --premise "de index is een boom" --assumption "de sleutels zijn gesorteerd" --intent "een kortere zoekactie" --agent researcher --edge mutate
 acvc score --repo . --variant PREFIX --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ De eerste twee zijn onvergelijkbaar en blijven op de grens. De derde is slechter
 
 ```text
 acvc reject --repo . --variant PREFIX --reason "cache-invalidatie breekt bij gelijktijdig schrijven"
-acvc spend --repo . --campaign zoek --tokens 15000 --note "sessie van de hypothese" --agent julio
+acvc spend --repo . --campaign zoek --tokens 15000 --note "sessie van de hypothese" --agent researcher
 ```
 
 ## Rommel uit de boom houden

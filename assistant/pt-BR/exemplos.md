@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create busca --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign busca --path ./hipotese --premise "o cache cabe em disco" --assumption "o disco é local" --intent "menos leituras" --agent julio
+acvc seed --repo . --campaign busca --path ./hipotese --premise "o cache cabe em disco" --assumption "o disco é local" --intent "menos leituras" --agent researcher
 ```
 
 O JSON do seed traz a variante, a árvore, quantos arquivos entraram e quais pesaram mais.
@@ -13,7 +13,7 @@ O JSON do seed traz a variante, a árvore, quantos arquivos entraram e quais pes
 ## A hipótese seguinte
 
 ```text
-acvc record --repo . --workspace ./hipotese --parent PREFIXO --premise "o índice é uma árvore" --assumption "as chaves estão ordenadas" --intent "busca mais curta" --agent julio --edge mutate
+acvc record --repo . --workspace ./hipotese --parent PREFIXO --premise "o índice é uma árvore" --assumption "as chaves estão ordenadas" --intent "busca mais curta" --agent researcher --edge mutate
 acvc score --repo . --variant PREFIXO --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ As duas primeiras são incomparáveis e ficam na fronteira. A terceira é pior n
 
 ```text
 acvc reject --repo . --variant PREFIXO --reason "a invalidação do cache quebra com escrita concorrente"
-acvc spend --repo . --campaign busca --tokens 15000 --note "sessão da hipótese" --agent julio
+acvc spend --repo . --campaign busca --tokens 15000 --note "sessão da hipótese" --agent researcher
 ```
 
 ## Tirar lixo da árvore

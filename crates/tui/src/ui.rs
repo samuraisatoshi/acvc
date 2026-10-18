@@ -417,7 +417,7 @@ mod tests {
             claim: "frase humana".into(),
             assumptions: Vec::new(),
             intent: String::new(),
-            agent: "julio".into(),
+            agent: "researcher".into(),
             parents: Vec::new(),
             children: vec![sample()],
             child_claims: vec!["sessão gravada".into()],

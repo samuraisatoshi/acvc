@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create anazitisi --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign anazitisi --path ./ypothesi --premise "η cache χωράει στον δίσκο" --assumption "ο δίσκος είναι τοπικός" --intent "λιγότερες αναγνώσεις" --agent julio
+acvc seed --repo . --campaign anazitisi --path ./ypothesi --premise "η cache χωράει στον δίσκο" --assumption "ο δίσκος είναι τοπικός" --intent "λιγότερες αναγνώσεις" --agent researcher
 ```
 
 Το JSON του seed φέρνει την παραλλαγή, το δέντρο, πόσα αρχεία μπήκαν και ποια ζύγιζαν περισσότερο.
@@ -13,7 +13,7 @@ acvc seed --repo . --campaign anazitisi --path ./ypothesi --premise "η cache χ
 ## Η επόμενη υπόθεση
 
 ```text
-acvc record --repo . --workspace ./ypothesi --parent PROTHEMA --premise "το ευρετήριο είναι δέντρο" --assumption "τα κλειδιά είναι ταξινομημένα" --intent "συντομότερη αναζήτηση" --agent julio --edge mutate
+acvc record --repo . --workspace ./ypothesi --parent PROTHEMA --premise "το ευρετήριο είναι δέντρο" --assumption "τα κλειδιά είναι ταξινομημένα" --intent "συντομότερη αναζήτηση" --agent researcher --edge mutate
 acvc score --repo . --variant PROTHEMA --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ acvc score --repo . --variant PROTHEMA --metric tests_passed=0 --metric latency_
 
 ```text
 acvc reject --repo . --variant PROTHEMA --reason "η ακύρωση της cache σπάει με ταυτόχρονες εγγραφές"
-acvc spend --repo . --campaign anazitisi --tokens 15000 --note "συνεδρία της υπόθεσης" --agent julio
+acvc spend --repo . --campaign anazitisi --tokens 15000 --note "συνεδρία της υπόθεσης" --agent researcher
 ```
 
 ## Να μείνει έξω το άχρηστο

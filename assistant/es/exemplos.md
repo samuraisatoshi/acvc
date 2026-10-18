@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create busca --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign busca --path ./hipotesis --premise "la caché cabe en disco" --assumption "el disco es local" --intent "menos lecturas" --agent julio
+acvc seed --repo . --campaign busca --path ./hipotesis --premise "la caché cabe en disco" --assumption "el disco es local" --intent "menos lecturas" --agent researcher
 ```
 
 El JSON del seed trae la variante, el árbol, cuántos archivos entraron y cuáles pesaron más.
@@ -13,7 +13,7 @@ El JSON del seed trae la variante, el árbol, cuántos archivos entraron y cuál
 ## La hipótesis siguiente
 
 ```text
-acvc record --repo . --workspace ./hipotesis --parent PREFIJO --premise "el índice es un árbol" --assumption "las claves están ordenadas" --intent "búsqueda más corta" --agent julio --edge mutate
+acvc record --repo . --workspace ./hipotesis --parent PREFIJO --premise "el índice es un árbol" --assumption "las claves están ordenadas" --intent "búsqueda más corta" --agent researcher --edge mutate
 acvc score --repo . --variant PREFIJO --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ Las dos primeras son incomparables y se quedan en la frontera. La tercera es peo
 
 ```text
 acvc reject --repo . --variant PREFIJO --reason "la invalidación de la caché se rompe con escritura concurrente"
-acvc spend --repo . --campaign busca --tokens 15000 --note "sesión de la hipótesis" --agent julio
+acvc spend --repo . --campaign busca --tokens 15000 --note "sesión de la hipótesis" --agent researcher
 ```
 
 ## Sacar basura del árbol

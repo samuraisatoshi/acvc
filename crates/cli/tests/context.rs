@@ -39,7 +39,7 @@ fn context_reads_origin_branch_and_tokens() {
             claim: "o teste não ficava na campanha".into(),
             assumptions: vec!["a sessão terminava sem gravar a hipótese".into()],
             intent: "guardar o que já foi medido".into(),
-            agent: "julio".into(),
+            agent: "researcher".into(),
         })
         .unwrap();
     fs::write(workspace.join("a.txt"), "next").unwrap();
@@ -52,7 +52,7 @@ fn context_reads_origin_branch_and_tokens() {
             assumptions: vec!["nada obrigava o registro".into()],
             revises: None,
             intent: "não perder o caminho".into(),
-            agent: "julio".into(),
+            agent: "researcher".into(),
             parents: Vec::new(),
         })
         .unwrap();
@@ -66,10 +66,10 @@ fn context_reads_origin_branch_and_tokens() {
         &BTreeMap::from([("tests_passed".into(), 2.0)]),
     )
     .unwrap();
-    assert_eq!(app.spend("engine", "julio", 1200, "revisão").unwrap(), 1200);
+    assert_eq!(app.spend("engine", "researcher", 1200, "revisão").unwrap(), 1200);
 
     let report = app.context("engine").unwrap();
-    assert_eq!(report.agents, vec!["julio".to_string()]);
+    assert_eq!(report.agents, vec!["researcher".to_string()]);
     assert_eq!(report.tokens, 1200);
     assert_eq!(report.variants, 2);
     assert_eq!(report.graph.len(), 1);
@@ -106,7 +106,7 @@ fn context_reads_origin_branch_and_tokens() {
             claim: "outra origem".into(),
             assumptions: Vec::new(),
             intent: String::new(),
-            agent: "julio".into(),
+            agent: "researcher".into(),
         })
         .unwrap_err();
     assert_eq!(err.message, "campaign already has an origin");

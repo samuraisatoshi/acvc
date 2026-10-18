@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create recherche --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign recherche --path ./hypothese --premise "le cache tient sur le disque" --assumption "le disque est local" --intent "moins de lectures" --agent julio
+acvc seed --repo . --campaign recherche --path ./hypothese --premise "le cache tient sur le disque" --assumption "le disque est local" --intent "moins de lectures" --agent researcher
 ```
 
 Le JSON du seed apporte la variante, l'arbre, combien de fichiers sont entrés et lesquels pesaient le plus.
@@ -13,7 +13,7 @@ Le JSON du seed apporte la variante, l'arbre, combien de fichiers sont entrés e
 ## L'hypothèse suivante
 
 ```text
-acvc record --repo . --workspace ./hypothese --parent PREFIXE --premise "l'index est un arbre" --assumption "les clés sont triées" --intent "une recherche plus courte" --agent julio --edge mutate
+acvc record --repo . --workspace ./hypothese --parent PREFIXE --premise "l'index est un arbre" --assumption "les clés sont triées" --intent "une recherche plus courte" --agent researcher --edge mutate
 acvc score --repo . --variant PREFIXE --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ Les deux premières sont incomparables et restent sur la frontière. La troisiè
 
 ```text
 acvc reject --repo . --variant PREFIXE --reason "l'invalidation du cache casse sous des écritures concurrentes"
-acvc spend --repo . --campaign recherche --tokens 15000 --note "session de l'hypothèse" --agent julio
+acvc spend --repo . --campaign recherche --tokens 15000 --note "session de l'hypothèse" --agent researcher
 ```
 
 ## Retirer le bruit de l'arbre

@@ -10,7 +10,7 @@ const why: Why = {
   claim: "frase humana",
   assumptions: ["os visores ainda dizem left"],
   intent: "a pessoa reconhece a hipótese",
-  agent: "julio",
+  agent: "researcher",
   parents: [],
   children: [],
   trials: [{ id: "b".repeat(64), metrics: { uso_real: 3 } }],

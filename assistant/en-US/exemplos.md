@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create search --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign search --path ./hypothesis --premise "the cache fits on disk" --assumption "the disk is local" --intent "fewer reads" --agent julio
+acvc seed --repo . --campaign search --path ./hypothesis --premise "the cache fits on disk" --assumption "the disk is local" --intent "fewer reads" --agent researcher
 ```
 
 The seed JSON brings the variant, the tree, how many files entered, and which weighed more.
@@ -13,7 +13,7 @@ The seed JSON brings the variant, the tree, how many files entered, and which we
 ## The next hypothesis
 
 ```text
-acvc record --repo . --workspace ./hypothesis --parent PREFIX --premise "the index is a tree" --assumption "the keys are sorted" --intent "a shorter search" --agent julio --edge mutate
+acvc record --repo . --workspace ./hypothesis --parent PREFIX --premise "the index is a tree" --assumption "the keys are sorted" --intent "a shorter search" --agent researcher --edge mutate
 acvc score --repo . --variant PREFIX --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ The first two are incomparable and stay on the frontier. The third is worse on b
 
 ```text
 acvc reject --repo . --variant PREFIX --reason "cache invalidation breaks under concurrent writes"
-acvc spend --repo . --campaign search --tokens 15000 --note "hypothesis session" --agent julio
+acvc spend --repo . --campaign search --tokens 15000 --note "hypothesis session" --agent researcher
 ```
 
 ## Keep junk out of the tree

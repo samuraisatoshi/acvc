@@ -5,7 +5,7 @@
 ```text
 acvc init --repo .
 acvc campaign create szukanie --metric tests_passed:higher --metric latency_ms:lower
-acvc seed --repo . --campaign szukanie --path ./hipoteza --premise "cache mieści się na dysku" --assumption "dysk jest lokalny" --intent "mniej odczytów" --agent julio
+acvc seed --repo . --campaign szukanie --path ./hipoteza --premise "cache mieści się na dysku" --assumption "dysk jest lokalny" --intent "mniej odczytów" --agent researcher
 ```
 
 JSON z seed podaje wariant, drzewo, ile plików weszło i które ważyły więcej.
@@ -13,7 +13,7 @@ JSON z seed podaje wariant, drzewo, ile plików weszło i które ważyły więce
 ## Następna hipoteza
 
 ```text
-acvc record --repo . --workspace ./hipoteza --parent PREFIKS --premise "indeks jest drzewem" --assumption "klucze są posortowane" --intent "krótsze szukanie" --agent julio --edge mutate
+acvc record --repo . --workspace ./hipoteza --parent PREFIKS --premise "indeks jest drzewem" --assumption "klucze są posortowane" --intent "krótsze szukanie" --agent researcher --edge mutate
 acvc score --repo . --variant PREFIKS --metric tests_passed=16 --metric latency_ms=4
 ```
 
@@ -43,7 +43,7 @@ Dwa pierwsze są nieporównywalne i zostają na granicy. Trzeci jest gorszy w ob
 
 ```text
 acvc reject --repo . --variant PREFIKS --reason "unieważnianie cache pęka przy równoległym zapisie"
-acvc spend --repo . --campaign szukanie --tokens 15000 --note "sesja hipotezy" --agent julio
+acvc spend --repo . --campaign szukanie --tokens 15000 --note "sesja hipotezy" --agent researcher
 ```
 
 ## Śmieci poza drzewem
