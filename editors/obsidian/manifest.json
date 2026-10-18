@@ -1,7 +1,7 @@
 {
   "id": "acvc",
   "name": "ACVC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.5.0",
   "description": "Frontier, lineage, file diff, and recall for an ACVC repository. Talks to the acvc executable.",
   "author": "acvc",
