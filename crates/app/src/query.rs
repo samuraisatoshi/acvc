@@ -73,13 +73,13 @@ impl App {
             let on_frontier = frontier_rows.iter().any(|row| row.variant == id);
             let measured = metrics_of(&trials, &schema).is_some();
             let status = if rejection.is_some() {
-                "rejeitada"
+                acvc_domain::REJECTED
             } else if on_frontier {
-                "na fronteira"
+                acvc_domain::ON_FRONTIER
             } else if measured {
-                "superada"
+                acvc_domain::SUPERSEDED
             } else {
-                "sem medição"
+                acvc_domain::UNMEASURED
             };
             let mut parents = Vec::new();
             for parent in &stored.variant.parents {

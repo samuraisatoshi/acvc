@@ -64,7 +64,7 @@ O spend, um livro-caixa lateral de tokens, é append-only e não é métrica. N�
 
 ### 3.4 Rejeição
 
-A dominação não escreve rejeição. `reject` guarda um motivo para uma variante. Até esse motivo existir, uma variante que saiu da fronteira é descrita como superada, com o vencedor e a métrica, e o texto diz que o motivo não foi gravado. Os valores de status no JSON são tokens fixos em português (`na fronteira`, `superada`, `rejeitada`, `sem medição`). A prosa segue o idioma do computador.
+A dominação não escreve rejeição. `reject` guarda um motivo para uma variante. Até esse motivo existir, uma variante que saiu da fronteira é descrita como superada, com o vencedor e a métrica, e o texto diz que o motivo não foi gravado. Os valores de status no JSON são códigos fixos (`on_frontier`, `superseded`, `rejected`, `unmeasured`). A prosa segue o idioma do computador.
 
 A revisão explícita de premissa se inspira no hábito, na filosofia da ciência, de tratar um pressuposto que falhou como mudança de hipótese, e não como edição silenciosa [14]. O software não testa falseabilidade. Só recusa deixar essa mudança escondida numa mutação comum: a aresta é outra, e o hash segue.
 

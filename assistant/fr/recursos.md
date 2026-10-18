@@ -8,10 +8,10 @@ Arêtes : `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
 
 Statut, dans les valeurs JSON :
 
-- `na fronteira` — mesurée, et aucune autre hypothèse ne la dépasse.
-- `superada` — mesurée, et une autre de la frontière est meilleure.
-- `rejeitada` — quelqu'un a enregistré le motif.
-- `sem medição` — il n'y a pas encore d'essai complet pour le schéma de la campagne.
+- `on_frontier` — mesurée, et aucune autre hypothèse ne la dépasse.
+- `superseded` — mesurée, et une autre de la frontière est meilleure.
+- `rejected` — quelqu'un a enregistré le motif.
+- `unmeasured` — il n'y a pas encore d'essai complet pour le schéma de la campagne.
 
 Quitter la frontière n'enregistre pas de rejet. S'il n'y a pas de motif, la lecture nomme qui a gagné, la métrique, et que le motif n'a pas été enregistré. En fr cette phrase est `Le motif n'a pas été enregistré.`
 

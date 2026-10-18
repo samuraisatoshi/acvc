@@ -60,7 +60,7 @@ test("the json cli serves frontier, lineage, diff, and recall", async () => {
     assert.equal(frontier.variants[0]?.variant, faster.variant);
 
     const hits = await acvc.recall("speed", "faster");
-    assert.equal(hits.hits.find((hit) => hit.variant === faster.variant)?.status, "na fronteira");
+    assert.equal(hits.hits.find((hit) => hit.variant === faster.variant)?.status, "on_frontier");
 
     const why = await acvc.why(faster.variant);
     assert.deepEqual(why.parents, [seeded.variant]);

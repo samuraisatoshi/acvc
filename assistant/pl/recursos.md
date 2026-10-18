@@ -8,10 +8,10 @@ Krawędzie: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
 
 Status, jako wartości JSON:
 
-- `na fronteira` — zmierzona i żadna inna hipoteza jej nie przewyższa.
-- `superada` — zmierzona, a inna na granicy jest lepsza.
-- `rejeitada` — ktoś zapisał motyw.
-- `sem medição` — nie ma jeszcze pełnej próby dla schematu kampanii.
+- `on_frontier` — zmierzona i żadna inna hipoteza jej nie przewyższa.
+- `superseded` — zmierzona, a inna na granicy jest lepsza.
+- `rejected` — ktoś zapisał motyw.
+- `unmeasured` — nie ma jeszcze pełnej próby dla schematu kampanii.
 
 Zejście z granicy nie zapisuje odrzucenia. Gdy nie ma motywu, odczyt podaje, kto wygrał, miarę i że motyw nie został zapisany. Po polsku to zdanie brzmi `Motyw nie został zapisany.`
 

@@ -8,10 +8,10 @@ Aristas: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
 
 Estado, en los valores JSON:
 
-- `na fronteira` — medida, y ninguna otra hipótesis la supera.
-- `superada` — medida, y otra de la frontera es mejor.
-- `rejeitada` — alguien grabó el motivo.
-- `sem medição` — aún no hay ensayo completo para el esquema de la campaña.
+- `on_frontier` — medida, y ninguna otra hipótesis la supera.
+- `superseded` — medida, y otra de la frontera es mejor.
+- `rejected` — alguien grabó el motivo.
+- `unmeasured` — aún no hay ensayo completo para el esquema de la campaña.
 
 Salir de la frontera no graba rechazo. Si no hay motivo, la lectura dice quién ganó, la métrica y que el motivo no quedó registrado. En es esa frase es `El motivo no quedó registrado.`
 

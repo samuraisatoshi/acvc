@@ -63,7 +63,7 @@ export function recallText(report: Recall, lang?: Lang): string {
     .map((hit) => {
       const parents = hit.parents ?? [];
       const from = parents.length === 0 ? text("opened_campaign", lang) : fill("came_from", { names: parents.map((parent) => parent.claim).join("; ") }, lang);
-      return `${hit.claim}\n${statusLabel(hit.status || "sem medição", lang)}\n${from}`;
+      return `${hit.claim}\n${statusLabel(hit.status || "unmeasured", lang)}\n${from}`;
     })
     .join("\n\n");
 }

@@ -17,6 +17,7 @@ mod plan;
 mod ports;
 mod premise;
 mod spend;
+mod status;
 mod tree;
 mod trial;
 mod variant;
@@ -38,6 +39,7 @@ pub use ports::{
 };
 pub use premise::Premise;
 pub use spend::Spend;
+pub use status::{ON_FRONTIER, REJECTED, SUPERSEDED, UNMEASURED};
 pub use tree::{
     EXEC_MODE, EntryKind, FILE_MODE, TREE_MODE, TreeEntry, TreeFile, canonical_tree, decode_tree,
     lookup_file, tree_hash, valid_relative, walk_files,

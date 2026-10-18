@@ -23,10 +23,10 @@ pub fn document() -> (Value, String) {
             {"name": "obsidian", "when": acvc_text::tr("when_obsidian")}
         ],
         "status": {
-            "na fronteira": acvc_text::tr("status_frontier_why"),
-            "superada": acvc_text::tr("status_beaten_why"),
-            "rejeitada": acvc_text::tr("status_rejected_why"),
-            "sem medição": acvc_text::tr("status_unmeasured_why")
+            "on_frontier": acvc_text::tr("status_frontier_why"),
+            "superseded": acvc_text::tr("status_beaten_why"),
+            "rejected": acvc_text::tr("status_rejected_why"),
+            "unmeasured": acvc_text::tr("status_unmeasured_why")
         }
     });
     (

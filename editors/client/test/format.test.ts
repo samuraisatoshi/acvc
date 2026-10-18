@@ -55,7 +55,7 @@ test("the premise replaces the hash and the side", () => {
   assert.doesNotMatch(compared, /dominance/);
 
   const hits = recallText({
-    hits: [{ variant: "a".repeat(64), claim: "frase humana", status: "superada", parents: [] }],
+    hits: [{ variant: "a".repeat(64), claim: "frase humana", status: "superseded", parents: [] }],
   } satisfies Recall, "pt-BR");
   assert.match(hits, /superada/);
   assert.doesNotMatch(hits, /a{12}/);

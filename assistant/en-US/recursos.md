@@ -8,10 +8,10 @@ Edges: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
 
 Status, as JSON values:
 
-- `na fronteira` — measured, and no other hypothesis beats it.
-- `superada` — measured, and another one on the frontier is better.
-- `rejeitada` — someone recorded the motive.
-- `sem medição` — there is no complete trial yet for the campaign schema.
+- `on_frontier` — measured, and no other hypothesis beats it.
+- `superseded` — measured, and another one on the frontier is better.
+- `rejected` — someone recorded the motive.
+- `unmeasured` — there is no complete trial yet for the campaign schema.
 
 Leaving the frontier does not record a rejection. If there is no motive, the reading names who won, the metric, and that the motive was not recorded. In en-US that sentence is `Motive was not recorded.`
 

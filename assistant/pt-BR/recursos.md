@@ -8,10 +8,10 @@ Arestas: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
 
 Status, nos valores JSON:
 
-- `na fronteira` — medida, e nenhuma outra hipótese a supera.
-- `superada` — medida, e outra da fronteira é melhor.
-- `rejeitada` — alguém gravou o motivo.
-- `sem medição` — ainda não há ensaio completo para o esquema da campanha.
+- `on_frontier` — medida, e nenhuma outra hipótese a supera.
+- `superseded` — medida, e outra da fronteira é melhor.
+- `rejected` — alguém gravou o motivo.
+- `unmeasured` — ainda não há ensaio completo para o esquema da campanha.
 
 Sair da fronteira não grava rejeição. Se não há motivo, a leitura diz quem ganhou, a métrica e que o motivo não foi gravado. Em pt-BR essa frase é `Motivo não gravado.`
 
