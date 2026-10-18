@@ -171,6 +171,137 @@ fn record(app: &acvc_app::App, workspace: &Path, claim: &str) -> acvc_app::Recor
     .unwrap()
 }
 
+#[test]
+fn incomparable_trials_of_one_hypothesis_both_stay_on_the_frontier() {
+    let root = scratch("frontier-trials");
+    let source = root.join("source");
+    fs::create_dir_all(&source).unwrap();
+    fs::write(source.join("note.txt"), b"hi").unwrap();
+    let app = init_at(&root.join("repo")).unwrap();
+    app.create_campaign(
+        "trade",
+        &[
+            MetricSpec {
+                name: "tests_passed".into(),
+                direction: Direction::Higher,
+            },
+            MetricSpec {
+                name: "latency_ms".into(),
+                direction: Direction::Lower,
+            },
+        ],
+    )
+    .unwrap();
+    let seeded = app
+        .seed(SeedRequest {
+            campaign: "trade".into(),
+            path: source,
+            claim: "um nó, dois ensaios".into(),
+            assumptions: Vec::new(),
+            intent: "seed".into(),
+            agent: "agent".into(),
+        })
+        .unwrap();
+    let id = seeded.variant;
+    app.score(&id, &scores(10.0, 10.0)).unwrap();
+    app.score(&id, &scores(1.0, 1.0)).unwrap();
+    app.score(&id, &scores(0.0, 20.0)).unwrap();
+    assert_eq!(app.resolve(&id.to_string()).unwrap(), id);
+    let rows = app.frontier("trade").unwrap();
+    let mine: Vec<_> = rows.iter().filter(|row| row.variant == id).collect();
+    assert_eq!(mine.len(), 2, "{rows:?}");
+    assert!(
+        mine.iter()
+            .any(|row| row.metrics.get("tests_passed") == Some(&10.0))
+    );
+    assert!(
+        mine.iter()
+            .any(|row| row.metrics.get("latency_ms") == Some(&1.0))
+    );
+    assert!(
+        mine.iter()
+            .all(|row| row.metrics.get("tests_passed") != Some(&0.0))
+    );
+    assert_eq!(app.why(&id).unwrap().trials.len(), 3);
+}
+
+#[test]
+fn domination_leaves_the_motive_unrecorded() {
+    let root = scratch("motive");
+    let source = root.join("source");
+    let workspace = root.join("ws");
+    fs::create_dir_all(&source).unwrap();
+    fs::write(source.join("note.txt"), b"hi").unwrap();
+    let app = init_at(&root.join("repo")).unwrap();
+    app.create_campaign(
+        "trade",
+        &[MetricSpec {
+            name: "tests_passed".into(),
+            direction: Direction::Higher,
+        }],
+    )
+    .unwrap();
+    let seeded = app
+        .seed(SeedRequest {
+            campaign: "trade".into(),
+            path: source,
+            claim: "base".into(),
+            assumptions: Vec::new(),
+            intent: "seed".into(),
+            agent: "agent".into(),
+        })
+        .unwrap();
+    app.materialize(&seeded.variant, &workspace).unwrap();
+    fs::write(workspace.join("note.txt"), b"bye").unwrap();
+    let child = record(&app, &workspace, "pior");
+    let mut better = BTreeMap::new();
+    better.insert("tests_passed".into(), 2.0);
+    let mut worse = BTreeMap::new();
+    worse.insert("tests_passed".into(), 1.0);
+    app.score(&seeded.variant, &better).unwrap();
+    app.score(&child.variant, &worse).unwrap();
+    let reading = app.why(&child.variant).unwrap();
+    assert!(reading.rejection.is_none());
+    assert!(!reading.on_frontier);
+    assert_eq!(reading.beaten_by.len(), 1);
+    assert_eq!(reading.beaten_by[0].claim, "base");
+    assert_eq!(reading.beaten_by[0].gaps[0].name, "tests_passed");
+    assert!(app.why(&seeded.variant).unwrap().rejection.is_none());
+}
+
+#[test]
+fn seed_reports_what_entered_and_what_weighed_more() {
+    let root = scratch("seed-weight");
+    let source = root.join("source");
+    fs::create_dir_all(source.join("lab/reports")).unwrap();
+    fs::write(source.join("lab/reports/shot.png"), vec![0; 40]).unwrap();
+    fs::write(source.join("note.txt"), b"hi").unwrap();
+    fs::write(source.join(".acvcignore"), b"lab/reports\n").unwrap();
+    let app = init_at(&root.join("repo")).unwrap();
+    app.create_campaign(
+        "tree",
+        &[MetricSpec {
+            name: "n".into(),
+            direction: Direction::Higher,
+        }],
+    )
+    .unwrap();
+    let seeded = app
+        .seed(SeedRequest {
+            campaign: "tree".into(),
+            path: source,
+            claim: "so a nota".into(),
+            assumptions: Vec::new(),
+            intent: "seed".into(),
+            agent: "agent".into(),
+        })
+        .unwrap();
+    assert_eq!(seeded.files, 1);
+    assert_eq!(seeded.heaviest.len(), 1);
+    assert_eq!(seeded.heaviest[0].path, "note.txt");
+    assert_eq!(seeded.heaviest[0].bytes, 2);
+}
+
 fn scores(tests_passed: f64, latency_ms: f64) -> BTreeMap<String, f64> {
     BTreeMap::from([
         ("tests_passed".into(), tests_passed),

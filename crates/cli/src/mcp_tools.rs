@@ -330,4 +330,39 @@ const TOOLS: &[Tool] = &[
         command: &["web"],
         fields: &[opt("bind", "--bind")],
     },
+    Tool {
+        name: "obsidian",
+        description: "Instala o visor no vault e aponta o repositório. Sem copiar o plugin à mão.",
+        command: &["obsidian"],
+        fields: &[opt("vault", "--vault")],
+    },
+    Tool {
+        name: "context",
+        description: "Lê a campanha antes de agir: problema, necessidade, agente, interações, tokens, idade e o mapa das ramificações",
+        command: &["context"],
+        fields: &[opt("campaign", "--campaign")],
+    },
+    Tool {
+        name: "guide",
+        description: "Como usar o ACVC: o que uma hipótese precisa dizer, quando chamar cada comando, exemplo",
+        command: &["guide"],
+        fields: &[],
+    },
+    Tool {
+        name: "assistant",
+        description: "Devolve o contrato operacional no idioma do computador. Quem tem o MCP do ASB envia documents para rag.index",
+        command: &["assistant"],
+        fields: &[opt("part", "--part")],
+    },
+    Tool {
+        name: "spend",
+        description: "Registra tokens consumidos na campanha sem mudar a identidade da hipótese",
+        command: &["spend"],
+        fields: &[
+            opt("campaign", "--campaign"),
+            opt("tokens", "--tokens"),
+            opt("note", "--note"),
+            opt("agent", "--agent"),
+        ],
+    },
 ];

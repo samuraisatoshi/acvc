@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code)]
 
+mod context;
 mod exchange;
 mod materialize;
 mod pack;
@@ -20,9 +21,10 @@ use std::sync::Arc;
 
 use acvc_domain::{
     BlobCache, CampaignStore, CheckoutWrite, Clock, DirectoryScan, GitPort, IndexIo, MarkerIo,
-    ObjectStore, RecallStore, TrialStore, VariantStore, WorkspaceRegistry,
+    ObjectStore, RecallStore, SpendStore, TrialStore, VariantStore, WorkspaceRegistry,
 };
 
+pub use context::{ContextNode, ContextReport};
 pub use exchange::{AcceptReport, ObjectBytes, Offer};
 pub use record::RecordRequest;
 pub use reports::*;
@@ -35,6 +37,7 @@ pub struct Ports {
     pub campaigns: Arc<dyn CampaignStore>,
     pub variants: Arc<dyn VariantStore>,
     pub trials: Arc<dyn TrialStore>,
+    pub spends: Arc<dyn SpendStore>,
     pub recall: Arc<dyn RecallStore>,
     pub workspaces: Arc<dyn WorkspaceRegistry>,
     pub scan: Arc<dyn DirectoryScan>,

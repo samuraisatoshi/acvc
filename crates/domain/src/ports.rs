@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::{
-    Hash, IndexEntry, ListedFile, Marker, MetricSpec, Result, StoredTrial, StoredVariant,
+    Hash, IndexEntry, ListedFile, Marker, MetricSpec, Result, Spend, StoredTrial, StoredVariant,
     TreeEntry, Trial, Variant,
 };
 
@@ -30,6 +30,19 @@ pub trait CampaignStore: Send + Sync {
     fn insert_campaign(&self, name: &str, schema: &[MetricSpec], now: i64) -> Result<()>;
     fn list_campaigns(&self) -> Result<Vec<String>>;
     fn schema_of(&self, name: &str) -> Result<Vec<MetricSpec>>;
+    fn opened_at(&self, name: &str) -> Result<i64>;
+}
+
+pub trait SpendStore: Send + Sync {
+    fn insert_spend(
+        &self,
+        campaign: &str,
+        agent: &str,
+        tokens: u64,
+        note: &str,
+        now: i64,
+    ) -> Result<()>;
+    fn spends_of(&self, campaign: &str) -> Result<Vec<Spend>>;
 }
 
 pub trait VariantStore: Send + Sync {

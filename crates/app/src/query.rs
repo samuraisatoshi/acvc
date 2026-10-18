@@ -1,13 +1,16 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use std::cmp::Ordering;
+
 use acvc_domain::{
-    Error, Hash, MetricSpec, Result, ScoreRelation, ScoredVariant, StoredTrial, compare_scores,
-    diff_trees, frontier, is_complete, lookup_file, unified,
+    Direction, Error, Hash, MetricSpec, Result, ScoreRelation, ScoredVariant, StoredTrial,
+    compare_scores, diff_trees, frontier, is_complete, lookup_file, unified,
 };
 
 use crate::{
-    App, BacktrackReport, CompareReport, FrontierRow, MetricDelta, RecallHit, TrialView, WhyReport,
+    App, BacktrackReport, BeatenBy, CompareReport, FrontierRow, MetricDelta, MetricGap, RecallHit,
+    TrialView, WhyReport,
 };
 
 impl App {
@@ -34,14 +37,14 @@ impl App {
         for stored in &variants {
             let id = stored.variant.id()?;
             let trials = self.ports.trials.trials_of(&id)?;
-            let Some(trial) = latest_complete(&trials, &schema) else {
-                continue;
-            };
-            scored.push(ScoredVariant {
-                variant: id,
-                metrics: trial.trial.metrics.clone(),
-                rejected: self.ports.trials.rejection_of(&id)?.is_some(),
-            });
+            let rejected = self.ports.trials.rejection_of(&id)?.is_some();
+            for trial in undominated_complete(&trials, &schema) {
+                scored.push(ScoredVariant {
+                    variant: id,
+                    metrics: trial.trial.metrics.clone(),
+                    rejected,
+                });
+            }
         }
         let chosen = frontier(&schema, &scored)?;
         let mut rows = Vec::new();
@@ -60,12 +63,43 @@ impl App {
     }
 
     pub fn recall(&self, campaign: &str, query: &str) -> Result<Vec<RecallHit>> {
+        let schema = self.ports.campaigns.schema_of(campaign)?;
+        let frontier_rows = self.frontier(campaign)?;
         let mut hits = Vec::new();
         for id in self.ports.recall.recall(campaign, query)? {
             let stored = self.ports.variants.get_variant(&id)?;
+            let trials = self.ports.trials.trials_of(&id)?;
+            let rejection = self.ports.trials.rejection_of(&id)?;
+            let on_frontier = frontier_rows.iter().any(|row| row.variant == id);
+            let measured = metrics_of(&trials, &schema).is_some();
+            let status = if rejection.is_some() {
+                "rejeitada"
+            } else if on_frontier {
+                "na fronteira"
+            } else if measured {
+                "superada"
+            } else {
+                "sem medição"
+            };
+            let mut parents = Vec::new();
+            for parent in &stored.variant.parents {
+                let claim = self
+                    .ports
+                    .variants
+                    .get_variant(parent)?
+                    .variant
+                    .premise
+                    .claim;
+                parents.push(crate::RecallParent {
+                    variant: *parent,
+                    claim,
+                });
+            }
             hits.push(RecallHit {
                 variant: id,
                 claim: stored.variant.premise.claim,
+                status: status.to_string(),
+                parents,
             });
         }
         Ok(hits)
@@ -74,6 +108,32 @@ impl App {
     pub fn why(&self, variant: &Hash) -> Result<WhyReport> {
         let stored = self.ports.variants.get_variant(variant)?;
         let trials = self.ports.trials.trials_of(variant)?;
+        let schema = self.ports.campaigns.schema_of(&stored.campaign)?;
+        let metrics = metrics_of(&trials, &schema);
+        let frontier_rows = self.frontier(&stored.campaign)?;
+        let on_frontier = frontier_rows.iter().any(|row| row.variant == *variant);
+        let rejection = self.ports.trials.rejection_of(variant)?;
+        let beaten_by = if rejection.is_none() && !on_frontier {
+            who_beats(
+                &schema,
+                metrics.as_ref(),
+                &frontier_rows
+                    .iter()
+                    .map(|row| (row.variant, row.claim.as_str(), &row.metrics))
+                    .collect::<Vec<_>>(),
+            )?
+        } else {
+            Vec::new()
+        };
+        let mut parent_claims = Vec::new();
+        for parent in &stored.variant.parents {
+            parent_claims.push(self.claim_of(parent)?);
+        }
+        let children = self.ports.variants.children(variant)?;
+        let mut child_claims = Vec::new();
+        for child in &children {
+            child_claims.push(self.claim_of(child)?);
+        }
         Ok(WhyReport {
             variant: *variant,
             campaign: stored.campaign,
@@ -83,7 +143,8 @@ impl App {
             intent: stored.variant.intent,
             agent: stored.variant.agent,
             parents: stored.variant.parents,
-            children: self.ports.variants.children(variant)?,
+            children,
+            child_claims,
             trials: trials
                 .into_iter()
                 .map(|trial| TrialView {
@@ -91,8 +152,21 @@ impl App {
                     metrics: trial.trial.metrics,
                 })
                 .collect(),
-            rejection: self.ports.trials.rejection_of(variant)?,
+            rejection,
+            on_frontier,
+            beaten_by,
+            parent_claims,
         })
+    }
+
+    fn claim_of(&self, variant: &Hash) -> Result<String> {
+        Ok(self
+            .ports
+            .variants
+            .get_variant(variant)?
+            .variant
+            .premise
+            .claim)
     }
 
     pub fn compare(&self, left: &Hash, right: &Hash) -> Result<CompareReport> {
@@ -119,19 +193,29 @@ impl App {
         names.sort();
         let metrics = names
             .into_iter()
-            .map(|name| MetricDelta {
-                left: left_metrics
-                    .as_ref()
-                    .and_then(|values| values.get(&name).copied()),
-                right: right_metrics
-                    .as_ref()
-                    .and_then(|values| values.get(&name).copied()),
-                name,
+            .map(|name| {
+                let direction = schema
+                    .iter()
+                    .find(|spec| spec.name == name)
+                    .map(|spec| spec.direction)
+                    .unwrap_or(Direction::Higher);
+                MetricDelta {
+                    left: left_metrics
+                        .as_ref()
+                        .and_then(|values| values.get(&name).copied()),
+                    right: right_metrics
+                        .as_ref()
+                        .and_then(|values| values.get(&name).copied()),
+                    direction,
+                    name,
+                }
             })
             .collect();
         Ok(CompareReport {
             left: *left,
             right: *right,
+            left_claim: left_stored.variant.premise.claim,
+            right_claim: right_stored.variant.premise.claim,
             diff,
             metrics,
             dominance,
@@ -187,20 +271,97 @@ impl App {
     }
 }
 
-fn latest_complete<'a>(
+pub(crate) fn who_beats(
+    schema: &[MetricSpec],
+    loser: Option<&BTreeMap<String, f64>>,
+    frontier_rows: &[(Hash, &str, &BTreeMap<String, f64>)],
+) -> Result<Vec<BeatenBy>> {
+    let Some(loser) = loser else {
+        return Ok(Vec::new());
+    };
+    let mut beaten = Vec::new();
+    for (variant, claim, metrics) in frontier_rows {
+        if compare_scores(schema, metrics, loser)? != ScoreRelation::LeftDominates {
+            continue;
+        }
+        beaten.push(BeatenBy {
+            variant: *variant,
+            claim: (*claim).to_string(),
+            gaps: gaps(schema, metrics, loser),
+        });
+    }
+    beaten.sort_by(|left, right| left.claim.cmp(&right.claim));
+    Ok(beaten)
+}
+
+fn gaps(
+    schema: &[MetricSpec],
+    winner: &BTreeMap<String, f64>,
+    loser: &BTreeMap<String, f64>,
+) -> Vec<MetricGap> {
+    let mut found = Vec::new();
+    for spec in schema {
+        let Some(win) = winner.get(&spec.name).copied() else {
+            continue;
+        };
+        let Some(lose) = loser.get(&spec.name).copied() else {
+            continue;
+        };
+        let order = match spec.direction {
+            Direction::Higher => win.partial_cmp(&lose),
+            Direction::Lower => lose.partial_cmp(&win),
+        };
+        if order == Some(Ordering::Greater) {
+            found.push(MetricGap {
+                name: spec.name.clone(),
+                direction: spec.direction,
+                winner: win,
+                loser: lose,
+            });
+        }
+    }
+    found
+}
+
+fn undominated_complete<'a>(
     trials: &'a [StoredTrial],
     schema: &[MetricSpec],
-) -> Option<&'a StoredTrial> {
-    trials
+) -> Vec<&'a StoredTrial> {
+    let complete: Vec<usize> = trials
         .iter()
-        .find(|trial| is_complete(schema, &trial.trial.metrics))
+        .enumerate()
+        .filter(|(_, trial)| is_complete(schema, &trial.trial.metrics))
+        .map(|(index, _)| index)
+        .collect();
+    complete
+        .iter()
+        .copied()
+        .filter(|index| {
+            !complete.iter().any(|other| {
+                *other != *index
+                    && matches!(
+                        compare_scores(
+                            schema,
+                            &trials[*other].trial.metrics,
+                            &trials[*index].trial.metrics,
+                        ),
+                        Ok(ScoreRelation::LeftDominates)
+                    )
+            })
+        })
+        .map(|index| &trials[index])
+        .collect()
+}
+
+fn best_complete<'a>(trials: &'a [StoredTrial], schema: &[MetricSpec]) -> Option<&'a StoredTrial> {
+    undominated_complete(trials, schema).into_iter().next()
 }
 
 pub(crate) fn metrics_of(
     trials: &[StoredTrial],
     schema: &[MetricSpec],
 ) -> Option<BTreeMap<String, f64>> {
-    latest_complete(trials, schema).map(|trial| trial.trial.metrics.clone())
+    best_complete(trials, schema).map(|trial| trial.trial.metrics.clone())
 }
 
 fn preview(app: &App, hash: &Hash) -> Result<String> {

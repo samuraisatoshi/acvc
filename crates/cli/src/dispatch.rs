@@ -52,7 +52,9 @@ pub fn dispatch(cli: Cli) -> Result<()> {
                         "direction": spec.direction.as_str(),
                     })
                 });
-                schemas.push(serde_json::json!({ "campaign": name, "metrics": metrics.collect::<Vec<_>>() }));
+                schemas.push(
+                    serde_json::json!({ "campaign": name, "metrics": metrics.collect::<Vec<_>>() }),
+                );
             }
             emit(
                 format,
@@ -148,7 +150,9 @@ pub fn dispatch(cli: Cli) -> Result<()> {
         Command::Frontier { campaign } => {
             let app = from_repo(repo)?;
             let campaign = sole_campaign(&app, campaign)?;
-            let (value, text) = present::frontier(&campaign, &app.frontier(&campaign)?);
+            let rows = app.frontier(&campaign)?;
+            let schema = app.schema(&campaign)?;
+            let (value, text) = present::frontier(&campaign, &rows, &schema);
             emit(format, value, text);
         }
         Command::Recall { campaign, query } => {
@@ -199,9 +203,46 @@ pub fn dispatch(cli: Cli) -> Result<()> {
             emit(format, value, text);
         }
         Command::Promote { variant, dest, git } => promote(format, repo, &variant, dest, git)?,
+        Command::Context { campaign } => {
+            let app = from_repo(repo)?;
+            let campaign = sole_campaign(&app, campaign)?;
+            let (value, text) = crate::consult::context(&app.context(&campaign)?);
+            emit(format, value, text);
+        }
+        Command::Guide => {
+            let (mut value, mut text) = crate::guide::document();
+            if let Ok(app) = from_repo(repo) {
+                let (live, extra) = live_repo(&app)?;
+                if let Some(obj) = value.as_object_mut() {
+                    obj.insert("this_repo".to_string(), live);
+                }
+                text.push_str(&extra);
+            }
+            emit(format, value, text);
+        }
+        Command::Assistant { part } => {
+            let (value, text) = crate::assistant::document(part.as_deref())?;
+            emit(format, value, text);
+        }
+        Command::Spend {
+            campaign,
+            tokens,
+            note,
+            agent,
+        } => {
+            let app = from_repo(repo)?;
+            let campaign = sole_campaign(&app, campaign)?;
+            let total = app.spend(&campaign, &agent, tokens, &note)?;
+            emit(
+                format,
+                serde_json::json!({ "campaign": campaign, "tokens": total, "agent": agent }),
+                format!("campanha {campaign} soma {total} tokens"),
+            );
+        }
         Command::Tui => acvc_tui::run(&from_repo(repo)?)?,
         Command::Mcp => crate::mcp::serve()?,
         Command::Web { bind } => crate::web::listen(repo, &bind, format)?,
+        Command::Obsidian { vault } => crate::obsidian::install(format, repo, vault)?,
     }
     Ok(())
 }
@@ -251,6 +292,19 @@ fn parse_scores(raw: &[String]) -> Result<BTreeMap<String, f64>> {
         scores.insert(name.to_string(), parsed);
     }
     Ok(scores)
+}
+
+fn live_repo(app: &acvc_app::App) -> Result<(serde_json::Value, String)> {
+    let names = app.campaigns()?;
+    let mut reports = Vec::new();
+    let mut text = String::from("\nNeste repositório agora:\n");
+    for name in &names {
+        let (value, body) = crate::consult::context(&app.context(name)?);
+        reports.push(value);
+        text.push_str(&body);
+        text.push('\n');
+    }
+    Ok((serde_json::Value::Array(reports), text))
 }
 
 fn optional_hash(app: &acvc_app::App, value: Option<String>) -> Result<Option<Hash>> {

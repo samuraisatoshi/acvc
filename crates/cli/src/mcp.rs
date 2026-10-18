@@ -72,13 +72,25 @@ fn read_message(reader: &mut impl BufRead) -> Result<Option<Value>> {
             return Ok(None);
         }
         if line == "\n" || line == "\r\n" {
-            break;
+            if let Some(length) = length.take() {
+                return read_body(reader, length);
+            }
+            continue;
         }
-        if let Some(rest) = line.to_ascii_lowercase().strip_prefix("content-length:") {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.to_ascii_lowercase().strip_prefix("content-length:") {
             length = rest.trim().parse::<usize>().ok();
+            continue;
+        }
+        if trimmed.starts_with('{') {
+            return serde_json::from_str(trimmed)
+                .map(Some)
+                .map_err(|err| Error::new(err.to_string()).ctx("op", "mcp json"));
         }
     }
-    let length = length.ok_or_else(|| Error::new("mcp frame has no content length"))?;
+}
+
+fn read_body(reader: &mut impl BufRead, length: usize) -> Result<Option<Value>> {
     if length > 8 * 1024 * 1024 {
         return Err(Error::new("mcp frame exceeds 8MB").ctx("len", length));
     }
@@ -92,10 +104,13 @@ fn read_message(reader: &mut impl BufRead) -> Result<Option<Value>> {
 }
 
 fn write_message(writer: &mut impl Write, value: &Value) -> Result<()> {
-    let body = serde_json::to_vec(value)
-        .map_err(|err| Error::new(err.to_string()).ctx("op", "mcp json"))?;
-    write!(writer, "Content-Length: {}\r\n\r\n", body.len())
-        .and_then(|_| writer.write_all(&body))
-        .and_then(|_| writer.flush())
-        .map_err(|err| Error::new(err.to_string()).ctx("op", "mcp write"))
+    serde_json::to_vec(value)
+        .map_err(|err| Error::new(err.to_string()).ctx("op", "mcp json"))
+        .and_then(|mut body| {
+            body.push(b'\n');
+            writer
+                .write_all(&body)
+                .and_then(|_| writer.flush())
+                .map_err(|err| Error::new(err.to_string()).ctx("op", "mcp write"))
+        })
 }

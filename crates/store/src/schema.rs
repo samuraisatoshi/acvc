@@ -88,4 +88,13 @@ CREATE VIRTUAL TABLE IF NOT EXISTS recall_fts USING fts5(
 CREATE INDEX IF NOT EXISTS idx_variants_campaign ON variants(campaign);
 CREATE INDEX IF NOT EXISTS idx_parents_parent ON parents(parent);
 CREATE INDEX IF NOT EXISTS idx_trials_variant ON trials(variant, created_at);
+CREATE TABLE IF NOT EXISTS spends (
+  id INTEGER PRIMARY KEY,
+  campaign TEXT NOT NULL,
+  agent TEXT NOT NULL,
+  tokens INTEGER NOT NULL,
+  note TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (campaign) REFERENCES campaigns(name)
+);
 ";

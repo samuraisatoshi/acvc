@@ -1,3 +1,4 @@
+use acvc_app::CompareReport;
 use acvc_domain::{EdgeKind, ScoreRelation};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout};
@@ -5,7 +6,7 @@ use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 
-use crate::model::{Model, Screen, short};
+use crate::model::{Model, Screen};
 
 pub fn draw(frame: &mut Frame, model: &Model) {
     let chunks = Layout::default()
@@ -33,9 +34,10 @@ pub fn draw(frame: &mut Frame, model: &Model) {
 }
 
 fn tabs(model: &Model) -> Line<'static> {
-    let campaign = model.selected_campaign().unwrap_or("sem campanha");
+    let campaign = model.selected_campaign().unwrap_or(acvc_text::tr("no_campaign"));
     let mut spans = vec![Span::raw(format!(" {campaign}  "))];
-    for (screen, name) in SCREENS {
+    for screen in SCREENS {
+        let name = screen_name(*screen);
         let style = if *screen == model.screen {
             Style::default().add_modifier(Modifier::REVERSED)
         } else {
@@ -46,32 +48,43 @@ fn tabs(model: &Model) -> Line<'static> {
     Line::from(spans)
 }
 
-const SCREENS: &[(Screen, &str)] = &[
-    (Screen::Campaigns, "Campanhas"),
-    (Screen::Frontier, "Fronteira"),
-    (Screen::Lineage, "Linhagem"),
-    (Screen::Detail, "Premissa"),
-    (Screen::Diff, "Comparar"),
-    (Screen::Recall, "Busca"),
+const SCREENS: &[Screen] = &[
+    Screen::Campaigns,
+    Screen::Frontier,
+    Screen::Lineage,
+    Screen::Detail,
+    Screen::Diff,
+    Screen::Recall,
 ];
+
+fn screen_name(screen: Screen) -> &'static str {
+    match screen {
+        Screen::Campaigns => acvc_text::tr("campaigns"),
+        Screen::Frontier => acvc_text::tr("frontier_screen"),
+        Screen::Lineage => acvc_text::tr("lineage_screen"),
+        Screen::Detail => acvc_text::tr("premise_screen"),
+        Screen::Diff => acvc_text::tr("compare_screen"),
+        Screen::Recall => acvc_text::tr("recall_screen"),
+    }
+}
 
 fn help(model: &Model) -> &'static str {
     if model.typing {
-        return "Enter busca. Esc cancela. Backspace apaga.";
+        return acvc_text::tr("help_search");
     }
     match model.screen {
-        Screen::Campaigns => "Enter abre a fronteira. ← → troca a tela. q sai.",
-        Screen::Frontier => "Enter abre a premissa. d compara duas. ← → troca a tela. q sai.",
-        Screen::Lineage => "Enter abre o parente. ← → troca a tela. q sai.",
-        Screen::Detail => "A hipótese e as medições. ← → troca a tela. q sai.",
-        Screen::Diff => "Enter mostra o arquivo. ← → troca a tela. q sai.",
-        Screen::Recall => "/ busca. Enter procura. ← → troca a tela. q sai.",
+        Screen::Campaigns => acvc_text::tr("help_campaigns"),
+        Screen::Frontier => acvc_text::tr("help_frontier"),
+        Screen::Lineage => acvc_text::tr("help_lineage"),
+        Screen::Detail => acvc_text::tr("help_detail"),
+        Screen::Diff => acvc_text::tr("help_diff"),
+        Screen::Recall => acvc_text::tr("help_recall"),
     }
 }
 
 fn body(model: &Model) -> Vec<Line<'static>> {
     let mut lines = match model.screen {
-        Screen::Campaigns => choices(&model.campaigns, model.campaign_idx, "Nenhuma campanha."),
+        Screen::Campaigns => choices(&model.campaigns, model.campaign_idx, acvc_text::tr("no_campaigns")),
         Screen::Frontier => frontier(model),
         Screen::Lineage => lineage(model),
         Screen::Detail => detail(model),
@@ -99,8 +112,8 @@ fn choices(items: &[String], selected: usize, empty: &str) -> Vec<Line<'static>>
 fn frontier(model: &Model) -> Vec<Line<'static>> {
     if model.frontier.is_empty() {
         return vec![
-            Line::from("Nenhuma hipótese pontuada."),
-            Line::from("Ela aparece aqui depois de acvc score."),
+            Line::from(acvc_text::tr("no_scored")),
+            Line::from(acvc_text::tr("appears_after_score")),
         ];
     }
     let mut lines = Vec::new();
@@ -114,26 +127,26 @@ fn frontier(model: &Model) -> Vec<Line<'static>> {
 fn lineage(model: &Model) -> Vec<Line<'static>> {
     let Some(detail) = &model.detail else {
         return vec![Line::from(
-            "Abra uma hipótese na fronteira para ver de onde ela veio.",
+            acvc_text::tr("open_lineage"),
         )];
     };
     let mut lines = Vec::new();
     if detail.parents.is_empty() && detail.children.is_empty() {
-        lines.push(Line::from("Esta hipótese começou a campanha."));
-        lines.push(Line::from("Não há variante anterior nem derivada."));
+        lines.push(Line::from(acvc_text::tr("opened_campaign")));
+        lines.push(Line::from(acvc_text::tr("no_before_after")));
         return lines;
     }
-    for (index, parent) in detail.parents.iter().enumerate() {
+    for (index, claim) in detail.parent_claims.iter().enumerate() {
         lines.push(marked(
             index == model.lineage_idx,
-            format!("anterior  {}", short(parent)),
+            acvc_text::fill("came_from_short", &[("claim", claim.as_str())]),
         ));
     }
-    for (index, child) in detail.children.iter().enumerate() {
-        let slot = detail.parents.len() + index;
+    for (index, claim) in detail.child_claims.iter().enumerate() {
+        let slot = detail.parent_claims.len() + index;
         lines.push(marked(
             slot == model.lineage_idx,
-            format!("derivada  {}", short(child)),
+            acvc_text::fill("then_short", &[("claim", claim.as_str())]),
         ));
     }
     lines
@@ -141,7 +154,7 @@ fn lineage(model: &Model) -> Vec<Line<'static>> {
 
 fn detail(model: &Model) -> Vec<Line<'static>> {
     let Some(detail) = &model.detail else {
-        return vec![Line::from("Abra uma hipótese na fronteira.")];
+        return vec![Line::from(acvc_text::tr("open_hypothesis"))];
     };
     let mut lines = vec![
         Line::from(Span::styled(
@@ -150,52 +163,66 @@ fn detail(model: &Model) -> Vec<Line<'static>> {
         )),
         Line::from(""),
         Line::from(origin(detail.edge)),
-        Line::from(format!("Agente  {}", agent_name(&detail.agent))),
+        Line::from(acvc_text::fill(
+            "agent_gap",
+            &[("agent", agent_name(&detail.agent))],
+        )),
     ];
     if !detail.intent.is_empty() {
-        lines.push(Line::from(format!("Intenção  {}", detail.intent)));
+        lines.push(Line::from(acvc_text::fill(
+            "intent_gap",
+            &[("intent", detail.intent.as_str())],
+        )));
     }
     if !detail.assumptions.is_empty() {
-        lines.push(Line::from(format!(
-            "Suposições  {}",
-            detail.assumptions.join("; ")
+        lines.push(Line::from(acvc_text::fill(
+            "assumptions_gap",
+            &[("items", &detail.assumptions.join("; "))],
         )));
     }
     if let Some(reason) = &detail.rejection {
-        lines.push(Line::from(format!("Fora da fronteira  {reason}")));
+        lines.push(Line::from(acvc_text::fill(
+            "rejected_gap",
+            &[("reason", reason.as_str())],
+        )));
+    } else if detail.on_frontier {
+        lines.push(Line::from(acvc_text::tr("on_frontier")));
+    } else {
+        lines.push(Line::from(acvc_text::tr("motive_unrecorded")));
+    }
+    for beaten in &detail.beaten_by {
+        lines.push(Line::from(beaten_sentence(beaten)));
     }
     lines.push(Line::from(""));
-    lines.push(Line::from("Pontuação"));
+    lines.push(Line::from(acvc_text::tr("score_heading")));
     if detail.trials.is_empty() {
-        lines.push(Line::from("    ainda sem medição"));
+        lines.push(Line::from(acvc_text::tr("still_unmeasured")));
     }
     for trial in &detail.trials {
         lines.push(Line::from(format!("    {}", metrics(&trial.metrics))));
     }
     lines.push(Line::from(""));
-    lines.push(Line::from(format!(
-        "Pais {}    Filhas {}",
-        count_label(detail.parents.len()),
-        count_label(detail.children.len())
+    lines.push(Line::from(acvc_text::fill(
+        "came_then",
+        &[
+            ("from", &count_label(detail.parents.len())),
+            ("after", &count_label(detail.children.len())),
+        ],
     )));
-    lines.push(Line::from(format!("id {}", short(&detail.variant))));
     lines
 }
 
 fn diff(model: &Model) -> Vec<Line<'static>> {
     let Some(compare) = &model.compare else {
         return vec![
-            Line::from("Nada comparado ainda."),
-            Line::from("Na fronteira, aperte d em duas hipóteses."),
+            Line::from(acvc_text::tr("nothing_compared")),
+            Line::from(acvc_text::tr("frontier_hint")),
         ];
     };
     let mut lines = vec![
-        Line::from(dominance(compare.dominance)),
-        Line::from(format!(
-            "{}  →  {}",
-            short(&compare.left),
-            short(&compare.right)
-        )),
+        Line::from(verdict(compare)),
+        Line::from(compare.left_claim.clone()),
+        Line::from(compare.right_claim.clone()),
     ];
     for delta in &compare.metrics {
         lines.push(Line::from(format!(
@@ -218,19 +245,28 @@ fn diff(model: &Model) -> Vec<Line<'static>> {
 }
 
 fn recall(model: &Model) -> Vec<Line<'static>> {
-    let mut query = format!("Busca  {}", model.recall_query);
+    let mut query = acvc_text::fill("search_label", &[("query", model.recall_query.as_str())]);
     if model.typing {
         query.push('▌');
     }
     let mut lines = vec![Line::from(query)];
     if model.recall_hits.is_empty() {
         lines.push(Line::from(
-            "Escreva uma palavra da premissa e aperte Enter.",
+            acvc_text::tr("recall_prompt"),
         ));
         return lines;
     }
     for (index, hit) in model.recall_hits.iter().enumerate() {
         lines.push(marked(index == model.recall_idx, hit.claim.clone()));
+        let origin = hit
+            .parents
+            .first()
+            .map(|parent| acvc_text::fill("came_from_one", &[("claim", parent.claim.as_str())]))
+            .unwrap_or_else(|| acvc_text::tr("opened_short").to_string());
+        lines.push(Line::from(format!(
+            "    {}  {origin}",
+            acvc_text::status_label(&hit.status)
+        )));
     }
     lines
 }
@@ -242,6 +278,37 @@ fn marked(selected: bool, text: String) -> Line<'static> {
         Style::default()
     };
     Line::from(Span::styled(format!(" {text} "), style))
+}
+
+fn beaten_sentence(winner: &acvc_app::BeatenBy) -> String {
+    let gaps = winner
+        .gaps
+        .iter()
+        .map(|gap| {
+            let sense = match gap.direction {
+                acvc_domain::Direction::Higher => acvc_text::tr("higher_better"),
+                acvc_domain::Direction::Lower => acvc_text::tr("lower_better"),
+            };
+            acvc_text::fill(
+                "against",
+                &[
+                    ("name", gap.name.as_str()),
+                    ("loser", &number(gap.loser)),
+                    ("winner", &number(gap.winner)),
+                    ("sense", sense),
+                ],
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("; ");
+    if gaps.is_empty() {
+        acvc_text::fill("beaten_by_gap", &[("claim", winner.claim.as_str())])
+    } else {
+        format!(
+            "{} {gaps}",
+            acvc_text::fill("beaten_by_gap", &[("claim", winner.claim.as_str())])
+        )
+    }
 }
 
 fn metrics(values: &std::collections::BTreeMap<String, f64>) -> String {
@@ -266,7 +333,7 @@ fn number_opt(value: Option<f64>) -> String {
 
 fn count_label(count: usize) -> String {
     if count == 0 {
-        "nenhum".into()
+        acvc_text::tr("none_count").to_string()
     } else {
         count.to_string()
     }
@@ -274,7 +341,7 @@ fn count_label(count: usize) -> String {
 
 fn agent_name(agent: &str) -> &str {
     if agent.is_empty() {
-        "não informado"
+        acvc_text::tr("agent_unknown")
     } else {
         agent
     }
@@ -282,26 +349,119 @@ fn agent_name(agent: &str) -> &str {
 
 fn origin(edge: EdgeKind) -> String {
     let text = match edge {
-        EdgeKind::Seed => "Começou a campanha. Não há hipótese anterior.",
-        EdgeKind::Mutate => "Mudança a partir de outra hipótese.",
-        EdgeKind::Revert => "Volta para uma hipótese anterior.",
-        EdgeKind::RevisePremise => "A premissa foi reescrita.",
-        EdgeKind::Synthesize => "Síntese de várias hipóteses.",
+        EdgeKind::Seed => acvc_text::tr("origin_seed"),
+        EdgeKind::Mutate => acvc_text::tr("origin_mutate"),
+        EdgeKind::Revert => acvc_text::tr("origin_revert"),
+        EdgeKind::RevisePremise => acvc_text::tr("origin_revise"),
+        EdgeKind::Synthesize => acvc_text::tr("origin_synthesize"),
     };
-    format!("Origem  {text}")
+    acvc_text::fill("origin_prefix", &[("text", text)])
 }
 
-fn dominance(relation: ScoreRelation) -> String {
-    match relation {
+fn verdict(compare: &CompareReport) -> String {
+    match compare.dominance {
         ScoreRelation::LeftDominates => {
-            "A da esquerda é melhor ou igual em tudo, e melhor em algo."
+            acvc_text::fill("stays", &[("claim", compare.left_claim.as_str())])
         }
         ScoreRelation::RightDominates => {
-            "A da direita é melhor ou igual em tudo, e melhor em algo."
+            acvc_text::fill("stays", &[("claim", compare.right_claim.as_str())])
         }
-        ScoreRelation::Tie => "Empate. Nenhuma é melhor.",
-        ScoreRelation::Incomparable => "Cada uma ganha numa métrica diferente.",
-        ScoreRelation::Incomplete => "Falta medição para decidir.",
+        ScoreRelation::Tie => acvc_text::fill(
+            "tie_both",
+            &[
+                ("left", compare.left_claim.as_str()),
+                ("right", compare.right_claim.as_str()),
+            ],
+        ),
+        ScoreRelation::Incomparable => acvc_text::tr("incomparable").to_string(),
+        ScoreRelation::Incomplete => acvc_text::tr("missing_measure_which").to_string(),
     }
-    .into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::Model;
+    use acvc_app::{BeatenBy, CompareReport, MetricGap, WhyReport};
+    use acvc_domain::{Direction as MetricDirection, EdgeKind, Hash, ScoreRelation, TreeDiff};
+    use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
+
+    fn sample() -> Hash {
+        Hash::parse("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap()
+    }
+
+    fn painted(model: &Model) -> String {
+        let backend = TestBackend::new(90, 24);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal.draw(|frame| draw(frame, model)).unwrap();
+        let buffer = terminal.backend().buffer();
+        let mut text = String::new();
+        for y in 0..buffer.area.height {
+            for x in 0..buffer.area.width {
+                text.push_str(buffer[(x, y)].symbol());
+            }
+            text.push('\n');
+        }
+        text
+    }
+
+    #[test]
+    fn lineage_and_compare_name_the_premise() {
+        acvc_text::install(acvc_text::Lang::PtBr);
+        let mut model = Model::empty();
+        model.detail = Some(WhyReport {
+            variant: sample(),
+            campaign: "evolucao".into(),
+            edge: EdgeKind::Seed,
+            claim: "frase humana".into(),
+            assumptions: Vec::new(),
+            intent: String::new(),
+            agent: "julio".into(),
+            parents: Vec::new(),
+            children: vec![sample()],
+            child_claims: vec!["sessão gravada".into()],
+            trials: Vec::new(),
+            rejection: None,
+            on_frontier: false,
+            beaten_by: vec![BeatenBy {
+                variant: sample(),
+                claim: "sessão gravada".into(),
+                gaps: vec![MetricGap {
+                    name: "uso_real".into(),
+                    direction: MetricDirection::Higher,
+                    winner: 5.0,
+                    loser: 3.0,
+                }],
+            }],
+            parent_claims: Vec::new(),
+        });
+        model.screen = Screen::Detail;
+        let premise = painted(&model);
+        assert!(premise.contains("Motivo não gravado."), "{premise}");
+        assert!(premise.contains("uso_real 3 contra 5"), "{premise}");
+        assert!(!premise.contains("Rejeitada"), "{premise}");
+        model.screen = Screen::Lineage;
+        let lineage = painted(&model);
+        assert!(lineage.contains("depois  sessão gravada"), "{lineage}");
+        assert!(!lineage.contains("aaaaaaaa"), "{lineage}");
+
+        model.compare = Some(CompareReport {
+            left: sample(),
+            right: sample(),
+            left_claim: "frase humana".into(),
+            right_claim: "sessão gravada".into(),
+            diff: TreeDiff {
+                added: Vec::new(),
+                removed: Vec::new(),
+                modified: Vec::new(),
+            },
+            metrics: Vec::new(),
+            dominance: ScoreRelation::RightDominates,
+        });
+        model.screen = Screen::Diff;
+        let compared = painted(&model);
+        assert!(compared.contains("sessão gravada fica."), "{compared}");
+        assert!(!compared.contains("esquerda"), "{compared}");
+    }
 }

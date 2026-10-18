@@ -1,0 +1,67 @@
+ACVC Non-Commercial Research License
+
+Copyright (c) 2026 Samuraisatoshi
+
+Original work: ACVC (Agent Code Variant Control)
+Repository: https://github.com/samuraisatoshi/acvc
+Written authorization: samuraisatoshi@cryptoworld.8shield.net
+
+This license follows the spirit of Linus Torvalds' original Linux license: a derivative credits the author and the original work, and the derived source is released publicly under the same license. ACVC adds a limit that license did not have: commercial use is not granted.
+
+
+1. Permission
+
+You may use, study, modify, and distribute ACVC, in whole or in part, for research, study, and personal use, only when all of the following are true:
+
+- the use is not commercial;
+- if there is a derivative work, the final product is not a commercial product;
+- you keep this notice and credit the author and the original work;
+- if you distribute a modification or a derivative work, you release the corresponding source code to the public under this same license.
+
+
+2. Commercial use
+
+The following is commercial use, even when the recipient pays nothing:
+
+- commercial software, including freeware and freemium;
+- use inside a commercial product, service, or activity, or in support of one;
+- research or study whose purpose is to produce, improve, or enable commercial software.
+
+This license does not grant that use.
+
+
+3. Written authorization
+
+Using ACVC in a commercial software project, or in a research or study project whose purpose is to produce commercial software, requires written authorization from the author of ACVC, Samuraisatoshi, at samuraisatoshi@cryptoworld.8shield.net.
+
+Without that authorization, the permission in section 1 does not cover the use. An authorization, when one exists, covers only what it describes.
+
+
+4. Derivative works
+
+A derivative work is allowed for research and study when the final product is not a commercial product.
+
+You may distribute a derivative work, or a modified part, only when all three conditions below are met together:
+
+- the work credits Samuraisatoshi as the author of ACVC and identifies ACVC as the original work, with the repository address above;
+- copyright notices stay intact; in a partial distribution, the notices of the included parts stay, and new parts carry the notice of whoever wrote them;
+- the derived source code is publicly available, at no extra license charge, under this same license and not under another.
+
+Making the code available only on request, for a fee, or behind an access restriction does not satisfy this section.
+
+
+5. What this license does not grant
+
+This license does not grant a right of commercial use, does not transfer ownership, and does not allow use of the author's name to endorse a derivative work.
+
+Trademarks and the name ACVC remain the author's. A derivative work must not present itself as the original ACVC.
+
+
+6. No warranty
+
+ACVC is provided as is, without warranty of any kind, express or implied, including fitness for a particular purpose and non-infringement. The author is not liable for damages arising from use or inability to use, to the extent allowed by applicable law.
+
+
+7. Acceptance
+
+By using, modifying, or distributing ACVC, you accept this license. If you cannot meet a condition, you do not have the corresponding permission.

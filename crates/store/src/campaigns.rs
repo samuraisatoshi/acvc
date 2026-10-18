@@ -75,6 +75,21 @@ impl CampaignStore for Graph {
             })
             .collect()
     }
+
+    fn opened_at(&self, name: &str) -> Result<i64> {
+        let conn = self.lock()?;
+        conn.query_row(
+            "SELECT created_at FROM campaigns WHERE name = ?1",
+            [name],
+            |row| row.get(0),
+        )
+        .map_err(|err| match err {
+            rusqlite::Error::QueryReturnedNoRows => {
+                acvc_domain::Error::new("campaign not found").ctx("campaign", name)
+            }
+            other => sql_err(other, "campaign opened"),
+        })
+    }
 }
 
 fn campaign_conflict(err: rusqlite::Error, name: &str) -> acvc_domain::Error {

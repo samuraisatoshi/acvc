@@ -1,9 +1,11 @@
 use std::path::PathBuf;
 
-use acvc_domain::{EdgeKind, Error, PlannedFile, Premise, Result, Variant, rebuild_merkle};
+use acvc_domain::{
+    EdgeKind, Error, ListedFile, PlannedFile, Premise, Result, Variant, rebuild_merkle,
+};
 
 use crate::pathutil::join_rel;
-use crate::{App, SeedReport};
+use crate::{App, HeavyPath, SeedReport};
 
 pub struct SeedRequest {
     pub campaign: String,
@@ -55,6 +57,16 @@ impl App {
             intent: request.intent,
             agent: request.agent,
         };
+        let id = variant.id()?;
+        let existing = self.ports.variants.variants_in(&request.campaign)?;
+        let same = existing
+            .iter()
+            .any(|stored| stored.variant.id().ok() == Some(id));
+        if !existing.is_empty() && !same {
+            return Err(Error::new("campaign already has an origin")
+                .ctx("campaign", request.campaign)
+                .ctx("fix", "record from the parent workspace"));
+        }
         let id = self.ports.variants.insert_variant(
             &request.campaign,
             &variant,
@@ -66,6 +78,27 @@ impl App {
             tree,
             files: files.len(),
             hashed: files.len(),
+            heaviest: heaviest(&listed),
         })
     }
+}
+
+fn heaviest(listed: &[ListedFile]) -> Vec<HeavyPath> {
+    let mut ranked: Vec<&ListedFile> = listed.iter().collect();
+    ranked.sort_by(|left, right| {
+        right
+            .stat
+            .fingerprint
+            .size
+            .cmp(&left.stat.fingerprint.size)
+            .then_with(|| left.path.cmp(&right.path))
+    });
+    ranked.truncate(5);
+    ranked
+        .into_iter()
+        .map(|file| HeavyPath {
+            path: file.path.clone(),
+            bytes: file.stat.fingerprint.size,
+        })
+        .collect()
 }

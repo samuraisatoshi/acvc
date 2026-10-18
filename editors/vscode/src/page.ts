@@ -1,6 +1,6 @@
 export function pageHtml(): string {
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
@@ -18,8 +18,8 @@ export function pageHtml(): string {
 </head>
 <body>
 <header>
-  <label>Campaign <select id="campaign"></select></label>
-  <form id="recall"><input id="query" placeholder="recall" /><button>Search</button></form>
+  <label>Campanha <select id="campaign"></select></label>
+  <form id="recall"><input id="query" placeholder="o que a hipótese afirma" /><button>Buscar</button></form>
 </header>
 <main>
   <p id="marks"></p>
@@ -49,12 +49,12 @@ function render(state) {
     option.selected = name === state.campaign;
     campaign.append(option);
   }
-  byId("marks").textContent = "left " + (state.left || "none") + "    right " + (state.right || "none");
+  byId("marks").textContent = "Uma: " + (state.one || "nenhuma") + "    Outra: " + (state.other || "nenhuma");
   byId("error").textContent = state.error || "";
   byId("body").textContent = state.body || "";
   const actions = byId("actions");
   actions.replaceChildren();
-  if (state.left && state.right) actions.append(button("compare", { type: "compare" }));
+  if (state.one && state.other) actions.append(button("Qual fica", { type: "compare" }));
   const frontier = byId("frontier");
   frontier.replaceChildren();
   for (const row of state.frontier) {
@@ -64,9 +64,9 @@ function render(state) {
     claim.textContent = row.label;
     item.append(
       claim,
-      button("premise", { type: "why", variant: row.variant }),
-      button("left", { type: "mark", side: "left", variant: row.variant }),
-      button("right", { type: "mark", side: "right", variant: row.variant })
+      button("Premissa", { type: "why", variant: row.variant }),
+      button("Uma", { type: "mark", side: "one", variant: row.variant }),
+      button("Outra", { type: "mark", side: "other", variant: row.variant })
     );
     frontier.append(item);
   }
@@ -74,7 +74,7 @@ function render(state) {
   paths.replaceChildren();
   for (const entry of state.paths) {
     const item = document.createElement("li");
-    item.append(button(entry.kind + " " + entry.path, { type: "file", path: entry.path }));
+    item.append(button(entry.label, { type: "file", path: entry.path }));
     paths.append(item);
   }
 }

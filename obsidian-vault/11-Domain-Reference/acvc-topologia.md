@@ -21,7 +21,7 @@ Um executável local. Cargo só compila. Quem roda o produto não precisa de Rus
 - Marcador .acvc-workspace, na pasta que o agente edita.
 - Índice .acvc-index, impressão digital por caminho.
 
-A varredura ignora as pastas .git, .acvc, target e node_modules, e os arquivos .acvc-workspace e .acvc-index. Symlink é erro.
+A varredura não lê o .gitignore. Ignora as pastas .git, .acvc, target, node_modules, .build e DerivedData, e os arquivos .acvc-workspace e .acvc-index. Symlink é erro. O store fica em --repo. Na pasta semeada ficam só os dois marcadores, e os dois entram no .gitignore.
 
 ## Editores
 
