@@ -21,6 +21,41 @@ Os arquivos de release, quando publicados, são Linux x86_64 e macOS Apple Silic
 
 A saída padrão é JSON. Use `--format text` quando quiser frases. As frases seguem o idioma do computador (`LC_ALL`, depois `LC_MESSAGES`, depois `LANG`). O inglês é o recurso quando o idioma não é identificado. Estes quatro valores de status no JSON não mudam: `na fronteira`, `superada`, `rejeitada`, `sem medição`.
 
+## Agents LLM
+
+Um agent aprende o ACVC pelo executável, não por este README. No começo de uma sessão, antes de explicar a ferramenta ou chamar outro verbo, ele roda `acvc assistant`. Esse comando devolve o contrato operacional no idioma do computador. O mesmo contrato é a ferramenta MCP `assistant`.
+
+O contrato tem oito partes: `indice`, `objetivo`, `recursos`, `como-usar`, `boas-praticas`, `exemplos`, `mau-uso`, `trade-offs`. Leia nessa ordem e pare quando a pergunta já tiver resposta.
+
+### CLI
+
+```bash
+acvc assistant
+acvc --format text assistant
+acvc assistant --part como-usar
+```
+
+O padrão é JSON. `lang` é o idioma (`en-US` quando a língua falta ou é desconhecida). `documents` é o contrato: cada item tem `id`, `source`, `text` e `metadata`. `index` diz a um agent que também tem o MCP do ASB para enviar esse array `documents` ao `rag.index` uma vez. A busca seguinte usa `rag.search`. `--part` devolve um documento. Uma parte desconhecida é erro (`unknown assistant document`).
+
+O trabalho passa pelo mesmo binário. `seed`, `record`, `score`, `frontier`, `why`, `recall`, `compare`, `reject` e `promote` são os verbos. Não abra `.acvc/graph.sqlite`, o log nem o pack. No JSON, leia o campo `status`. Os quatro valores continuam `na fronteira`, `superada`, `rejeitada` e `sem medição`. A frase traduzida é para uma pessoa.
+
+### MCP
+
+`acvc mcp` fala MCP em stdio. Ele não abre o armazenamento. Cada ferramenta sobe o binário `acvc` de novo e devolve a saída desse processo.
+
+```json
+{
+  "mcpServers": {
+    "acvc": {
+      "command": "acvc",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Chame a ferramenta `assistant` primeiro, com o argumento opcional `part`. As outras ferramentas são os verbos da CLI. Passe `repo` quando a campanha não está no diretório atual do servidor. Uma página, uma TUI ou um editor que quer os dados chama esse executável. Não reimplementa o grafo.
+
 ## Uma campanha
 
 ```bash
