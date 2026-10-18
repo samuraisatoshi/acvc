@@ -1,4 +1,3 @@
-// obsidian-vault/12-Scope-Docs/CD-ACVC-08-packfile.md
 // Blob records only. Trees stay in objects.log so record never opens the pack.
 
 use std::collections::BTreeMap;
