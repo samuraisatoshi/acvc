@@ -131,104 +131,11 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 
 ### 6.1 Scion
 
-Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema de controle de versão que substituiu o Git no monorepo deles [25]. As figuras abaixo recontam diagramas desse post. As medições são da Anthropic. Este repositório não as repetiu.
+Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema que substituiu o Git no monorepo deles [25]. As contagens abaixo são tiradas desse post. Este repositório não as mediu, e não reproduz as figuras do post. Os diagramas ficam na página deles.
 
-Eles relatam a pressão que fez do Git o gargalo. O gráfico "Changes merged per day" imprime 30.401 merges em 9 de setembro de 2026. Em maio o mesmo monorepo estava perto de 2.500 por dia. A série passa de pull requests para change requests do Antique, a média de sete dias sobe ao longo de setembro, e o gráfico marca uma semana quieta no começo de agosto. O histórico do main sozinho tem quase 100 GB, e uma working copy comprimida passa de 25 GB. O CI faz da ordem de 25 milhões de checkouts por dia. Buscado de forma ingênua, isso passa de 600 PB de tráfego Git por dia. Os diretórios que guardam o Scion e o Antique acumularam 12.257 mudanças integradas de janeiro a setembro de 2026.
+Eles relatam merges subindo de cerca de 2.500 por dia em maio de 2026 para 30.401 em 9 de setembro de 2026. O histórico do main tem quase 100 GB. O CI faz da ordem de 25 milhões de checkouts por dia. O relato deles é que uma frota de mirrors Git deixou de bastar para clientes que estão online, e que o Scion responde o histórico a partir de um servidor. Uma mudança aterrada fica guardada como os arquivos que diferem do pai, com os bytes conservados por hash. Nos tempos de comando publicados, um commit de desenvolvedor passa de 1,4 s para 1,1 s, o status de 3,9 s para 19 ms, e uma worktree nova de agente de 7,1 min para 5,1 s.
 
-O arranjo que eles estavam deixando é um cluster de mirrors Git. Jobs, ambientes de desenvolvimento, sandboxes de agente e jobs de pesquisa puxam por um cache de packfile, depois réplicas de mirror, depois primários, depois um upstream. Um snapshot de seed em blob storage alimenta um seed do nó, e os jobs também leem desse seed. No pico eles operavam várias centenas desses mirrors.
-
-```mermaid
-flowchart LR
-  subgraph jobs [Jobs]
-    ci[CI jobs]
-    dev[Ambientes de desenvolvimento]
-    agents[Sandboxes de agente]
-    research[Jobs de pesquisa]
-  end
-  subgraph cluster [Por cluster]
-    pack[Cache de packfile]
-    replicas[Réplicas de mirror]
-    primaries[Primários do mirror]
-  end
-  upstream[Upstream]
-  blobs[Blob storage: snapshot do seed]
-  seed[Seed do nó]
-  ci --> pack
-  dev --> pack
-  agents --> pack
-  research --> pack
-  pack --> replicas --> primaries --> upstream
-  replicas --> blobs --> seed
-  seed --> ci
-  seed --> dev
-  seed --> agents
-  seed --> research
-```
-
-O arranjo típico para escalar checkouts Git, como descrito em [25]. O desenho é nosso.
-
-Um changeset é uma entrada num log de escrita antecipada. A forma publicada guarda os metadados no Spanner: autor, datas, mensagem, pais, uma assinatura opcional, e a lista de mudanças de arquivo contra o primeiro pai. Cada mudança aponta para um blob endereçado por conteúdo no cloud storage: arquivo regular, deleção ou executável. A árvore raiz e as árvores aninhadas são derivadas pelo servidor. Elas não ficam gravadas no changeset. Os bytes do arquivo são imutáveis, comprimidos e deduplicados por hash. Blame, histórico de caminho e o grafo de commits são dados derivados a mais, calculados a partir dos pais. Os clientes são pressupostos online. O servidor cria o changeset, responde o histórico e faz o merge. O cliente guarda um cache limitado e materializa os arquivos que lhe pediram. Refs além do main, ou de um branch de release, são desencorajadas, porque todo servidor teria de concordar sobre elas. Não há packfile.
-
-```mermaid
-flowchart TD
-  parent[Changeset pai]
-  meta["Metadados do changeset: autor, mensagem, pais, mudanças de arquivo"]
-  blob[Cloud storage: bytes do arquivo por hash]
-  tree["Derivado pelo servidor: árvore raiz e árvores aninhadas"]
-  parent --> meta
-  meta -->|mudança de arquivo| blob
-  meta -.->|não fica no changeset| tree
-  tree --> blob
-```
-
-A forma de um changeset no Scion, como descrita em [25]. O desenho é nosso.
-
-O checkout publicado tem dois planos. O plano de controle é o mesmo para o Antique, as máquinas de desenvolvimento e o CI: upload, commit e land, contra o scion-server. Esse servidor guarda changesets, branches e árvores no Spanner, e o conteúdo dos arquivos no cloud storage. O plano de objetos é regional. As máquinas de desenvolvimento buscam árvores e conteúdo no scion-cache. Um job de CI ou de cluster fala com o scion-daemon no nó. O daemon nasce de um snapshot periódico e pergunta ao cache regional num miss. O cache pergunta ao scion-server num miss. Cada camada relatou taxa de acerto acima de 99 por cento. Eles relatam a frota usando cerca de 200 vezes menos CPU e memória do que os mirrors Git, e checkouts de CI passando de minutos para segundos.
-
-```mermaid
-flowchart LR
-  antique[Antique]
-  dev[Máquinas de desenvolvimento]
-  jobs[Jobs de CI e de cluster]
-  daemon[scion-daemon no nó]
-  cache[scion-cache na região]
-  server[scion-server]
-  spanner[Spanner: changesets, branches, árvores]
-  blobs2[Cloud storage: conteúdo dos arquivos]
-  snap[Snapshot periódico]
-  antique -->|upload, commit, land| server
-  dev -->|upload, commit, land| server
-  jobs -->|upload, commit, land| server
-  dev -->|árvores e conteúdo| cache
-  jobs --> daemon
-  snap -->|semeia o nó| daemon
-  daemon -->|miss| cache
-  cache -->|miss| server
-  server --> spanner
-  server --> blobs2
-```
-
-As camadas de checkout como descritas em [25]. O desenho é nosso. O original tem a legenda "Scion's checkout architecture."
-
-A figura de desempenho no post tem a legenda "Observed performance improvements on native Scion repos." O título do gráfico é "Everyday source control commands on the monorepo." Estes são os medianos impressos nele.
-
-| Comando | git | scn | Fator relatado |
-| --- | --- | --- | --- |
-| Pull latest, desenvolvedor | 87 s | 3,5 s | ×25 |
-| Checkout, desenvolvedor | 15 s | 1,1 s | ×14 |
-| Rebase, desenvolvedor | 13 s | 2,7 s | ×4,8 |
-| Status, desenvolvedor | 3,9 s | 19 ms | ×207 |
-| Commit, desenvolvedor | 1,4 s | 1,1 s | ×1,3 |
-| Diff, desenvolvedor | 407 ms | 67 ms | ×6,1 |
-| New worktree, agente | 7,1 min | 5,1 s | ×84 |
-| Pull latest, agente | 3,0 min | 9,0 s | ×20 |
-| Commit, agente | 18 s | 761 ms | ×24 |
-| Status, agente | 4,3 s | <0,2 s | ×20+ |
-| Tempo de source control por change request, agente | 34 min | 3,7 min | ×9,2, cerca de 11.000 horas de agente por dia |
-| Checkout no início de um job de compute | 175 s | 22 s | ×8,0, cerca de 85.000 horas de máquina por dia |
-| Checkout dentro de um job de CI | 31 s | 3,5 s | ×6,8, cerca de 195.000 horas de máquina por dia |
-
-A dispersão dentro desse gráfico é o ponto. Numa máquina de desenvolvimento, o commit passa de 1,4 s para 1,1 s. O status passa de 3,9 s para 19 ms. Uma worktree nova de agente passa de 7,1 min para 5,1 s. O tempo que some é o tempo de copiar e consultar um histórico do tamanho do monorepo. O tempo que mal se move é o ato local de gravar uma mudança. O Scion torna o trunk barato de ler e barato de receber. Ele deixa em aberto qual de várias tentativas medidas deve aterrar.
+A dispersão é o ponto. O tempo que encolhe é o tempo de copiar e consultar um histórico do tamanho do monorepo. O tempo que mal se move é o ato local de gravar uma mudança. O Scion torna o trunk barato de ler e barato de receber. Ele deixa em aberto qual de várias tentativas medidas deve aterrar.
 
 O Scion e o ACVC recusam fazer cada cliente carregar o histórico inteiro para responder uma pergunta. No Scion a pergunta é ancestralidade, blame e o diff contra a base do merge, e o servidor responde. No ACVC a pergunta é quais medições completas ainda não foram superadas, e o executável responde a partir da campanha. A fronteira é derivada dos ensaios do jeito que o blame deles é derivado dos pais. A conferência dessa derivação está em [TLA.md](TLA.md). O agente não abre o log.
 

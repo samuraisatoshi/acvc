@@ -131,104 +131,11 @@ None of these is a substitute. Each one owns a purpose. ACVC owns the scored hyp
 
 ### 6.1 Scion
 
-On 13 October 2026 Anthropic described Scion, the version control system that replaced Git on their monorepo [25]. The figures below restate diagrams from that post. The measurements are Anthropic's. This repository did not repeat them.
+On 13 October 2026 Anthropic described Scion, the system that replaced Git on their monorepo [25]. The counts below are taken from that post. This repository did not measure them, and it does not reproduce the post's figures. The diagrams stay on their page.
 
-They report the pressure that made Git the bottleneck. The chart "Changes merged per day" prints 30,401 merges on 9 September 2026. In May the same monorepo was near 2,500 a day. The series moves from pull requests to Antique change requests, the seven-day average climbs through September, and the chart marks a quiet week in early August. The history of main alone is almost 100 GB, and a compressed working copy is over 25 GB. CI performs on the order of 25 million checkouts a day. Fetched naively, that is over 600 PB of Git traffic a day. The directories that hold Scion and Antique accumulated 12,257 merged changes from January through September 2026.
+They report merges rising from about 2,500 a day in May 2026 to 30,401 on 9 September 2026. The history of main is almost 100 GB. CI does on the order of 25 million checkouts a day. Their account is that a fleet of Git mirrors stopped being enough for clients that are online, and that Scion answers history from a server. A landed change is stored as the files that differ from its parent, with the bytes kept by hash. On the published command timings, a developer commit moves from 1.4 s to 1.1 s, status from 3.9 s to 19 ms, and a new agent worktree from 7.1 min to 5.1 s.
 
-The setup they were leaving is a cluster of Git mirrors. Jobs, developer environments, agent sandboxes, and research jobs pull through a packfile cache, then mirror replicas, then mirror primaries, then an upstream. A seed snapshot in blob storage feeds a node seed, and the jobs also read from that seed. At the peak they ran several hundred of these mirrors.
-
-```mermaid
-flowchart LR
-  subgraph jobs [Jobs]
-    ci[CI jobs]
-    dev[Developer environments]
-    agents[Agent sandboxes]
-    research[Research jobs]
-  end
-  subgraph cluster [Per cluster]
-    pack[Packfile cache]
-    replicas[Mirror replicas]
-    primaries[Mirror primaries]
-  end
-  upstream[Upstream]
-  blobs[Blob storage: seed snapshot]
-  seed[Node seed]
-  ci --> pack
-  dev --> pack
-  agents --> pack
-  research --> pack
-  pack --> replicas --> primaries --> upstream
-  replicas --> blobs --> seed
-  seed --> ci
-  seed --> dev
-  seed --> agents
-  seed --> research
-```
-
-The typical setup for scaling Git checkouts, as described in [25]. The drawing is ours.
-
-A changeset is an entry in a write-ahead log. The published shape stores the metadata in Spanner: author, dates, message, parents, an optional signature, and the list of file changes against the first parent. Each change points at a content-addressed blob in cloud storage: a regular file, a deletion, or an executable. The root tree and the nested trees are derived by the server. They are not stored in the changeset. The file bytes are immutable, compressed, and deduplicated by hash. Blame, path history, and the commit graph are further derived data, computed from the parents. Clients are assumed to be online. The server creates the changeset, answers history, and merges. The client keeps a bounded cache and lays out the files it was asked for. Refs other than main, or a release branch, are discouraged, because every server would have to agree on them. There is no packfile.
-
-```mermaid
-flowchart TD
-  parent[Parent changeset]
-  meta["Changeset metadata: author, message, parents, file changes"]
-  blob[Cloud storage: file bytes by hash]
-  tree["Derived by the server: root tree and nested trees"]
-  parent --> meta
-  meta -->|file change| blob
-  meta -.->|not stored on the changeset| tree
-  tree --> blob
-```
-
-The shape of a changeset in Scion, as described in [25]. The drawing is ours.
-
-The published checkout has two planes. The control plane is the same for Antique, developer machines, and CI: upload, commit, and land, against scion-server. That server stores changesets, branches, and trees in Spanner, and file contents in cloud storage. The object plane is regional. Developer machines fetch trees and file contents from scion-cache. A CI or cluster job talks to scion-daemon on its node. The daemon is seeded from a periodic snapshot and asks the regional cache on a miss. The cache asks scion-server on a miss. Each tier reported a hit rate over 99 percent. They report the fleet using about 200 times less CPU and memory than the Git mirrors, and CI checkouts moving from minutes to seconds.
-
-```mermaid
-flowchart LR
-  antique[Antique]
-  dev[Developer machines]
-  jobs[CI and cluster jobs]
-  daemon[scion-daemon on the node]
-  cache[scion-cache in the region]
-  server[scion-server]
-  spanner[Spanner: changesets, branches, trees]
-  blobs[Cloud storage: file contents]
-  snap[Periodic snapshot]
-  antique -->|upload, commit, land| server
-  dev -->|upload, commit, land| server
-  jobs -->|upload, commit, land| server
-  dev -->|trees and file contents| cache
-  jobs --> daemon
-  snap -->|seeds the node| daemon
-  daemon -->|miss| cache
-  cache -->|miss| server
-  server --> spanner
-  server --> blobs
-```
-
-Checkout tiers as described in [25]. The drawing is ours. The original is captioned "Scion's checkout architecture."
-
-The second figure in the post is captioned "Observed performance improvements on native Scion repos." The chart title is "Everyday source control commands on the monorepo." These are the medians printed on it.
-
-| Command | git | scn | Reported factor |
-| --- | --- | --- | --- |
-| Pull latest, developer | 87 s | 3.5 s | ×25 |
-| Checkout, developer | 15 s | 1.1 s | ×14 |
-| Rebase, developer | 13 s | 2.7 s | ×4.8 |
-| Status, developer | 3.9 s | 19 ms | ×207 |
-| Commit, developer | 1.4 s | 1.1 s | ×1.3 |
-| Diff, developer | 407 ms | 67 ms | ×6.1 |
-| New worktree, agent | 7.1 min | 5.1 s | ×84 |
-| Pull latest, agent | 3.0 min | 9.0 s | ×20 |
-| Commit, agent | 18 s | 761 ms | ×24 |
-| Status, agent | 4.3 s | <0.2 s | ×20+ |
-| Source-control time per change request, agent | 34 min | 3.7 min | ×9.2, about 11,000 agent hours a day |
-| Checkout at the start of a compute job | 175 s | 22 s | ×8.0, about 85,000 machine hours a day |
-| Checkout inside a CI job | 31 s | 3.5 s | ×6.8, about 195,000 machine hours a day |
-
-The spread inside that chart is the point. On a developer machine, commit moves from 1.4 s to 1.1 s. Status moves from 3.9 s to 19 ms. A new agent worktree moves from 7.1 min to 5.1 s. The time that disappears is the time spent copying and querying a history the size of the monorepo. The time that barely moves is the local act of recording a change. Scion makes the trunk cheap to read and cheap to land on. It leaves open which of several measured attempts should land.
+The spread is the point. The time that shrinks is the time spent copying and querying a history the size of the monorepo. The time that barely moves is the local act of recording a change. Scion makes the trunk cheap to read and cheap to land on. It leaves open which of several measured attempts should land.
 
 Scion and ACVC both refuse to make every client carry the whole history in order to answer a question. In Scion the question is ancestry, blame, and the diff against a merge base, and the server answers it. In ACVC the question is which complete measurements are still undominated, and the executable answers it from the campaign. The frontier is derived from the trials the way their blame is derived from the parents. The check of that derivation is [TLA.md](TLA.md). The agent does not open the log.
 
