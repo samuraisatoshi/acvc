@@ -72,9 +72,10 @@ jobs:
 
             Since 0.1.1:
             - `acvc assistant` tells an agent how `record` chooses a parent, which edge to use, and that `score` does not change the variant id.
+            - The paper reads Scion against that gate. `promote` may be called by an agent or by a person. The section draws both workflows.
             - The README, the paper, and the TLC check of the frontier are in the repository. They describe which attempts stay out of Git.
 
-            ACVC records an agent's hypotheses, trials, and the Pareto frontier outside Git. Git still stores the variant a person chooses to record.
+            ACVC records hypotheses, trials, and the frontier outside Git. Git receives the tree `promote` copies. The caller may be an agent or a person.
 
             This release is covered by the ACVC Non-Commercial Research License in LICENSE.
             Commercial use is not granted. That includes freeware, freemium, and research or study whose purpose is to produce commercial software. Those uses need written authorization from Samuraisatoshi at samuraisatoshi@cryptoworld.8shield.net.

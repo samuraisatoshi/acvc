@@ -117,7 +117,7 @@ None of these is a substitute. Each one owns a purpose. ACVC owns the scored hyp
 | Git [1, 2] | Content-addressed blobs, trees, and commits | The commit is a decision. Abandoned hypotheses are not a frontier. |
 | Gitless [4] | A simpler conceptual layer over Git | It repairs Git's concepts. It does not add premises or trials. |
 | container-use [11] | A container, a worktree, and a branch per agent, plus command history in Git notes | It isolates execution. It does not score hypotheses or share unchanged blobs across a campaign. |
-| Scion [25] | A server-side changeset log for one huge monorepo: files changed against the first parent, content-addressed blobs, derived blame and history | It makes landing and checkout cheap. A failed attempt that becomes a changeset is still history. It does not score a hypothesis. |
+| Scion [25] | A server-side changeset log for one huge monorepo: files changed against the first parent, content-addressed blobs, derived blame and history | It makes it cheap to put a change into history and to check that history out. A failed attempt that becomes a changeset is still history. It does not score a hypothesis. |
 | Variolite [5] | Lightweight local variants inside the editor | Variants are snippets for exploration. They are not a Merkle campaign with a frontier. |
 | DVC [19] | Data, models, and pipelines, with hashes, on top of Git | The pipeline run is the object. The hypothesis edge and the undominated set of code variants are not. |
 | MLflow [9] | Parameters, metrics, and artifacts of runs | The run is a row. The code tree is not a Merkle hypothesis, and dominance is not the status. |
@@ -131,19 +131,45 @@ None of these is a substitute. Each one owns a purpose. ACVC owns the scored hyp
 
 ### 6.1 Scion
 
-On 13 October 2026 Anthropic described Scion in [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. The counts below are theirs. This repository did not measure them.
+On 13 October 2026 Anthropic described Scion in [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. The numbers below come from that post. This repository did not measure them.
 
-Agents land more changes than a history built for human decisions can cheaply answer. They report about 2,500 merges a day in May 2026 and 30,401 on 9 September 2026. The history of main is almost 100 GB. CI does on the order of 25 million checkouts a day. On the timings they published, a developer commit moves from 1.4 s to 1.1 s, while status moves from 3.9 s to 19 ms. The cost that grew is reading and fetching the trunk. Recording one change barely moved.
+The problem is volume. Agents produce more changes than a history built for people can answer without becoming expensive. The post reports about 2,500 merges a day in May 2026 and 30,401 on 9 September 2026. The history of `main` is almost 100 GB. Continuous integration checks the repository out on the order of 25 million times a day. On the timings they published, a developer commit goes from 1.4 s to 1.1 s, and `status` goes from 3.9 s to 19 ms. What became expensive is reading and fetching the repository. The time to record one change barely moved.
 
-Scion is the server they built for that trunk. A landed change is the files that differ from its parent, and the server answers history. ACVC is a gate in front of a landing. An attempt is a hypothesis with a measurement. It stays in `.acvc` until `promote` copies one approved tree into a checkout that already exists. This repository has no Scion client. The joint column is what that one tree would be on their server: one changeset. It is a seam, not a system shipped here.
+Scion is the server they put in Git's place on that monorepo. What enters the history is the set of files that differ from the parent. A question about the past goes to the server. ACVC sits before that entry. Each attempt is a hypothesis with a measurement, and it stays in `.acvc`. `promote` copies the tree it is given into a checkout that already exists. It does not ask whether that tree is still on the frontier, and it does not ask whether the caller is a person or an agent. The frontier informs the choice. The choice belongs to whoever is allowed to run the command. That caller can be an agent, a small one or a large model, or a person. A small agent that only records and scores is already part of the process. The same binary serves the terminal and `acvc mcp`.
 
-The gate reduces the changeset log only when measured attempts would otherwise land. One change that is already the decision does not need a campaign. The campaign does not reduce the checkout cost they reported.
+Two workflows use those same commands. This repository has no Scion client, and it does not measure which workflow a team picks. If the checkout were Scion, the copied tree would be one changeset in their history.
 
-| | Scion alone | ACVC alone | Together |
+Machine to machine. One agent records the versions and the measurements. The frontier is computed from those measurements. The same agent, or another one, reads the frontier and calls `promote` when its rule names one tree. The other attempts stay in `.acvc`. When more than one hypothesis is still undominated, the campaign does not pick. The rule belongs to the caller. The command is the same for a short script and for a large model.
+
+Machine to machine, with a person in the middle. The agents still record and measure, and they still read a frontier the program computed. The person is the one who calls `promote` or `reject`. A rejection is a sentence passed to the command. The person or the agent who passes it is the one who wrote it. The program does not invent that sentence.
+
+```mermaid
+flowchart TB
+  subgraph auto ["Machine to machine"]
+    direction LR
+    a1["an agent records versions and measurements"] --> f1["the frontier is computed"]
+    f1 --> p1["an agent applies a rule"]
+    p1 --> g1["promote copies one tree"]
+    p1 --> r1["the rest stays in .acvc"]
+    g1 --> s1["one changeset on main"]
+  end
+  subgraph human ["Machine to machine, with a person in the middle"]
+    direction LR
+    a2["an agent records versions and measurements"] --> f2["the frontier is computed"]
+    f2 --> h2["a person reads the frontier"]
+    h2 --> g2["promote or reject"]
+    h2 --> r2["the rest stays in .acvc"]
+    g2 --> s2["one changeset on main"]
+  end
+```
+
+The two meet in a way that shortens history only when several measured attempts would otherwise reach `main`. A change that is already the chosen decision does not need a campaign. A campaign also does not make the checkout they measured any cheaper.
+
+| | Scion alone | ACVC alone | The two together |
 | --- | --- | --- | --- |
-| Question it answers | Who changed a line, and the diff of what landed. The server answers. | Which complete measurements still compete, and which tree was approved. | The server answers the trunk. The campaign answers the search. |
-| Where an attempt that does not land goes | Outside the system the post describes. A landed change is a changeset. | In `.acvc`, with its numbers. Git receives nothing until `promote`. | In `.acvc`. The trunk receives the approved tree as one changeset. |
-| What it leaves undone | Which of several measured attempts should land. | A history of almost 100 GB, and tens of millions of checkouts a day. | The checkout load, which stays with Scion. An attempt that was not approved stays out of that log. |
+| The question | Who changed a line, and what differed in what entered the history. The answer comes from the server. | Which complete measurements are still undominated, and which tree `promote` copied. | The server answers for the history of `main`. The campaign answers for the search that has not been copied. |
+| An attempt that does not enter | The post does not describe a place for it. What enters the history is a changeset. | It stays in `.acvc`, with its numbers. Git receives no copy until `promote`. | It stays in `.acvc`. `main` receives only the tree `promote` copied, as one changeset. |
+| What stays outside | The choice of which measured attempt should enter, when there are several. | A history of almost 100 GB, and tens of millions of checkouts a day. | The checkout cost, which stays with Scion. An attempt that was not copied stays out of that history. |
 
 ## 7. Limits
 

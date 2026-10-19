@@ -117,7 +117,7 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 | Git [1, 2] | Blobs, árvores e commits endereçados por conteúdo | O commit é uma decisão. Hipóteses abandonadas não são uma fronteira. |
 | Gitless [4] | Uma camada conceitual mais simples sobre o Git | Repara os conceitos do Git. Não acrescenta premissas nem ensaios. |
 | container-use [11] | Um container, uma worktree e um branch por agente, mais o histórico de comandos em Git notes | Isola a execução. Não pontua hipóteses nem compartilha blobs intactos numa campanha. |
-| Scion [25] | Um log de changesets no servidor, para um monorepo enorme: arquivos mudados contra o primeiro pai, blobs endereçados por conteúdo, blame e histórico derivados | Torna o landing e o checkout baratos. Uma tentativa falha que vira changeset continua sendo histórico. Não pontua uma hipótese. |
+| Scion [25] | Um log de changesets no servidor, para um monorepo enorme: arquivos mudados contra o primeiro pai, blobs endereçados por conteúdo, blame e histórico derivados | Barateia colocar uma mudança no histórico e fazer o checkout. Uma tentativa que falhou, se entrar como changeset, continua no histórico. Não pontua uma hipótese. |
 | Variolite [5] | Variantes locais leves dentro do editor | Variantes são trechos para exploração. Não são uma campanha Merkle com fronteira. |
 | DVC [19] | Dados, modelos e pipelines, com hashes, sobre o Git | A execução do pipeline é o objeto. A aresta da hipótese e o conjunto não dominado de variantes de código não são. |
 | MLflow [9] | Parâmetros, métricas e artefatos de execuções | A execução é uma linha. A árvore de código não é uma hipótese Merkle, e a dominação não é o status. |
@@ -131,19 +131,45 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 
 ### 6.1 Scion
 
-Em 13 de outubro de 2026 a Anthropic descreveu o Scion em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. As contagens abaixo são deles. Este repositório não as mediu.
+Em 13 de outubro de 2026 a Anthropic descreveu o Scion em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. Os números abaixo saem desse post. Este repositório não os mediu.
 
-Agentes aterram mais mudanças do que um histórico feito para decisões humanas consegue responder barato. Eles relatam cerca de 2.500 merges por dia em maio de 2026 e 30.401 em 9 de setembro de 2026. O histórico do main tem quase 100 GB. O CI faz da ordem de 25 milhões de checkouts por dia. Nos tempos que publicaram, um commit de desenvolvedor passa de 1,4 s para 1,1 s, enquanto o status passa de 3,9 s para 19 ms. O custo que cresceu é ler e buscar o trunk. Gravar uma mudança mal se moveu.
+O problema é o volume. Agentes produzem mais mudanças do que um histórico pensado para pessoas consegue consultar sem ficar caro. O post relata cerca de 2.500 merges por dia em maio de 2026 e 30.401 no dia 9 de setembro de 2026. O histórico de `main` tem quase 100 GB. A integração contínua faz checkout do repositório da ordem de 25 milhões de vezes por dia. Nos tempos que publicaram, um commit de desenvolvedor passa de 1,4 s para 1,1 s, e `status` passa de 3,9 s para 19 ms. O que encareceu foi ler e buscar o repositório. O tempo de registrar uma mudança quase não se moveu.
 
-O Scion é o servidor que eles construíram para esse trunk. Uma mudança aterrada são os arquivos que diferem do pai, e o servidor responde o histórico. O ACVC é um portão na frente de um landing. Uma tentativa é uma hipótese com uma medição. Ela fica em `.acvc` até o `promote` copiar uma árvore aprovada para um checkout que já existe. Este repositório não tem cliente Scion. A coluna conjunta é o que essa única árvore seria no servidor deles: um changeset. É uma costura, não um sistema entregue aqui.
+O Scion é o servidor que eles puseram no lugar do Git nesse monorepo. O que entra no histórico é o conjunto de arquivos diferentes do pai. Quem pergunta o passado pergunta ao servidor. O ACVC fica antes dessa entrada. Cada tentativa é uma hipótese com uma medição, e permanece em `.acvc`. `promote` copia a árvore pedida para um checkout que já existe. Não pergunta se essa árvore ainda está na fronteira, e não pergunta se quem chamou é uma pessoa ou um agente. A fronteira informa a escolha. A escolha é de quem tem permissão para executar o comando. Quem chama pode ser um agente, pequeno ou um modelo grande, ou uma pessoa. Um agente que só registra e mede já participa do processo. O mesmo binário atende o terminal e o `acvc mcp`.
 
-O portão reduz o log de changesets só quando tentativas medidas aterrariam de outro modo. Uma mudança que já é a decisão não precisa de campanha. A campanha não reduz o custo de checkout que eles relataram.
+Os dois fluxos usam esses mesmos comandos. Este repositório não tem cliente do Scion, e não mede qual fluxo um time escolhe. Se o checkout fosse o Scion, a árvore copiada seria uma mudança no histórico deles, um changeset.
 
-| | Scion sozinho | ACVC sozinho | Os dois |
+Máquina a máquina. Um agente registra as versões e as medições. A fronteira é calculada a partir dessas medições. O mesmo agente, ou outro, lê a fronteira e chama `promote` quando a regra dele aponta uma árvore. As outras tentativas ficam em `.acvc`. Quando mais de uma hipótese continua sem ser superada, a campanha não escolhe. A regra é de quem chama o comando. O comando é o mesmo para um script curto e para um modelo grande.
+
+Máquina a máquina, com uma pessoa no meio. Os agentes continuam registrando e medindo, e continuam lendo uma fronteira que o programa calculou. A pessoa é quem chama `promote` ou `reject`. Uma rejeição é uma frase passada ao comando. Quem a escreve é a pessoa ou o agente que passa o argumento. O programa não inventa essa frase.
+
+```mermaid
+flowchart TB
+  subgraph auto ["Máquina a máquina"]
+    direction LR
+    a1["um agente registra versões e medições"] --> f1["a fronteira é calculada"]
+    f1 --> p1["um agente aplica uma regra"]
+    p1 --> g1["promote copia uma árvore"]
+    p1 --> r1["o resto fica em .acvc"]
+    g1 --> s1["um changeset em main"]
+  end
+  subgraph humano ["Máquina a máquina, com uma pessoa no meio"]
+    direction LR
+    a2["um agente registra versões e medições"] --> f2["a fronteira é calculada"]
+    f2 --> h2["uma pessoa lê a fronteira"]
+    h2 --> g2["promote ou reject"]
+    h2 --> r2["o resto fica em .acvc"]
+    g2 --> s2["um changeset em main"]
+  end
+```
+
+Eles se encontram de um jeito que encurta o histórico só quando várias tentativas medidas iriam para `main` sem isso. Uma mudança que já é a decisão escolhida não precisa de uma campanha. A campanha também não deixa mais barato o checkout que o post mediu.
+
+| | Só o Scion | Só o ACVC | Os dois juntos |
 | --- | --- | --- | --- |
-| Pergunta que responde | Quem mudou uma linha, e o diff do que aterrou. O servidor responde. | Quais medições completas ainda competem, e qual árvore foi aprovada. | O servidor responde o trunk. A campanha responde a busca. |
-| Para onde vai uma tentativa que não aterra | Fora do sistema que o post descreve. Uma mudança aterrada é um changeset. | Em `.acvc`, com os números. O Git não recebe nada até o `promote`. | Em `.acvc`. O trunk recebe a árvore aprovada como um changeset. |
-| O que deixa por fazer | Qual de várias tentativas medidas deve aterrar. | Um histórico de quase 100 GB, e dezenas de milhões de checkouts por dia. | A carga de checkout, que continua com o Scion. Uma tentativa não aprovada fica fora desse log. |
+| A pergunta | Quem alterou uma linha, e o que diferiu no que entrou no histórico. A resposta vem do servidor. | Quais medições completas ainda não foram superadas, e qual árvore o `promote` copiou. | O servidor responde pelo histórico de `main`. A campanha responde pela busca que ainda não foi copiada. |
+| A tentativa que não entra | O post não descreve um lugar para ela. O que entra no histórico é um changeset. | Fica em `.acvc`, com os números. O Git não recebe cópia até o `promote`. | Fica em `.acvc`. `main` recebe só a árvore que o `promote` copiou, como um changeset. |
+| O que fica de fora | A escolha de qual tentativa medida deve entrar, quando há várias. | Um histórico de quase 100 GB, e dezenas de milhões de checkouts por dia. | O custo do checkout, que continua com o Scion. A tentativa que não foi copiada fica fora desse histórico. |
 
 ## 7. Limites
 
