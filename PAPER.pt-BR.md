@@ -36,7 +36,7 @@ O segundo problema é a medição. Dois métodos de stitching, duas regras de in
 
 O terceiro problema é o motivo. Dominação não é decisão. Uma hipótese pode sair da fronteira porque outro ensaio completo a supera em tudo, enquanto ninguém disse por que a perdedora foi abandonada. O ACVC mantém essa lacuna visível. O status diz quem venceu e que o motivo não foi gravado. Uma rejeição é uma frase humana, gravada uma vez para aquela variante. Agentes esquecem sessões. Um armazenamento que só guarda vencedores esquece a razão de uma derrota.
 
-O container-use, do projeto Dagger, responde a um problema vizinho: um agente precisa de um container isolado e de um branch Git para que o trabalho em paralelo não colida com o checkout [11]. Isso é um ambiente de execução. Ele não nomeia uma premissa, não pontua uma campanha e não guarda uma fronteira não dominada. O ACVC não sobe um container. As duas ferramentas respondem a perguntas diferentes. A seção 6 lista os outros vizinhos.
+O container-use, do projeto Dagger, responde a um problema vizinho: um agente precisa de um container isolado e de um branch Git para que o trabalho em paralelo não colida com o checkout [11]. Isso é um ambiente de execução. Ele não nomeia uma premissa, não pontua uma campanha e não guarda uma fronteira não dominada. O ACVC não sobe um container. As duas ferramentas respondem a perguntas diferentes. A seção 6 lista os outros vizinhos. A seção 6.1 lê o Scion da Anthropic, que torna o commit barato num monorepo e deixa a escolha da tentativa fora desse commit [25].
 
 ## 3. Métodos
 
@@ -117,6 +117,7 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 | Git [1, 2] | Blobs, árvores e commits endereçados por conteúdo | O commit é uma decisão. Hipóteses abandonadas não são uma fronteira. |
 | Gitless [4] | Uma camada conceitual mais simples sobre o Git | Repara os conceitos do Git. Não acrescenta premissas nem ensaios. |
 | container-use [11] | Um container, uma worktree e um branch por agente, mais o histórico de comandos em Git notes | Isola a execução. Não pontua hipóteses nem compartilha blobs intactos numa campanha. |
+| Scion [25] | Um log de changesets no servidor, para um monorepo enorme: arquivos mudados contra o primeiro pai, blobs endereçados por conteúdo, blame e histórico derivados | Torna o landing e o checkout baratos. Uma tentativa falha que vira changeset continua sendo histórico. Não pontua uma hipótese. |
 | Variolite [5] | Variantes locais leves dentro do editor | Variantes são trechos para exploração. Não são uma campanha Merkle com fronteira. |
 | DVC [19] | Dados, modelos e pipelines, com hashes, sobre o Git | A execução do pipeline é o objeto. A aresta da hipótese e o conjunto não dominado de variantes de código não são. |
 | MLflow [9] | Parâmetros, métricas e artefatos de execuções | A execução é uma linha. A árvore de código não é uma hipótese Merkle, e a dominação não é o status. |
@@ -128,13 +129,51 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 | Jujutsu [24] | Um sistema de controle de versão compatível com Git, com outro modelo de trabalho | Continua sendo uma história de decisões. |
 | Linhas de produto de software [18] | Variantes de feature de um produto | Uma feature não é uma hipótese sob um esquema de métricas. |
 
+### 6.1 Scion
+
+Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema que substituiu o Git no monorepo deles, em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. As contagens abaixo são tiradas desse post. Este repositório não as mediu, e não reproduz as figuras do post. Os diagramas ficam na página deles.
+
+Eles relatam merges subindo de cerca de 2.500 por dia em maio de 2026 para 30.401 em 9 de setembro de 2026. O histórico do main tem quase 100 GB. O CI faz da ordem de 25 milhões de checkouts por dia. O relato deles é que uma frota de mirrors Git deixou de bastar para clientes que estão online, e que o Scion responde o histórico a partir de um servidor. Uma mudança aterrada fica guardada como os arquivos que diferem do pai, com os bytes conservados por hash. Nos tempos de comando publicados, um commit de desenvolvedor passa de 1,4 s para 1,1 s, o status de 3,9 s para 19 ms, e uma worktree nova de agente de 7,1 min para 5,1 s.
+
+A dispersão é o ponto. O tempo que encolhe é o tempo de copiar e consultar um histórico do tamanho do monorepo. O tempo que mal se move é o ato local de gravar uma mudança. O Scion torna o trunk barato de ler e barato de receber. Ele deixa em aberto qual de várias tentativas medidas deve aterrar.
+
+O Scion e o ACVC recusam fazer cada cliente carregar o histórico inteiro para responder uma pergunta. No Scion a pergunta é ancestralidade, blame e o diff contra a base do merge, e o servidor responde. No ACVC a pergunta é quais medições completas ainda não foram superadas, e o executável responde a partir da campanha. A fronteira é derivada dos ensaios do jeito que o blame deles é derivado dos pais. A conferência dessa derivação está em [TLA.md](TLA.md). O agente não abre o log.
+
+O laço de reparo do post é onde os desenhos se separam. Eles abriram mão de um cadeado global na fila de merge, porque centenas de mudanças aterram enquanto os testes ainda correm, e reparam conflitos depois do merge. Um conflito textual num trunk só pode ser reparado assim. Duas hipóteses que vencem em números diferentes são uma comparação, e as duas ficam na fronteira. Aterrar as duas, ou aterrar a última, derruba a comparação.
+
+Os revisores deles passaram de ler cada linha para julgar a intenção, e para recusar uma mudança que fura uma regra do sistema. O ACVC guarda essa recusa. `reject` conserva a medição e grava o motivo. Uma hipótese que perde a comparação e não foi rejeitada continua visível como superseded, com o motivo por gravar.
+
+O ACVC não toma a outra metade do problema deles. Não serve 25 milhões de checkouts, não parte um histórico de 100 GB e não substitui o Git num monorepo. O post diz que o Scion é a ferramenta errada para um repositório comum, e que a exportação útil são perguntas do lado do servidor enquanto o Git continua sendo o modelo. Uma campanha é essa exportação no tamanho de uma pergunta. As tentativas ficam em `.acvc`. `promote` copia a árvore aprovada para um checkout que já existe.
+
+O ganho aparece quando as duas continuam unidas nessa única árvore. O agente edita num checkout que o servidor já sabe servir, esparso e buscado pelo objeto que o cliente pede. Cada versão que vale lembrar é uma hipótese: a premissa, os arquivos e a medição. A fronteira guarda toda tentativa que ninguém superou em todos os números. `reject` grava o motivo e deixa a medição em `.acvc`. `promote` copia a árvore aprovada para o checkout. O Scion então grava um changeset, os arquivos que diferem do primeiro pai, e aterra no main.
+
+```mermaid
+flowchart TD
+  tries["o agente tenta versões de uma mudança"]
+  campaign["ACVC: cada versão é uma hipótese com uma medição"]
+  frontier["fronteira: tentativas que ninguém superou em todos os números"]
+  aside[".acvc guarda o resto, inclusive um reject escrito"]
+  one["promote copia uma árvore aprovada"]
+  cs["um changeset Scion contra o primeiro pai"]
+  trunk["main"]
+  tries --> campaign --> frontier
+  frontier --> aside
+  frontier --> one --> cs --> trunk
+```
+
+A união, desenhada aqui. As caixas do Scion nomeiam papéis de [25]. As caixas da campanha são o ACVC. Este repositório não tem cliente Scion. `promote` hoje copia para um checkout Git. Essa mesma árvore única é o que um cliente Scion transformaria num changeset.
+
+O gráfico deles mostra o trunk absorvendo 30.401 merges em 9 de setembro de 2026. Uma campanha que tentou dez versões medidas e aprovou uma acrescentaria um changeset, e manteria as outras nove, com os números e qualquer motivo escrito, fora dessa conta. O Scion continua pagando o checkout barato e o landing barato dessa árvore. O ACVC continua respondendo qual das dez ainda competia. O blame de uma linha no main continua pergunta do Scion. O status de uma tentativa que perdeu continua pergunta do ACVC.
+
+Um conflito textual entre duas árvores aprovadas continua sendo o reparo do Scion depois do merge. Um par que vence em números diferentes fica na fronteira até alguém fazer `promote` de uma. A união não soma os fatores de velocidade que eles relataram a uma campanha. O ×84 de uma worktree nova de agente é o custo de um lugar para editar. O ganho da campanha é o histórico que esse lugar não guarda.
+
 ## 7. Limites
 
-Não há estudo sobre se pesquisadores ou agentes registram premissas com honestidade. A fronteira só é tão boa quanto os ensaios. Um ensaio completo ainda pode ser a métrica errada. O ACVC não executa o código e não o isola; o container-use ou um shell comum faz isso. Windows está fora do modelo atual de identidade de arquivo, que usa metadados Unix. O paper e o software podem divergir; o executável é a autoridade sobre o comportamento.
+Não há estudo sobre se pesquisadores ou agentes registram premissas com honestidade. A fronteira só é tão boa quanto os ensaios. Um ensaio completo ainda pode ser a métrica errada. O ACVC não executa o código e não o isola; o container-use ou um shell comum faz isso. Windows está fora do modelo atual de identidade de arquivo, que usa metadados Unix. O paper e o software podem divergir; o executável é a autoridade sobre o comportamento. O ACVC não faz checkout de um monorepo de 100 GB e não responde blame para dezenas de milhões de jobs. Essa escala é o problema que o Scion relata [25]. Uma camada de cache não transforma uma campanha nesse sistema.
 
 ## 8. Conclusão
 
-O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores: por hash, com os bytes do arquivo escritos só quando o conteúdo é novo. O hash controla a hipótese. O Git controla a decisão de conservar uma árvore. A fronteira mostra quais medições completas ainda não foram superadas, e recusa tratar uma perda como um motivo que ninguém escreveu.
+O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores: por hash, com os bytes do arquivo escritos só quando o conteúdo é novo. O hash controla a hipótese. O Git controla a decisão de conservar uma árvore. A fronteira mostra quais medições completas ainda não foram superadas, e recusa tratar uma perda como um motivo que ninguém escreveu. Tornar o commit mais barato, como o Scion faz para um monorepo [25], deixa essa escolha onde ela estava: fora do commit.
 
 ## Referências
 
@@ -185,3 +224,5 @@ O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores
 [23] E. Dolstra, "The purely functional software deployment model," Ph.D. dissertation, Utrecht University, 2006.
 
 [24] M. von Zweigbergk e contribuidores, Jujutsu. https://github.com/jj-vcs/jj
+
+[25] Nick G. e o time de source control da Anthropic, "Redesigning source control at Anthropic," Anthropic Engineering, 13 de outubro de 2026, atualizado em 15 de outubro de 2026. https://www.anthropic.com/engineering/redesigning-source-control
