@@ -12,6 +12,8 @@ A person uses the same record. Researchers, developers, and software engineers c
 
 The longer description of the design is in [PAPER.md](PAPER.md) ([português](PAPER.pt-BR.md)). That note is a system description. It is not a peer-reviewed article, and it does not report a user study.
 
+The rule for which attempts still compete was checked with TLC. The model, the run, and the graphs are in [TLA.md](TLA.md) ([português](TLA.pt-BR.md)). The modules are in [specs/frontier](specs/frontier).
+
 ## The words, once
 
 - An **attempt** is one version of the files, plus the sentence that says what you believe. The commands call that a hypothesis.
