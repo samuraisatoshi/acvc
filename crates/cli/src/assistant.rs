@@ -155,4 +155,14 @@ mod tests {
         assert!(text.contains("Git should receive the attempt a person approves."));
         assert!(document(Some("nope")).is_err());
     }
+
+    #[test]
+    fn english_contract_states_record_edge_and_score() {
+        acvc_text::install(acvc_text::Lang::EnUs);
+        let (_, steps) = document(Some("como-usar")).unwrap();
+        assert!(steps.contains("Without `--parent`"));
+        let (_, resources) = document(Some("recursos")).unwrap();
+        assert!(resources.contains("`revise_premise` — the belief itself changed."));
+        assert!(resources.contains("The identifier does not change."));
+    }
 }

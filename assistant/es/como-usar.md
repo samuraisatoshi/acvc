@@ -5,7 +5,7 @@ Los pasos de abajo usan los nombres de los comandos. Un intento es una hipótesi
 1. `acvc context --campaign NOMBRE` antes de proponer, medir o descartar.
 2. Si la campaña no existe: `acvc init --repo .` y `acvc campaign create NOMBRE --metric metrica:higher`.
 3. La primera hipótesis es `seed` de la carpeta que contiene los archivos de la hipótesis, con `--premise`, `--assumption`, `--intent` y `--agent`.
-4. Cambió un archivo: `record` a partir del padre. No haga otro `seed`.
+4. Cambió un archivo: `record`. Sin `--parent`, el padre es la hipótesis a la que apunta el workspace. `record` pasa a apuntar el workspace a la hipótesis nueva, así que el `record` siguiente se encadena a ella. Dos hijos del seed piden `--parent` con el id del seed, o `materialize` del seed antes de cada `record`. No haga otro `seed`.
 5. Hay un número real de la métrica declarada: `score`. Un ensayo incompleto no entra en la frontera.
 6. `frontier` muestra lo que todavía compite. `why` explica una hipótesis. `recall --query` la encuentra por el texto de la premisa.
 7. Dos medidas concretas: `compare`.

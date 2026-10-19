@@ -6,7 +6,13 @@ Uma pessoa que nunca viu o ACVC precisa de uma frase antes destes nomes. O ACVC 
 
 O identificador é o hash BLAKE3 dos bytes canônicos: árvore, pais, aresta, premissa, causas, revisão, intenção e agente. O nome da campanha, a data, as medições e o gasto de tokens não entram no hash. A mesma hipótese é o mesmo nó.
 
-Arestas: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
+Arestas:
+
+- `seed` — a única origem.
+- `mutate` — os arquivos mudaram e a crença permanece. É a aresta padrão do `record`.
+- `revert` — o passo volta a uma hipótese anterior.
+- `revise_premise` — a própria crença mudou.
+- `synthesize` — dois ou mais pais.
 
 Status, nos valores JSON:
 
@@ -46,8 +52,8 @@ Escrita:
 - `init` — cria o store.
 - `campaign create NOME --metric nome:higher|lower` — o esquema. Pode haver mais de uma métrica.
 - `seed` — a primeira hipótese da campanha. A segunda origem é recusada. O caminho seguinte é `record`.
-- `record` — a pasta mudou. A hipótese nova aponta para o pai. Aresta padrão: `mutate`.
-- `score --metric nome=número` — acrescenta um ensaio. Não apaga os anteriores.
+- `record` — a pasta mudou. Sem `--parent`, o pai é a hipótese do workspace, e o workspace passa a apontar para a hipótese nova. Aresta padrão: `mutate`.
+- `score --metric nome=número` — acrescenta um ensaio na mesma variante. O identificador não muda. Não apaga os anteriores.
 - `reject --reason "..."` — ato explícito. O motivo fica no grafo.
 - `spend --tokens N` — livro à parte. Não entra no hash, não é métrica e não trava o `record`. Zero tokens é recusado.
 - `materialize` — copia a hipótese para uma pasta.

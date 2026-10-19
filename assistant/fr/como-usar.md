@@ -5,7 +5,7 @@ Les étapes ci-dessous utilisent les noms des commandes. Une tentative est une h
 1. `acvc context --campaign NOM` avant de proposer, mesurer ou écarter.
 2. Si la campagne n'existe pas : `acvc init --repo .` et `acvc campaign create NOM --metric metrique:higher`.
 3. La première hypothèse est `seed` du dossier qui contient les fichiers de l'hypothèse, avec `--premise`, `--assumption`, `--intent` et `--agent`.
-4. Un fichier a changé : `record` à partir du parent. Ne faites pas un autre `seed`.
+4. Un fichier a changé : `record`. Sans `--parent`, le parent est l'hypothèse que le workspace désigne. `record` désigne ensuite la nouvelle hypothèse, donc le `record` suivant s'enchaîne sur elle. Deux enfants du seed demandent `--parent` avec l'id du seed, ou `materialize` du seed avant chaque `record`. Ne faites pas un autre `seed`.
 5. Il y a un nombre réel pour la métrique déclarée : `score`. Un essai incomplet n'entre pas sur la frontière.
 6. `frontier` montre ce qui est encore en concurrence. `why` explique une hypothèse. `recall --query` la trouve par le texte de la prémisse.
 7. Deux mesures concrètes : `compare`.

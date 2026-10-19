@@ -6,7 +6,13 @@ Una persona que nunca vio ACVC necesita una frase antes de estos nombres. ACVC g
 
 El identificador es el hash BLAKE3 de los bytes canónicos: árbol, padres, arista, premisa, causas, revisión, intención y agente. El nombre de la campaña, la fecha, las mediciones y el gasto de tokens no entran en el hash. La misma hipótesis es el mismo nodo.
 
-Aristas: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
+Aristas:
+
+- `seed` — el único origen.
+- `mutate` — los archivos cambiaron y la creencia sigue. Es la arista predeterminada de `record`.
+- `revert` — el paso vuelve a una hipótesis anterior.
+- `revise_premise` — cambió la propia creencia.
+- `synthesize` — dos o más padres.
 
 Estado, en los valores JSON:
 
@@ -46,8 +52,8 @@ Escritura:
 - `init` — crea el store.
 - `campaign create NOMBRE --metric nombre:higher|lower` — el esquema. Puede haber más de una métrica.
 - `seed` — la primera hipótesis de la campaña. El segundo origen se rechaza. El camino siguiente es `record`.
-- `record` — la carpeta cambió. La hipótesis nueva apunta al padre. Arista predeterminada: `mutate`.
-- `score --metric nombre=número` — añade un ensayo. No borra los anteriores.
+- `record` — la carpeta cambió. Sin `--parent`, el padre es la hipótesis del workspace, y el workspace pasa a apuntar a la hipótesis nueva. Arista predeterminada: `mutate`.
+- `score --metric nombre=número` — añade un ensayo en la misma variante. El identificador no cambia. No borra los anteriores.
 - `reject --reason "..."` — acto explícito. El motivo queda en el grafo.
 - `spend --tokens N` — libro aparte. No entra en el hash, no es métrica y no traba `record`. Cero tokens se rechaza.
 - `materialize` — copia la hipótesis a una carpeta.

@@ -6,7 +6,13 @@ A person who has never seen ACVC needs one sentence before these names. ACVC kee
 
 The identifier is the BLAKE3 hash of the canonical bytes: tree, parents, edge, premise, causes, revision, intent, and agent. The campaign name, the date, the measurements, and the token spend do not enter the hash. The same hypothesis is the same node.
 
-Edges: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
+Edges:
+
+- `seed` — the only origin.
+- `mutate` — the files changed and the belief stands. This is the default for `record`.
+- `revert` — the step goes back to an earlier hypothesis.
+- `revise_premise` — the belief itself changed.
+- `synthesize` — two or more parents.
 
 Status, as JSON values:
 
@@ -46,8 +52,8 @@ Write:
 - `init` — creates the store.
 - `campaign create NAME --metric name:higher|lower` — the schema. There can be more than one metric.
 - `seed` — the first hypothesis of the campaign. A second origin is refused. The next path is `record`.
-- `record` — the folder changed. The new hypothesis points at the parent. Default edge: `mutate`.
-- `score --metric name=number` — appends a trial. It does not erase the earlier ones.
+- `record` — the folder changed. Without `--parent`, the parent is the hypothesis the workspace points at, and the workspace then points at the new hypothesis. Default edge: `mutate`.
+- `score --metric name=number` — appends a trial on the same variant. The identifier does not change. It does not erase the earlier trials.
 - `reject --reason "..."` — an explicit act. The motive stays in the graph.
 - `spend --tokens N` — a side ledger. It does not enter the hash, it is not a metric, and it does not lock `record`. Zero tokens is refused.
 - `materialize` — copies the hypothesis into a folder.

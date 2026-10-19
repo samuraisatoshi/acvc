@@ -4,14 +4,14 @@ version = 4
 
 [[package]]
 name = "acvc-app"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "acvc-domain",
 ]
 
 [[package]]
 name = "acvc-cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "acvc-app",
  "acvc-domain",
@@ -24,14 +24,14 @@ dependencies = [
 
 [[package]]
 name = "acvc-domain"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "blake3",
 ]
 
 [[package]]
 name = "acvc-store"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "acvc-domain",
  "flate2",
@@ -42,14 +42,14 @@ dependencies = [
 
 [[package]]
 name = "acvc-text"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
 ]
 
 [[package]]
 name = "acvc-tui"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "acvc-app",
  "acvc-domain",
