@@ -1,5 +1,7 @@
 # Trade-offs
 
+Użyj tego, gdy są dwie lub więcej zmierzonych wersji i liczby się nie zgadzają. Jedna prosta droga, bez drugiej wersji, nie potrzebuje kampanii.
+
 ## Użyj ACVC, gdy
 
 - Sesja testuje więcej niż jedną hipotezę, a następna musi wiedzieć, która wciąż konkuruje.

@@ -1,5 +1,7 @@
 # Misbruik
 
+Dit zijn de manieren waarop het register ophoudt te zeggen wat het zegt. Mislukte pogingen blijven hier. Git krijgt alleen de poging die een persoon goedkeurt.
+
 - `.acvc/graph.sqlite`, `objects.log` of `objects.pack` openen om status, grens of premisse te lezen. Het contract is het uitvoerbare bestand.
 - Git behandelen als de hypothesegraaf. De commit bewaart de verliezende proef niet, en ook niet het motief dat nooit is geschreven.
 - Een tweede `seed` in dezelfde campagne. De campagne heeft al een oorsprong. Het pad is `record` vanuit de ouder.

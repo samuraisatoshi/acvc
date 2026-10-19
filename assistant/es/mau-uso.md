@@ -1,5 +1,7 @@
 # Mal uso
 
+Estas son las formas en que el registro deja de decir lo que dice. Los intentos fallidos se quedan aquí. Git recibe solo el intento que una persona aprueba.
+
 - Abrir `.acvc/graph.sqlite`, `objects.log` u `objects.pack` para leer estado, frontera o premisa. El contrato es el ejecutable.
 - Tratar Git como el grafo de hipótesis. El commit no guarda el ensayo perdedor ni el motivo que no se escribió.
 - Un segundo `seed` en la misma campaña. La campaña ya tiene origen. El camino es `record` a partir del padre.

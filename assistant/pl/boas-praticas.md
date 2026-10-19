@@ -1,5 +1,7 @@
 # Praktyki
 
+Zapisz przekonanie słowami osoby. Zostaw każdą wersję. Gorsza liczba nie kasuje wersji i nie zapisuje powodu za ciebie.
+
 - Przesłanka jest problemem w języku człowieka. Hash nie jest nazwą hipotezy.
 - Każda przyczyna zostaje przy hipotezie, która ją zakłada. Kilka przyczyn nie staje się jednym zdaniem kampanii.
 - `context` jest pierwszym odczytem sesji. `frontier` odpowiada, co wciąż konkuruje. `why` odpowiada na jedną hipotezę.

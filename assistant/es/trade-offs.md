@@ -1,5 +1,7 @@
 # Trade-offs
 
+Use esto cuando hay dos o más intentos medidos y los números no coinciden. Un camino recto, sin un segundo intento, no necesita una campaña.
+
 ## Use ACVC cuando
 
 - La sesión prueba más de una hipótesis y la siguiente necesita saber cuál todavía compite.

@@ -1,5 +1,7 @@
 # Boas práticas
 
+Escreva a crença nas palavras de uma pessoa. Guarde toda tentativa. Um número pior não apaga a tentativa, e não escreve o motivo por você.
+
 - A premissa é o problema em linguagem de pessoa. O hash não é o nome da hipótese.
 - Cada causa fica na hipótese que a assume. Várias causas não viram uma frase única da campanha.
 - `context` é a primeira leitura da sessão. `frontier` responde o que ainda compete. `why` responde uma hipótese.

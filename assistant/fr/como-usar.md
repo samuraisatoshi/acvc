@@ -1,5 +1,7 @@
 # Comment l'utiliser
 
+Les étapes ci-dessous utilisent les noms des commandes. Une tentative est une hypothèse. Une mesure est un essai. Les tentatives que personne n'a battues sur tous les nombres sont la frontière.
+
 1. `acvc context --campaign NOM` avant de proposer, mesurer ou écarter.
 2. Si la campagne n'existe pas : `acvc init --repo .` et `acvc campaign create NOM --metric metrique:higher`.
 3. La première hypothèse est `seed` du dossier qui contient les fichiers de l'hypothèse, avec `--premise`, `--assumption`, `--intent` et `--agent`.

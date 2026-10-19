@@ -1,5 +1,7 @@
 # Como usar
 
+Os passos abaixo usam os nomes dos comandos. Uma tentativa é uma hipótese. Uma medição é um ensaio. As tentativas que ninguém superou em todos os números são a fronteira.
+
 1. `acvc context --campaign NOME` antes de propor, medir ou descartar.
 2. Se a campanha não existe: `acvc init --repo .` e `acvc campaign create NOME --metric metrica:higher`.
 3. A primeira hipótese é `seed` da pasta que contém os arquivos da hipótese, com `--premise`, `--assumption`, `--intent` e `--agent`.

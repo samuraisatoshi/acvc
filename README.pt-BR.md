@@ -12,6 +12,14 @@ Uma pessoa usa o mesmo registro. Pesquisadores, desenvolvedores e engenheiros de
 
 A descrição mais longa do desenho está em [PAPER.md](PAPER.md) ([português](PAPER.pt-BR.md)). Essa nota é uma descrição do sistema. Não é um artigo com revisão por pares e não relata um estudo com usuários.
 
+## As palavras, uma vez
+
+- Uma **tentativa** é uma versão dos arquivos, mais a frase que diz o que você acredita. Os comandos chamam isso de hipótese.
+- Uma **campanha** é uma pergunta, e os números com que você vai comparar as tentativas.
+- Uma **medição** são esses números escritos para uma tentativa. Os comandos chamam isso de ensaio, ou de score.
+- A **fronteira** são as tentativas que ninguém superou em todos os números. Duas tentativas podem continuar as duas.
+- **Promote** copia a tentativa que você aprova para um checkout Git que já existe. As outras ficam fora do Git.
+
 ## Instalar
 
 Gere o binário `acvc` a partir deste repositório:
@@ -27,9 +35,9 @@ A saída padrão é JSON. Use `--format text` quando quiser frases. As frases se
 
 ## Agents LLM
 
-Um agent aprende o ACVC pelo executável, não por este README. No começo de uma sessão, antes de explicar a ferramenta ou chamar outro verbo, ele roda `acvc assistant`. Esse comando devolve o contrato operacional no idioma do computador. O mesmo contrato é a ferramenta MCP `assistant`.
+Uma pessoa lê esta página. Um agente que vai usar a ferramenta roda `acvc assistant` antes de explicar o ACVC ou chamar outro comando. A resposta volta no idioma do computador. Se você registra `acvc mcp`, essa mesma resposta é a ferramenta `assistant`.
 
-O contrato tem oito partes: `indice`, `objetivo`, `recursos`, `como-usar`, `boas-praticas`, `exemplos`, `mau-uso`, `trade-offs`. Leia nessa ordem e pare quando a pergunta já tiver resposta.
+A resposta tem oito partes: `indice`, `objetivo`, `recursos`, `como-usar`, `boas-praticas`, `exemplos`, `mau-uso`, `trade-offs`. Leia nessa ordem e pare quando a pergunta já tiver resposta.
 
 ### CLI
 
@@ -62,6 +70,8 @@ Chame a ferramenta `assistant` primeiro, com o argumento opcional `part`. As out
 
 ## Uma campanha
 
+Uma campanha é uma pergunta. Você nomeia os números antes da primeira tentativa. `lower` significa que o número menor é melhor. `higher` significa que o número maior é melhor.
+
 ```bash
 acvc init
 acvc --format text campaign create integral \
@@ -69,54 +79,58 @@ acvc --format text campaign create integral \
   --metric evaluations:lower
 ```
 
-Uma métrica é `nome:lower` ou `nome:higher`. `lower` significa que o número menor vence. `higher` significa que o número maior vence. O nome é um token: letras, dígitos e `_`.
+O nome é um token: letras, dígitos e `_`.
 
-`acvc seed` guarda a primeira árvore da campanha. Uma campanha tem uma origem. As tentativas seguintes são `acvc record` a partir desse workspace, depois de editar os arquivos.
+`seed` guarda a primeira versão dos arquivos e a frase que diz o que você acredita. Uma campanha tem uma primeira versão. Depois de editar os arquivos, `record` guarda a versão seguinte e aponta para a que você editou.
 
-Uma pontuação nomeia todas as métricas. `acvc score --metric residual=1e-4 --metric evaluations=80` é um ensaio. Um ensaio que omite uma métrica fica fora da fronteira.
+`score` é você escrevendo os números. Preencha cada número que nomeou. Se falta um, essa medição não compete.
 
-A fronteira guarda todo ensaio completo que nenhuma outra hipótese supera em todas as métricas. Duas tentativas podem permanecer: uma mais precisa, a outra mais barata. Um ensaio estritamente pior sai da fronteira. Essa saída não é uma rejeição. Você rejeita só quando decide que a tentativa morreu:
+A fronteira é quem ainda compete. Uma tentativa fica quando nenhuma outra é melhor em todos os números. Duas podem ficar: uma mais precisa, a outra mais barata. Uma tentativa que perde em todos os números sai dessa lista. Sair não é uma decisão. Você faz `reject` só quando decidiu que a tentativa acabou, e escreve o motivo:
 
 ```bash
 acvc --format text reject --variant <id> --reason "a série diverge no extremo"
 ```
 
-Se uma tentativa está fora da fronteira e você não a rejeitou, a leitura diz quem venceu e que o motivo não foi gravado.
+Se uma tentativa saiu da lista e você não a rejeitou, a leitura diz quem venceu e que o motivo não foi escrito.
 
-`acvc promote --variant <id> --git <checkout>` copia a árvore escolhida para um checkout Git que já existe. Esse é o depósito. As outras tentativas continuam em `.acvc`.
+`promote` copia a tentativa que você aprova para um checkout Git que já existe. Esse é o commit do qual você estava afastando os experimentos. As outras tentativas ficam em `.acvc`.
 
-Não abra `.acvc/graph.sqlite`, o log nem o pack. Pergunte com `acvc frontier`, `acvc why`, `acvc compare` e `acvc recall`.
+```bash
+acvc --format text promote --variant <id> --git <checkout>
+```
+
+Pergunte com `frontier` (quem ainda compete), `why` (uma tentativa), `compare` (duas tentativas) e `recall` (achar uma tentativa pela frase que você escreveu). Não abra `.acvc/graph.sqlite`, o log nem o pack.
 
 ## ACVC e container-use
 
-O [container-use](https://github.com/dagger/container-use) (Dagger) dá a um agente de código um container isolado e um branch Git. O ACVC dá a uma pessoa, ou a um agente, o registro das hipóteses e das medições. Um não substitui o outro. A escolha segue o objetivo.
+O [container-use](https://github.com/dagger/container-use) (Dagger) dá a um agente de código uma caixa isolada e um branch Git, para o experimento não mexer no seu checkout. O ACVC lembra as tentativas, os números e qual delas você aprovou para o Git. Um não substitui o outro. A escolha segue o que você precisa.
 
 O container-use cria um environment: um container Dagger, uma worktree e um branch. Os comandos rodam nesse container. As mudanças de arquivo caem nesse branch. O histórico de operações e o estado do container ficam em Git notes. Você inspeciona com `container-use log`, `diff` e `checkout`, e aceita o trabalho com `merge` (fica com os commits do environment) ou `apply` (deixa o diff preparado e escreve o seu commit). Um environment que falhou pode ser apagado. Vários agentes podem trabalhar ao mesmo tempo porque cada um tem o próprio container e o próprio branch.
 
-O ACVC cria uma campanha. A primeira árvore é um seed: premissa, pressupostos, intenção e os arquivos. As árvores seguintes são records (`mutate`, `revert`, `revise_premise`, `synthesize`). Uma pontuação é um ensaio contra as métricas da campanha. A fronteira guarda todo ensaio completo que nenhuma outra hipótese supera em todas as métricas. O Git recebe uma árvore só quando você faz `promote` da que escolheu.
+O ACVC começa com uma pergunta e uma primeira versão dos arquivos (`seed`): o que você acredita, o que está supondo, o que espera conseguir e os arquivos. As versões seguintes são `record`. A aresta diz que tipo de passo foi: `mutate` muda os arquivos, `revert` volta a uma ideia anterior, `revise_premise` muda a própria crença, `synthesize` junta duas ou mais tentativas. Aí você escreve os números. O Git recebe arquivos só quando você faz `promote` da tentativa que aprova.
 
 ### Comparação
 
 | Pergunta | ACVC | container-use |
 | --- | --- | --- |
-| O que é uma tentativa? | Uma variante: premissa, pressupostos, intenção, aresta e uma árvore endereçada pelo conteúdo | Um environment: um container mais um branch Git |
-| Onde ficam as outras tentativas? | Em `.acvc`, até você promover uma árvore para um checkout Git | Em branches de environment, com commits e Git notes |
-| O que o histórico responde? | Quais medições completas ainda não foram superadas, e o motivo de uma rejeição | Quais comandos rodaram, e o diff daquele branch |
-| Como se descarta? | `reject` com um motivo, ou a tentativa fica fora da fronteira | Apaga o environment |
-| Como o trabalho escolhido entra no seu branch? | `promote --git` copia essa árvore para um checkout que já existe | `merge` conserva os commits do environment, ou `apply` prepara o diff |
+| O que é uma tentativa? | Uma versão dos arquivos, a frase que diz o que você acredita, e como ela se liga à versão anterior | Um environment: um container mais um branch Git |
+| Onde ficam as outras tentativas? | Em `.acvc`, até você copiar a que aprova para um checkout Git | Em branches de environment, com commits e Git notes |
+| O que o histórico responde? | Quais medições ainda competem, e o motivo que você escreveu quando decidiu que uma tentativa acabou | Quais comandos rodaram, e o diff daquele branch |
+| Como se descarta? | `reject` com um motivo, ou a tentativa fica fora da lista do que ainda compete | Apaga o environment |
+| Como o trabalho escolhido entra no seu branch? | `promote --git` copia esses arquivos para um checkout que já existe | `merge` conserva os commits do environment, ou `apply` prepara o diff |
 | Quem executa o código? | Você. O ACVC guarda a árvore e os números que você informa | O agente executa comandos dentro do container |
 | O que isola a execução? | Nada. O workspace é um diretório que você já tem | O container e a worktree |
 | Para quem serve | Um pesquisador ou um engenheiro comparando abordagens medidas, com ou sem agente | Agentes em paralelo que não podem mexer no seu checkout |
 
 ### Tradeoffs, pelo objetivo
 
-Medir abordagens que competem. Use o ACVC. Um pipeline de stitching, uma regra de integração ou um armazenamento de comandas é uma campanha: as mesmas métricas, várias premissas, uma fronteira que pode guardar mais de um vencedor. O container-use guarda cada protótipo num branch e mostra os comandos. Ele não diz qual ensaio completo ainda não foi superado, e não guarda a premissa ao lado da pontuação.
+Você quer comparar abordagens por números. Use o ACVC. Um pipeline de costura, uma regra de integração ou um armazenamento de comandas é uma pergunta: os mesmos números, várias crenças, e uma lista que pode guardar mais de uma tentativa porque cada uma vence num número diferente. O container-use guarda cada protótipo num branch e mostra os comandos. Ele não diz quais tentativas ainda competem, e não guarda a crença ao lado dos números.
 
 Deixar agentes trabalharem em paralelo sem colidir. Use o container-use. Cada agente recebe um container e um branch, você acompanha o log, e faz merge ou apaga. O ACVC não sobe esse container, não esconde a execução da sua árvore de trabalho e não grava o histórico do shell.
 
 Guardar o Git para a decisão. Use o ACVC quando as tentativas abandonadas devem ficar fora do histórico do branch. Use o container-use quando você quer essas tentativas como branches para fazer checkout, e aceita os commits do agente até o merge ou o apply.
 
-Precisa dos dois. Um agente pode prototipar dentro de um environment do container-use. A hipótese que você quer lembrar — premissa, métricas e se ela ainda se sustenta — é uma variante ACVC da árvore que você conserva. O container explica como a execução foi isolada. A campanha explica o que a execução afirmava e como ela foi medida.
+Precisa dos dois. Um agente pode experimentar dentro de um environment do container-use. A tentativa que você quer lembrar — a crença, os números e se ela ainda compete — é um registro ACVC dos arquivos que você conserva. O container explica como a execução foi isolada. O ACVC explica o que a execução afirmava e como ela foi medida.
 
 ## Licença
 
@@ -126,7 +140,7 @@ O terceiro caso abaixo é uma pergunta de SaaS comercial. Executá-lo como produ
 
 ## Caso A. Um problema matemático
 
-Você está integrando uma função suave num intervalo fechado. Importam o resíduo e quantas avaliações a regra gasta. Resíduo menor é melhor. Menos avaliações é melhor.
+Você está integrando uma função suave num intervalo fechado. Dois números importam: a distância da resposta até o valor verdadeiro, e quantas vezes a regra avalia a função. Menor é melhor nos dois. Cada regra é uma tentativa. O Git recebe só a regra que você aprova.
 
 ```bash
 mkdir -p integral
@@ -167,7 +181,7 @@ acvc --format text score --variant <simpson> --metric residual=2.1e-8 --metric e
 acvc --format text score --variant <serie> --metric residual=4.0e-10 --metric evaluations=360
 ```
 
-Simpson vence o trapézio nas duas métricas, então o ensaio do trapézio sai da fronteira. Simpson e a série permanecem: Simpson gasta menos avaliações, a série tem o resíduo menor. Nenhum dos dois é estritamente melhor.
+Simpson vence o trapézio nos dois números, então a tentativa do trapézio sai da lista do que ainda compete. Simpson e a série permanecem: Simpson usa menos avaliações, a série tem o erro menor. Nenhum dos dois vence nos dois números.
 
 ```bash
 acvc --format text frontier --campaign integral
@@ -204,7 +218,7 @@ acvc --format text promote --variant <serie> --git .
 
 ## Caso B. Costura de imagens
 
-Você está melhorando um pipeline de stitching. Três números importam: o erro da emenda, o tempo de execução e quanto da cena ficou coberto. Emenda e tempo menores são melhores. Cobertura maior é melhor.
+Você está juntando fotos numa imagem só. Três números importam: o erro da emenda, o tempo e quanto da cena ficou coberto. Emenda e tempo menores são melhores. Cobertura maior é melhor. Cada método é uma tentativa. Você pode guardar todo método que é o melhor em alguma coisa, e copiar para o Git só o que escolher.
 
 ```bash
 mkdir -p stitch
@@ -253,7 +267,7 @@ acvc --format text score --variant <malha> --metric seam=0.18 --metric runtime_m
 acvc --format text score --variant <mistura> --metric seam=0.07 --metric runtime_ms=710 --metric coverage=0.93
 ```
 
-As três podem permanecer na fronteira. A homografia é a mais rápida e a menos precisa. A malha cobre mais e custa tempo. A mistura tem a emenda mais limpa, a mesma cobertura da malha e um tempo maior, então ela não apaga a malha: a malha continua mais rápida. Leia isso antes de escolher.
+As três podem continuar na lista do que ainda compete. A homografia é a mais rápida e a menos precisa. A malha cobre mais e custa tempo. A mistura tem a emenda mais limpa, a mesma cobertura da malha e um tempo maior, então ela não apaga a malha: a malha continua mais rápida. Leia isso antes de escolher quais arquivos vão para o Git.
 
 ```bash
 acvc --format text frontier --campaign stitch
@@ -270,7 +284,7 @@ acvc --format text promote --variant <mistura> --git .
 
 ## Caso C. SQL ou banco de documentos num SaaS de restaurante
 
-Você está escolhendo o armazenamento por trás da venda de comandas. A superfície comum é a API HTTP e os testes. Os dois armazenamentos são tentativas posteriores, não duas origens: uma campanha tem um seed.
+Você está escolhendo o banco por trás da venda de comandas. A API HTTP e os testes continuam os mesmos. SQL e um banco de documentos são duas tentativas posteriores dessa única pergunta. Uma campanha tem uma primeira versão, não duas.
 
 Esta comparação é sobre um produto comercial. Usar o ACVC para construir esse produto precisa de autorização por escrito do autor. Veja `LICENSE`.
 
@@ -337,7 +351,7 @@ acvc --format text frontier --campaign orders
 acvc --format text compare <postgres> <documento>
 ```
 
-A fronteira segurando os dois é o ponto. A escolha é sua. Se uma comanda perdida no caixa é inaceitável, diga isso. A rejeição é o motivo, não um efeito colateral da pontuação:
+Os dois armazenamentos podem continuar valendo a pena, porque cada um vence num número diferente. A escolha é sua. Se uma comanda perdida no caixa é inaceitável, escreva isso. Essa frase é a decisão. Os números sozinhos não descartam a tentativa:
 
 ```bash
 acvc --format text reject --variant <documento> \
@@ -347,6 +361,8 @@ acvc --format text promote --variant <postgres> --git .
 
 ## Ler a campanha
 
+Estes comandos respondem a uma pessoa que não estava na sessão. `frontier` lista as tentativas que ainda competem. `context` é o mapa da pergunta: quem tentou o quê, e como as tentativas se ligam. `tui` é o mesmo mapa no terminal. `web` é o mesmo mapa no navegador.
+
 ```bash
 acvc --format text frontier
 acvc --format text context
@@ -354,4 +370,4 @@ acvc tui
 acvc web
 ```
 
-`acvc web` escuta em `127.0.0.1:9420`. `acvc guide` é o mapa curto da campanha aberta. `acvc assistant` devolve o contrato operacional para um agente, no idioma do computador.
+`acvc web` escuta em `127.0.0.1:9420`. `acvc guide` é um mapa curto da pergunta aberta e dos comandos. `acvc assistant` é a explicação que um agente deve ler, no idioma do computador.

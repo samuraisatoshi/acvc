@@ -1,5 +1,7 @@
 # Zasoby
 
+Osoba, która nigdy nie widziała ACVC, potrzebuje jednego zdania przed tymi nazwami. ACVC trzyma próby, które nie powinny stać się commitami. Każda próba to pomysł, pliki i liczby. Próby, których nikt nie pokonał na każdej liczbie, wciąż konkurują. `promote` kopiuje zatwierdzone pliki do checkoutu Gita, który już istnieje. Nazwy poniżej to te, których używają polecenia i JSON.
+
 ## Czym jest hipoteza
 
 Identyfikator to hash BLAKE3 bajtów kanonicznych: drzewo, rodzice, krawędź, przesłanka, przyczyny, rewizja, intencja i agent. Nazwa kampanii, data, pomiary i wydatek tokenów nie wchodzą do hasha. Ta sama hipoteza jest tym samym węzłem.

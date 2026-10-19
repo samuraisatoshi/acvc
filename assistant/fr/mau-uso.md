@@ -1,5 +1,7 @@
 # Mauvais usage
 
+Voici les façons dont le registre cesse de dire ce qu'il dit. Les essais ratés restent ici. Git ne reçoit que la tentative qu'une personne approuve.
+
 - Ouvrir `.acvc/graph.sqlite`, `objects.log` ou `objects.pack` pour lire le statut, la frontière ou la prémisse. Le contrat est l'exécutable.
 - Traiter Git comme le graphe d'hypothèses. Le commit ne garde pas l'essai perdant ni le motif qui n'a pas été écrit.
 - Un second `seed` dans la même campagne. La campagne a déjà une origine. Le chemin est `record` à partir du parent.

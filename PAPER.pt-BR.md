@@ -6,6 +6,12 @@ Correspondência: samuraisatoshi@cryptoworld.8shield.net
 
 Esta é uma descrição do sistema de software neste repositório. Não é um artigo com revisão por pares. Não relata estudo com usuários nem benchmark. A implementação é a fonte das afirmações sobre comportamento.
 
+## Se você ainda não viu o ACVC
+
+Um agente tenta muitas versões da mesma mudança. Colocar cada tentativa falha no Git enche o repositório, e o agente seguinte se perde nesse histórico. O ACVC registra cada tentativa: a ideia, os arquivos e a medição. Você vê quais tentativas ainda competem. O Git recebe uma árvore, a que você aprova, pelo `acvc promote`, num checkout que já existe. O ACVC não faz merge e não substitui o Git.
+
+O resto desta nota usa os nomes precisos. Uma hipótese é uma tentativa. Um ensaio é uma medição. A fronteira são as tentativas que ninguém superou em todos os números. Duas tentativas podem continuar as duas.
+
 ## Resumo
 
 O ACVC (Agent Code Variant Control) é um armazenamento local de hipóteses sobre um corpo de código. Uma pessoa ou um agente pode experimentar muitas variantes. Cada variante tem premissa, pressupostos, intenção, relação com os pais e uma árvore de arquivos. A árvore é uma árvore de Merkle: um nó guarda o hash do filho, não os bytes do filho. Um arquivo que não mudou não é gravado de novo. O Git continua sendo o lugar em que a pessoa deposita a variante que decidiu conservar. A campanha nomeia as métricas. Um ensaio é uma medição completa. A fronteira guarda todo ensaio completo que nenhuma outra hipótese supera em todas as métricas. Uma perda na fronteira não é uma rejeição. A rejeição é um ato separado, e carrega um motivo.

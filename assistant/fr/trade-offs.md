@@ -1,5 +1,7 @@
 # Trade-offs
 
+Utilisez ceci quand il y a deux tentatives mesurées ou plus et que les nombres ne s'accordent pas. Un chemin droit, sans seconde tentative, n'a pas besoin d'une campagne.
+
 ## Utilisez ACVC quand
 
 - La session teste plus d'une hypothèse et la suivante doit savoir laquelle est encore en concurrence.

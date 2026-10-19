@@ -2,6 +2,8 @@
 
 Deze map is het contract voor een agent die ACVC gaat gebruiken, of ACVC aan een andere agent uitlegt, in een sessie van Cursor, Claude Code, OpenCode of iets gelijkwaardigs.
 
+Als je ACVC uitlegt aan iemand die het nog nooit zag, begin dan bij `objetivo.md`: mislukte pogingen blijven buiten Git, en alleen de goedgekeurde poging wordt gekopieerd naar een checkout die al bestaat.
+
 Het commando `acvc assistant` geeft dit contract terug in de taal van de computer. Een agent met de ASB-MCP indexeert het één keer: stuur de array `documents` naar `rag.index`. Zoeken daarna gaat met `rag.search`.
 
 Lees in deze volgorde, en stop wanneer de vraag al een antwoord heeft:

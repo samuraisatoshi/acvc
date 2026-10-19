@@ -1,5 +1,7 @@
 # Bonnes pratiques
 
+Écrivez la croyance avec les mots d'une personne. Gardez chaque tentative. Un nombre pire n'efface pas la tentative, et n'écrit pas le motif à votre place.
+
 - La prémisse est le problème dans la langue d'une personne. Le hash n'est pas le nom de l'hypothèse.
 - Chaque cause reste sur l'hypothèse qui la suppose. Plusieurs causes ne deviennent pas une seule phrase de campagne.
 - `context` est la première lecture de la session. `frontier` répond à ce qui est encore en concurrence. `why` répond à une hypothèse.

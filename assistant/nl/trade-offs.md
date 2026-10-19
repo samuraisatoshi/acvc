@@ -1,5 +1,7 @@
 # Trade-offs
 
+Gebruik dit wanneer er twee of meer gemeten pogingen zijn en de getallen het oneens zijn. Eén rechte weg, zonder tweede poging, heeft geen campagne nodig.
+
 ## Gebruik ACVC wanneer
 
 - De sessie meer dan één hypothese test en de volgende moet weten welke nog meedingt.

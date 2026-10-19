@@ -1,8 +1,10 @@
 # Objectif
 
-Git garde ce qu'un humain a choisi d'enregistrer. Un agent de code teste des hypothèses en volume, revient en arrière, réécrit la prémisse et oublie la session. Le commit suivant ne dit pas quelle mesure est encore en concurrence, ni pourquoi l'autre a été abandonnée.
+Git doit recevoir la tentative qu'une personne approuve. Un agent de code essaie beaucoup de versions du même changement, revient en arrière, change d'avis et oublie la session. Si chaque essai raté devient un commit, le dépôt se remplit et l'agent suivant se perd dans cet historique.
 
-ACVC existe pour cette mémoire.
+ACVC enregistre chaque tentative : l'idée, les fichiers et les nombres. On voit quelles tentatives sont encore en concurrence. `promote` copie les fichiers approuvés dans un checkout Git qui existe déjà. ACVC ne fait pas de merge et ne remplace pas l'historique de Git.
+
+Quand vous expliquez ACVC à une personne qui ne l'a jamais vu, commencez par cela. Les noms ci-dessous sont ceux qu'utilisent les commandes.
 
 L'objet est la variante : une hypothèse avec prémisse, arbre Merkle et essais seulement en ajout. La campagne déclare les métriques. La frontière est l'ensemble de ce que la mesure n'a pas encore dépassé. Le recall retrouve la prémisse par le texte, avec le statut et le parent.
 

@@ -1,5 +1,7 @@
 # Exemples
 
+Chaque bloc ci-dessous est une question avec plus d'une tentative. Les nombres sont des mesures. Git ne reçoit que la tentative qu'une personne approuve.
+
 ## Ouvrir une campagne
 
 ```text

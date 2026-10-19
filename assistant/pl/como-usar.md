@@ -1,5 +1,7 @@
 # Jak używać
 
+Kroki poniżej używają nazw poleceń. Hipoteza to jedna wersja plików i zdanie, w co wierzysz. Pomiar to te liczby. Granica to wersje, których nikt nie pokonał na każdej liczbie.
+
 1. `acvc context --campaign NAZWA` zanim zaproponujesz, zmierzysz albo odrzucisz.
 2. Jeśli kampanii nie ma: `acvc init --repo .` i `acvc campaign create NAZWA --metric miara:higher`.
 3. Pierwsza hipoteza to `seed` folderu z plikami hipotezy, z `--premise`, `--assumption`, `--intent` i `--agent`.

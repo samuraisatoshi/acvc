@@ -1,5 +1,7 @@
 # Przykłady
 
+Każdy blok poniżej to jedno pytanie z więcej niż jedną wersją. Liczby są pomiarami. Git dostaje tylko wersję, którą osoba zatwierdza.
+
 ## Otwarcie kampanii
 
 ```text
