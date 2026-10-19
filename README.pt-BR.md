@@ -12,6 +12,8 @@ Uma pessoa usa o mesmo registro. Pesquisadores, desenvolvedores e engenheiros de
 
 A descrição mais longa do desenho está em [PAPER.md](PAPER.md) ([português](PAPER.pt-BR.md)). Essa nota é uma descrição do sistema. Não é um artigo com revisão por pares e não relata um estudo com usuários.
 
+A regra de quais tentativas ainda competem foi conferida com o TLC. O modelo, a execução e os gráficos estão em [TLA.md](TLA.md) ([português](TLA.pt-BR.md)). Os módulos estão em [specs/frontier](specs/frontier).
+
 ## As palavras, uma vez
 
 - Uma **tentativa** é uma versão dos arquivos, mais a frase que diz o que você acredita. Os comandos chamam isso de hipótese.
