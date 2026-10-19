@@ -238,6 +238,28 @@ Their reviewers moved from reading every line to judging intent, and to refusing
 
 ACVC does not take the other half of their problem. It does not serve 25 million checkouts, it does not shard a 100 GB history, and it does not replace Git on a monorepo. The post says Scion is the wrong tool for an ordinary repository, and that the useful export is server-side questions while Git remains the model. A campaign is that export at the size of one question. The attempts stay in `.acvc`. `promote` copies the approved tree into a checkout that already exists.
 
+The gain appears when the two stay joined at that one tree. The agent edits in a checkout the server already knows how to serve, sparse and fetched by the object the client asks for. Each version worth remembering is a hypothesis: the premise, the files, and the measurement. The frontier holds every attempt nobody has beaten on every number. `reject` writes the motive and leaves the measurement in `.acvc`. `promote` copies the approved tree into the checkout. Scion then records one changeset, the files that differ from the first parent, and lands it on main.
+
+```mermaid
+flowchart TD
+  tries["agent tries versions of one change"]
+  campaign["ACVC: each version is a hypothesis with a measurement"]
+  frontier["frontier: attempts nobody has beaten on every number"]
+  aside[".acvc holds the rest, including a written reject"]
+  one["promote copies one approved tree"]
+  cs["one Scion changeset against the first parent"]
+  trunk["main"]
+  tries --> campaign --> frontier
+  frontier --> aside
+  frontier --> one --> cs --> trunk
+```
+
+The join, drawn here. The Scion boxes name roles from [25]. The campaign boxes are ACVC. This repository has no Scion client. `promote` today copies into a Git checkout. That same one tree is what a Scion client would turn into one changeset.
+
+Their chart shows the trunk absorbing 30,401 merges on 9 September 2026. A campaign that tried ten measured versions and approved one would add one changeset, and would keep the other nine, with their numbers and any written motive, out of that count. Scion still pays the cheap checkout and the cheap landing of the one tree. ACVC still answers which of the ten still competed. Blame of a line on main stays a Scion question. The status of an attempt that lost stays an ACVC question.
+
+A textual conflict between two approved trees remains Scion's repair after the merge. A pair that wins on different numbers stays on the frontier until someone promotes one. The join does not add their reported speedups to a campaign. The ×84 on a new agent worktree is the cost of a place to edit. The campaign's gain is the history that place does not keep.
+
 ## 7. Limits
 
 There is no study of whether researchers or agents record premises honestly. The frontier is only as good as the trials. A complete trial can still be the wrong metric. ACVC does not run the code and does not isolate it; container-use or an ordinary shell does that. Windows is outside the current file-identity model, which uses Unix metadata. The paper and the software can drift; the executable is the authority for behavior. ACVC does not checkout a 100 GB monorepo and does not answer blame for tens of millions of jobs. That scale is the problem Scion reports [25]. A cache tier does not turn a campaign into that system.

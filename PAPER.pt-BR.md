@@ -238,6 +238,28 @@ Os revisores deles passaram de ler cada linha para julgar a intenção, e para r
 
 O ACVC não toma a outra metade do problema deles. Não serve 25 milhões de checkouts, não parte um histórico de 100 GB e não substitui o Git num monorepo. O post diz que o Scion é a ferramenta errada para um repositório comum, e que a exportação útil são perguntas do lado do servidor enquanto o Git continua sendo o modelo. Uma campanha é essa exportação no tamanho de uma pergunta. As tentativas ficam em `.acvc`. `promote` copia a árvore aprovada para um checkout que já existe.
 
+O ganho aparece quando as duas continuam unidas nessa única árvore. O agente edita num checkout que o servidor já sabe servir, esparso e buscado pelo objeto que o cliente pede. Cada versão que vale lembrar é uma hipótese: a premissa, os arquivos e a medição. A fronteira guarda toda tentativa que ninguém superou em todos os números. `reject` grava o motivo e deixa a medição em `.acvc`. `promote` copia a árvore aprovada para o checkout. O Scion então grava um changeset, os arquivos que diferem do primeiro pai, e aterra no main.
+
+```mermaid
+flowchart TD
+  tries["o agente tenta versões de uma mudança"]
+  campaign["ACVC: cada versão é uma hipótese com uma medição"]
+  frontier["fronteira: tentativas que ninguém superou em todos os números"]
+  aside[".acvc guarda o resto, inclusive um reject escrito"]
+  one["promote copia uma árvore aprovada"]
+  cs["um changeset Scion contra o primeiro pai"]
+  trunk["main"]
+  tries --> campaign --> frontier
+  frontier --> aside
+  frontier --> one --> cs --> trunk
+```
+
+A união, desenhada aqui. As caixas do Scion nomeiam papéis de [25]. As caixas da campanha são o ACVC. Este repositório não tem cliente Scion. `promote` hoje copia para um checkout Git. Essa mesma árvore única é o que um cliente Scion transformaria num changeset.
+
+O gráfico deles mostra o trunk absorvendo 30.401 merges em 9 de setembro de 2026. Uma campanha que tentou dez versões medidas e aprovou uma acrescentaria um changeset, e manteria as outras nove, com os números e qualquer motivo escrito, fora dessa conta. O Scion continua pagando o checkout barato e o landing barato dessa árvore. O ACVC continua respondendo qual das dez ainda competia. O blame de uma linha no main continua pergunta do Scion. O status de uma tentativa que perdeu continua pergunta do ACVC.
+
+Um conflito textual entre duas árvores aprovadas continua sendo o reparo do Scion depois do merge. Um par que vence em números diferentes fica na fronteira até alguém fazer `promote` de uma. A união não soma os fatores de velocidade que eles relataram a uma campanha. O ×84 de uma worktree nova de agente é o custo de um lugar para editar. O ganho da campanha é o histórico que esse lugar não guarda.
+
 ## 7. Limites
 
 Não há estudo sobre se pesquisadores ou agentes registram premissas com honestidade. A fronteira só é tão boa quanto os ensaios. Um ensaio completo ainda pode ser a métrica errada. O ACVC não executa o código e não o isola; o container-use ou um shell comum faz isso. Windows está fora do modelo atual de identidade de arquivo, que usa metadados Unix. O paper e o software podem divergir; o executável é a autoridade sobre o comportamento. O ACVC não faz checkout de um monorepo de 100 GB e não responde blame para dezenas de milhões de jobs. Essa escala é o problema que o Scion relata [25]. Uma camada de cache não transforma uma campanha nesse sistema.
