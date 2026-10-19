@@ -1,5 +1,7 @@
 # Cómo usar
 
+Los pasos de abajo usan los nombres de los comandos. Un intento es una hipótesis. Una medición es un ensayo. Los intentos que nadie superó en todos los números son la frontera.
+
 1. `acvc context --campaign NOMBRE` antes de proponer, medir o descartar.
 2. Si la campaña no existe: `acvc init --repo .` y `acvc campaign create NOMBRE --metric metrica:higher`.
 3. La primera hipótesis es `seed` de la carpeta que contiene los archivos de la hipótesis, con `--premise`, `--assumption`, `--intent` y `--agent`.

@@ -1,5 +1,7 @@
 # Resources
 
+A person who has never seen ACVC needs one sentence before these names. ACVC keeps the attempts that should not become commits. Each attempt is the idea, the files, and the numbers. The attempts nobody has beaten on every number still compete. `promote` copies the approved files into a Git checkout that already exists. The names below are what the commands and the JSON use.
+
 ## What a hypothesis is
 
 The identifier is the BLAKE3 hash of the canonical bytes: tree, parents, edge, premise, causes, revision, intent, and agent. The campaign name, the date, the measurements, and the token spend do not enter the hash. The same hypothesis is the same node.

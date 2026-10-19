@@ -6,6 +6,12 @@ Correspondence: samuraisatoshi@cryptoworld.8shield.net
 
 This is a system description of the software in this repository. It is not a peer-reviewed article. It reports no user study and no benchmark. The implementation is the source of the claims about behavior.
 
+## If you have not seen ACVC
+
+An agent tries many versions of the same change. Putting every failed try in Git fills the repository, and the next agent gets lost in that history. ACVC records each attempt: the idea, the files, and the measurement. You see which attempts still compete. Git receives one tree, the one you approve, through `acvc promote` into a checkout that already exists. ACVC does not merge and does not replace Git.
+
+The rest of this note uses the precise names. A hypothesis is one attempt. A trial is one measurement. The frontier is the attempts nobody has beaten on every number. Two attempts can both stay.
+
 ## Abstract
 
 ACVC (Agent Code Variant Control) is a local store for hypotheses about a body of code. A person or an agent may try many variants. Each variant has a premise, assumptions, an intent, a relation to its parents, and a tree of files. The tree is a Merkle tree: a node holds the hash of a child, not the child's bytes. A file that did not change is not stored again. Git remains the place where a person deposits the variant they chose to keep. The campaign names the metrics. A trial is one complete measurement. The frontier keeps every complete trial that no other hypothesis strictly beats. A loss on the frontier is not a rejection. A rejection is a separate act, and it carries a motive.

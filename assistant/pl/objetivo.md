@@ -1,8 +1,10 @@
 # Cel
 
-Git przechowuje to, co człowiek postanowił zapisać. Agent kodu testuje hipotezy hurtowo, cofa się, przepisuje przesłankę i zapomina sesję. Następny commit nie mówi, który pomiar wciąż konkuruje, ani dlaczego drugi został porzucony.
+Git powinien dostać próbę, którą osoba zatwierdza. Agent kodu próbuje wielu wersji tej samej zmiany, cofa się, zmienia zdanie i zapomina sesję. Jeśli każda nieudana próba staje się commitem, repozytorium się zapełnia, a następny agent gubi się w tej historii.
 
-ACVC istnieje dla tej pamięci.
+ACVC zapisuje każdą próbę: pomysł, pliki i liczby. Widać, które próby wciąż konkurują. `promote` kopiuje zatwierdzone pliki do checkoutu Gita, który już istnieje. ACVC nie robi merge i nie zastępuje historii Gita.
+
+Gdy tłumaczysz ACVC osobie, która go nigdy nie widziała, zacznij od tego. Nazwy poniżej to te, których używają polecenia.
 
 Obiektem jest wariant: hipoteza z przesłanką, drzewem Merkle i próbami tylko dopisywanymi. Kampania deklaruje miary. Granica to zbiór tego, czego pomiar jeszcze nie pokonał. Recall znajduje przesłankę po tekście, ze statusem i rodzicem.
 

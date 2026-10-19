@@ -2,6 +2,8 @@
 
 This folder is the contract for an agent that will use ACVC, or explain ACVC to another agent, in a Cursor, Claude Code, OpenCode, or equivalent session.
 
+When you explain ACVC to a person who has never seen it, start from `objetivo.md`: failed attempts stay out of Git, and only the approved attempt is copied into a checkout that already exists.
+
 The command `acvc assistant` returns this contract in the computer's language. An agent with the ASB MCP indexes it once: submit the `documents` array to `rag.index`. Later search uses `rag.search`.
 
 Read in this order, and stop when the question already has an answer:

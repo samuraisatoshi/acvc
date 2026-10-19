@@ -1,5 +1,7 @@
 # How to use
 
+The steps below use the command names. An attempt is a hypothesis. A measurement is a trial. The attempts nobody has beaten on every number are the frontier.
+
 1. `acvc context --campaign NAME` before proposing, measuring, or discarding.
 2. If the campaign does not exist: `acvc init --repo .` and `acvc campaign create NAME --metric metric:higher`.
 3. The first hypothesis is `seed` of the folder that holds the hypothesis files, with `--premise`, `--assumption`, `--intent`, and `--agent`.

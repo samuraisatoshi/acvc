@@ -1,5 +1,7 @@
 # Exemplos
 
+Cada bloco abaixo é uma pergunta com mais de uma tentativa. Os números são medições. O Git recebe só a tentativa que uma pessoa aprova.
+
 ## Abrir uma campanha
 
 ```text

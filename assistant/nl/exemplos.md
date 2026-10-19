@@ -1,5 +1,7 @@
 # Voorbeelden
 
+Elk blok hieronder is één vraag met meer dan één poging. De getallen zijn metingen. Git krijgt alleen de poging die een persoon goedkeurt.
+
 ## Een campagne openen
 
 ```text

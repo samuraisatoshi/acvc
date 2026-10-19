@@ -2,6 +2,8 @@
 
 Esta carpeta es el contrato para un agente que va a usar ACVC, o explicar ACVC a otro agente, en una sesión de Cursor, Claude Code, OpenCode o equivalente.
 
+Cuando explique ACVC a una persona que nunca lo vio, empiece por `objetivo.md`: los intentos fallidos quedan fuera de Git, y solo el intento aprobado se copia a un checkout que ya existe.
+
 El comando `acvc assistant` devuelve este contrato en el idioma del computador. Quien tiene el MCP de ASB lo indexa una vez: envía el array `documents` a `rag.index`. La búsqueda siguiente usa `rag.search`.
 
 Lea en este orden, y pare cuando la pregunta ya tenga respuesta:

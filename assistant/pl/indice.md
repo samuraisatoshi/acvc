@@ -2,6 +2,8 @@
 
 Ten folder jest umową dla agenta, który użyje ACVC albo wyjaśni ACVC innemu agentowi w sesji Cursor, Claude Code, OpenCode lub równoważnej.
 
+Gdy tłumaczysz ACVC osobie, która go nigdy nie widziała, zacznij od `objetivo.md`: nieudane próby zostają poza Gitem, a do checkoutu, który już istnieje, kopiowana jest tylko zatwierdzona próba.
+
 Polecenie `acvc assistant` zwraca tę umowę w języku komputera. Agent z MCP ASB indeksuje ją raz: wysyła tablicę `documents` do `rag.index`. Późniejsze szukanie używa `rag.search`.
 
 Czytaj w tej kolejności i zatrzymaj się, gdy pytanie ma już odpowiedź:

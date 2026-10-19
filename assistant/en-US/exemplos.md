@@ -1,5 +1,7 @@
 # Examples
 
+Each block below is one question with more than one attempt. The numbers are measurements. Git receives only the attempt a person approves.
+
 ## Open a campaign
 
 ```text

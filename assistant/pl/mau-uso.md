@@ -1,5 +1,7 @@
 # Złe użycie
 
+To sposoby, w które zapis przestaje znaczyć to, co mówi. Nieudane wersje zostają tutaj. Git dostaje tylko wersję, którą osoba zatwierdza.
+
 - Otwieranie `.acvc/graph.sqlite`, `objects.log` albo `objects.pack`, żeby czytać status, granicę albo przesłankę. Umową jest program.
 - Traktowanie Gita jako grafu hipotez. Commit nie trzyma przegranej próby ani motywu, którego nie zapisano.
 - Drugi `seed` w tej samej kampanii. Kampania ma już pochodzenie. Drogą jest `record` od rodzica.

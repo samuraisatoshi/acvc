@@ -2,6 +2,8 @@
 
 Run `acvc assistant`. The command returns this contract in the computer's language. It does not depend on this file being open.
 
+The contract opens in plain language: failed attempts stay out of Git, and only the approved attempt is copied into a checkout that already exists.
+
 Detection, when choosing a folder by hand: `LC_ALL`, then `LC_MESSAGES`, then `LANG`. Skip an empty value, `C`, and `POSIX`. Map `pt` to `pt-BR/`, `en` to `en-US/`, and `es`, `fr`, `nl`, `el`, `pl`, `ru` to the folder of that name. Anything else uses `en-US/`.
 
 An agent with the ASB MCP indexes the contract once. Submit the `documents` array from `acvc assistant` to `rag.index`. Later context search uses `rag.search`.

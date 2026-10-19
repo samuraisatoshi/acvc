@@ -1,5 +1,7 @@
 # Middelen
 
+Iemand die ACVC nog nooit zag, heeft één zin nodig vóór deze namen. ACVC bewaart de pogingen die geen commit mogen worden. Elke poging is het idee, de bestanden en de getallen. De pogingen die niemand op elk getal heeft verslagen, dingen nog mee. `promote` kopieert de goedgekeurde bestanden naar een Git-checkout die al bestaat. De namen hieronder zijn die van de commando's en de JSON.
+
 ## Wat een hypothese is
 
 De identificatie is de BLAKE3-hash van de canonieke bytes: boom, ouders, kant, premisse, oorzaken, herziening, bedoeling en agent. De campagnenaam, de datum, de metingen en het tokenverbruik gaan niet in de hash. Dezelfde hypothese is dezelfde knoop.

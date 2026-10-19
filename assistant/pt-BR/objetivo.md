@@ -1,8 +1,10 @@
 # Objetivo
 
-O Git guarda o que um humano escolheu registrar. Um agente de código testa hipóteses em volume, volta atrás, reescreve a premissa e esquece a sessão. O commit seguinte não diz qual medição ainda compete, nem por que a outra foi abandonada.
+O Git deve receber a tentativa que uma pessoa aprova. Um agente de código tenta muitas versões da mesma mudança, volta atrás, muda de ideia e esquece a sessão. Se cada tentativa falha vira commit, o repositório enche e o agente seguinte se perde nesse histórico.
 
-O ACVC existe para essa memória.
+O ACVC registra cada tentativa: a ideia, os arquivos e os números. Dá para ver quais tentativas ainda competem. `promote` copia os arquivos aprovados para um checkout Git que já existe. O ACVC não faz merge e não substitui o histórico do Git.
+
+Quando explicar o ACVC a uma pessoa que nunca o viu, comece por isso. Os nomes abaixo são os que os comandos usam.
 
 O objeto é a variante: uma hipótese com premissa, árvore Merkle e ensaios só de acréscimo. A campanha declara as métricas. A fronteira é o conjunto do que a medição ainda não superou. O recall acha a premissa pelo texto, com o status e o pai.
 

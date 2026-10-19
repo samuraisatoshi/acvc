@@ -1,5 +1,7 @@
 # Gebruik
 
+De stappen hieronder gebruiken de namen van de commando's. Een poging is een hypothese. Een meting is een proef. De pogingen die niemand op elk getal heeft verslagen, zijn de grens.
+
 1. `acvc context --campaign NAAM` voordat je voorstelt, meet of weggooit.
 2. Als de campagne niet bestaat: `acvc init --repo .` en `acvc campaign create NAAM --metric maat:higher`.
 3. De eerste hypothese is `seed` van de map met de bestanden van de hypothese, met `--premise`, `--assumption`, `--intent` en `--agent`.

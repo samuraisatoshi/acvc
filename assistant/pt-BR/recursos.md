@@ -1,5 +1,7 @@
 # Recursos
 
+Uma pessoa que nunca viu o ACVC precisa de uma frase antes destes nomes. O ACVC guarda as tentativas que não devem virar commit. Cada tentativa é a ideia, os arquivos e os números. As tentativas que ninguém superou em todos os números ainda competem. `promote` copia os arquivos aprovados para um checkout Git que já existe. Os nomes abaixo são os que os comandos e o JSON usam.
+
 ## O que uma hipótese é
 
 O identificador é o hash BLAKE3 dos bytes canônicos: árvore, pais, aresta, premissa, causas, revisão, intenção e agente. O nome da campanha, a data, as medições e o gasto de tokens não entram no hash. A mesma hipótese é o mesmo nó.

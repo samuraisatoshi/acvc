@@ -1,8 +1,10 @@
 # Doel
 
-Git bewaart wat een mens koos te registreren. Een code-agent test hypothesen in volume, gaat terug, herschrijft de premisse en vergeet de sessie. De volgende commit zegt niet welke meting nog meedingt, en niet waarom de andere is losgelaten.
+Git hoort de poging te krijgen die een persoon goedkeurt. Een code-agent probeert veel versies van dezelfde wijziging, gaat terug, verandert van gedachte en vergeet de sessie. Als elke mislukte poging een commit wordt, vult de repository zich en verdwaalt de volgende agent in die geschiedenis.
 
-ACVC bestaat voor dat geheugen.
+ACVC legt elke poging vast: het idee, de bestanden en de getallen. Je ziet welke pogingen nog meedingen. `promote` kopieert de goedgekeurde bestanden naar een Git-checkout die al bestaat. ACVC doet geen merge en vervangt de Git-geschiedenis niet.
+
+Als je ACVC uitlegt aan iemand die het nog nooit zag, begin dan daarmee. De namen hieronder zijn de namen die de commando's gebruiken.
 
 Het object is de variant: een hypothese met premisse, Merkle-boom en alleen toevoegende proeven. De campagne verklaart de maten. De grens is de verzameling van wat de meting nog niet heeft overtroffen. Recall vindt de premisse via tekst, met de status en de ouder.
 

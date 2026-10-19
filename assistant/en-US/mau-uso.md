@@ -1,5 +1,7 @@
 # Misuse
 
+These are the ways the record stops meaning what it says. Failed attempts stay here. Git receives only the attempt a person approves.
+
 - Opening `.acvc/graph.sqlite`, `objects.log`, or `objects.pack` to read status, frontier, or premise. The contract is the executable.
 - Treating Git as the hypothesis graph. The commit does not keep the losing trial or the motive that was never written.
 - A second `seed` in the same campaign. The campaign already has an origin. The path is `record` from the parent.

@@ -152,7 +152,7 @@ mod tests {
         let (value, text) = document(Some("objetivo")).unwrap();
         let docs = value["documents"].as_array().unwrap();
         assert_eq!(docs.len(), 1);
-        assert!(text.contains("Git stores what a human chose to record."));
+        assert!(text.contains("Git should receive the attempt a person approves."));
         assert!(document(Some("nope")).is_err());
     }
 }

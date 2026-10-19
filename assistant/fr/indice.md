@@ -2,6 +2,8 @@
 
 Ce dossier est le contrat pour un agent qui va utiliser ACVC, ou expliquer ACVC à un autre agent, dans une session Cursor, Claude Code, OpenCode ou équivalente.
 
+Quand vous expliquez ACVC à une personne qui ne l'a jamais vu, commencez par `objetivo.md` : les essais ratés restent hors de Git, et seule la tentative approuvée est copiée dans un checkout qui existe déjà.
+
 La commande `acvc assistant` renvoie ce contrat dans la langue de l'ordinateur. Un agent qui a le MCP d'ASB l'indexe une fois : il envoie le tableau `documents` à `rag.index`. La recherche suivante utilise `rag.search`.
 
 Lisez dans cet ordre, et arrêtez-vous quand la question a déjà une réponse :

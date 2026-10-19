@@ -1,5 +1,7 @@
 # Practices
 
+Write the belief in a person's words. Keep every attempt. A worse number does not delete the attempt, and it does not write the reason for you.
+
 - The premise is the problem in a person's language. The hash is not the name of the hypothesis.
 - Each cause stays on the hypothesis that assumes it. Several causes do not become one campaign sentence.
 - `context` is the first read of the session. `frontier` answers what still competes. `why` answers one hypothesis.

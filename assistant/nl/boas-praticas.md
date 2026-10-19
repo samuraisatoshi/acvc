@@ -1,5 +1,7 @@
 # Praktijken
 
+Schrijf de overtuiging in de woorden van een persoon. Bewaar elke poging. Een slechter getal wist de poging niet, en schrijft de reden niet voor je.
+
 - De premisse is het probleem in de taal van een persoon. De hash is niet de naam van de hypothese.
 - Elke oorzaak blijft bij de hypothese die haar aanneemt. Meerdere oorzaken worden niet één campagnezin.
 - `context` is de eerste lezing van de sessie. `frontier` antwoordt wat nog meedingt. `why` antwoordt één hypothese.
