@@ -6,7 +6,13 @@ Iemand die ACVC nog nooit zag, heeft één zin nodig vóór deze namen. ACVC bew
 
 De identificatie is de BLAKE3-hash van de canonieke bytes: boom, ouders, kant, premisse, oorzaken, herziening, bedoeling en agent. De campagnenaam, de datum, de metingen en het tokenverbruik gaan niet in de hash. Dezelfde hypothese is dezelfde knoop.
 
-Kanten: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
+Kanten:
+
+- `seed` — de enige oorsprong.
+- `mutate` — de bestanden veranderden en de overtuiging blijft. Dit is de standaardkant van `record`.
+- `revert` — de stap gaat terug naar een eerdere hypothese.
+- `revise_premise` — de overtuiging zelf veranderde.
+- `synthesize` — twee of meer ouders.
 
 Status, als JSON-waarden:
 
@@ -46,8 +52,8 @@ Schrijven:
 - `init` — maakt de store.
 - `campaign create NAAM --metric naam:higher|lower` — het schema. Er kan meer dan één maat zijn.
 - `seed` — de eerste hypothese van de campagne. Een tweede oorsprong wordt geweigerd. Het volgende pad is `record`.
-- `record` — de map veranderde. De nieuwe hypothese wijst naar de ouder. Standaardkant: `mutate`.
-- `score --metric naam=getal` — voegt een proef toe. Hij wist de eerdere niet.
+- `record` — de map veranderde. Zonder `--parent` is de ouder de hypothese van de workspace, en de workspace wijst daarna naar de nieuwe hypothese. Standaardkant: `mutate`.
+- `score --metric naam=getal` — voegt een proef toe aan dezelfde variant. De identificatie verandert niet. Hij wist de eerdere niet.
 - `reject --reason "..."` — een expliciete daad. Het motief blijft in de graaf.
 - `spend --tokens N` — een apart boek. Het gaat niet in de hash, het is geen maat en het vergrendelt `record` niet. Nul tokens wordt geweigerd.
 - `materialize` — kopieert de hypothese naar een map.

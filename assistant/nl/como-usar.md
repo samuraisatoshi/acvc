@@ -5,7 +5,7 @@ De stappen hieronder gebruiken de namen van de commando's. Een poging is een hyp
 1. `acvc context --campaign NAAM` voordat je voorstelt, meet of weggooit.
 2. Als de campagne niet bestaat: `acvc init --repo .` en `acvc campaign create NAAM --metric maat:higher`.
 3. De eerste hypothese is `seed` van de map met de bestanden van de hypothese, met `--premise`, `--assumption`, `--intent` en `--agent`.
-4. Een bestand veranderde: `record` vanuit de ouder. Doe geen tweede `seed`.
+4. Een bestand veranderde: `record`. Zonder `--parent` is de ouder de hypothese waar de workspace naar wijst. `record` wijst de workspace daarna naar de nieuwe hypothese, dus de volgende `record` ketent daarop. Twee kinderen van de seed vragen `--parent` met het seed-id, of `materialize` van de seed vóór elke `record`. Doe geen tweede `seed`.
 5. Er is een echt getal voor de verklaarde maat: `score`. Een onvolledige proef komt niet op de grens.
 6. `frontier` toont wat nog meedingt. `why` legt één hypothese uit. `recall --query` vindt haar via de premissetekst.
 7. Twee concrete metingen: `compare`.

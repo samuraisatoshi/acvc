@@ -6,7 +6,13 @@ Une personne qui n'a jamais vu ACVC a besoin d'une phrase avant ces noms. ACVC g
 
 L'identifiant est le hash BLAKE3 des octets canoniques : arbre, parents, arête, prémisse, causes, révision, intention et agent. Le nom de la campagne, la date, les mesures et la dépense de jetons n'entrent pas dans le hash. La même hypothèse est le même nœud.
 
-Arêtes : `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
+Arêtes :
+
+- `seed` — la seule origine.
+- `mutate` — les fichiers ont changé et la croyance tient. C'est l'arête par défaut de `record`.
+- `revert` — le pas revient à une hypothèse antérieure.
+- `revise_premise` — la croyance elle-même a changé.
+- `synthesize` — deux parents ou plus.
 
 Statut, dans les valeurs JSON :
 
@@ -46,8 +52,8 @@ Lecture, avant d'agir :
 - `init` — crée le store.
 - `campaign create NOM --metric nom:higher|lower` — le schéma. Il peut y avoir plus d'une métrique.
 - `seed` — la première hypothèse de la campagne. Une seconde origine est refusée. Le chemin suivant est `record`.
-- `record` — le dossier a changé. La nouvelle hypothèse pointe vers le parent. Arête par défaut : `mutate`.
-- `score --metric nom=nombre` — ajoute un essai. Il n'efface pas les précédents.
+- `record` — le dossier a changé. Sans `--parent`, le parent est l'hypothèse du workspace, et le workspace désigne ensuite la nouvelle hypothèse. Arête par défaut : `mutate`.
+- `score --metric nom=nombre` — ajoute un essai sur la même variante. L'identifiant ne change pas. Il n'efface pas les précédents.
 - `reject --reason "..."` — acte explicite. Le motif reste dans le graphe.
 - `spend --tokens N` — livre à part. Il n'entre pas dans le hash, ce n'est pas une métrique et il ne verrouille pas `record`. Zéro jeton est refusé.
 - `materialize` — copie l'hypothèse dans un dossier.

@@ -68,12 +68,11 @@ jobs:
             dist/*.tar.gz
             dist/SHA256SUMS
           body: |
-            ACVC 0.1.1.
+            ACVC 0.1.2.
 
-            Since 0.1.0:
-            - The JSON `status` field is a stable code in every language: `on_frontier`, `superseded`, `rejected`, `unmeasured`. The sentence a person reads still follows the computer locale.
-            - `acvc assistant` is the orientation for an LLM agent, on the CLI and on the MCP server (`acvc mcp`).
-            - The sponsor button points only at the Bitcoin, Solana, and Liquid deposit addresses.
+            Since 0.1.1:
+            - `acvc assistant` tells an agent how `record` chooses a parent, which edge to use, and that `score` does not change the variant id.
+            - The README, the paper, and the TLC check of the frontier are in the repository. They describe which attempts stay out of Git.
 
             ACVC records an agent's hypotheses, trials, and the Pareto frontier outside Git. Git still stores the variant a person chooses to record.
 

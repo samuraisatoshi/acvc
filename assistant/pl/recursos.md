@@ -6,7 +6,13 @@ Osoba, która nigdy nie widziała ACVC, potrzebuje jednego zdania przed tymi naz
 
 Identyfikator to hash BLAKE3 bajtów kanonicznych: drzewo, rodzice, krawędź, przesłanka, przyczyny, rewizja, intencja i agent. Nazwa kampanii, data, pomiary i wydatek tokenów nie wchodzą do hasha. Ta sama hipoteza jest tym samym węzłem.
 
-Krawędzie: `seed`, `mutate`, `revert`, `revise_premise`, `synthesize`.
+Krawędzie:
+
+- `seed` — jedyne pochodzenie.
+- `mutate` — pliki się zmieniły, a przekonanie zostaje. To domyślna krawędź `record`.
+- `revert` — krok wraca do wcześniejszej hipotezy.
+- `revise_premise` — zmieniło się samo przekonanie.
+- `synthesize` — dwoje lub więcej rodziców.
 
 Status, jako wartości JSON:
 
@@ -46,8 +52,8 @@ Zapis:
 - `init` — tworzy magazyn.
 - `campaign create NAZWA --metric nazwa:higher|lower` — schemat. Miar może być więcej niż jedna.
 - `seed` — pierwsza hipoteza kampanii. Drugie pochodzenie jest odrzucane. Następną drogą jest `record`.
-- `record` — folder się zmienił. Nowa hipoteza wskazuje rodzica. Domyślna krawędź: `mutate`.
-- `score --metric nazwa=liczba` — dopisuje próbę. Nie kasuje wcześniejszych.
+- `record` — folder się zmienił. Bez `--parent` rodzicem jest hipoteza workspace, a workspace wskazuje potem nową hipotezę. Domyślna krawędź: `mutate`.
+- `score --metric nazwa=liczba` — dopisuje próbę do tej samej hipotezy. Identyfikator się nie zmienia. Nie kasuje wcześniejszych.
 - `reject --reason "..."` — jawny czyn. Motyw zostaje w grafie.
 - `spend --tokens N` — osobna księga. Nie wchodzi do hasha, nie jest miarą i nie blokuje `record`. Zero tokenów jest odrzucane.
 - `materialize` — kopiuje hipotezę do folderu.

@@ -5,7 +5,7 @@ Os passos abaixo usam os nomes dos comandos. Uma tentativa é uma hipótese. Uma
 1. `acvc context --campaign NOME` antes de propor, medir ou descartar.
 2. Se a campanha não existe: `acvc init --repo .` e `acvc campaign create NOME --metric metrica:higher`.
 3. A primeira hipótese é `seed` da pasta que contém os arquivos da hipótese, com `--premise`, `--assumption`, `--intent` e `--agent`.
-4. Mudou arquivo: `record` a partir do pai. Não faça outro `seed`.
+4. Mudou arquivo: `record`. Sem `--parent`, o pai é a hipótese para a qual o workspace aponta. O `record` passa a apontar o workspace para a hipótese nova, então o `record` seguinte encadeia nela. Dois filhos do seed pedem `--parent` com o id do seed, ou `materialize` do seed antes de cada `record`. Não faça outro `seed`.
 5. Há número real da métrica declarada: `score`. Um ensaio incompleto não entra na fronteira.
 6. `frontier` mostra o que ainda compete. `why` explica uma hipótese. `recall --query` acha pelo texto da premissa.
 7. Duas medidas concretas: `compare`.
