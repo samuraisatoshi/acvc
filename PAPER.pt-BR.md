@@ -131,7 +131,7 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 
 ### 6.1 Scion
 
-Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema que substituiu o Git no monorepo deles [25]. As contagens abaixo são tiradas desse post. Este repositório não as mediu, e não reproduz as figuras do post. Os diagramas ficam na página deles.
+Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema que substituiu o Git no monorepo deles, em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. As contagens abaixo são tiradas desse post. Este repositório não as mediu, e não reproduz as figuras do post. Os diagramas ficam na página deles.
 
 Eles relatam merges subindo de cerca de 2.500 por dia em maio de 2026 para 30.401 em 9 de setembro de 2026. O histórico do main tem quase 100 GB. O CI faz da ordem de 25 milhões de checkouts por dia. O relato deles é que uma frota de mirrors Git deixou de bastar para clientes que estão online, e que o Scion responde o histórico a partir de um servidor. Uma mudança aterrada fica guardada como os arquivos que diferem do pai, com os bytes conservados por hash. Nos tempos de comando publicados, um commit de desenvolvedor passa de 1,4 s para 1,1 s, o status de 3,9 s para 19 ms, e uma worktree nova de agente de 7,1 min para 5,1 s.
 

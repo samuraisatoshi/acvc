@@ -131,7 +131,7 @@ None of these is a substitute. Each one owns a purpose. ACVC owns the scored hyp
 
 ### 6.1 Scion
 
-On 13 October 2026 Anthropic described Scion, the system that replaced Git on their monorepo [25]. The counts below are taken from that post. This repository did not measure them, and it does not reproduce the post's figures. The diagrams stay on their page.
+On 13 October 2026 Anthropic described Scion, the system that replaced Git on their monorepo, in [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. The counts below are taken from that post. This repository did not measure them, and it does not reproduce the post's figures. The diagrams stay on their page.
 
 They report merges rising from about 2,500 a day in May 2026 to 30,401 on 9 September 2026. The history of main is almost 100 GB. CI does on the order of 25 million checkouts a day. Their account is that a fleet of Git mirrors stopped being enough for clients that are online, and that Scion answers history from a server. A landed change is stored as the files that differ from its parent, with the bytes kept by hash. On the published command timings, a developer commit moves from 1.4 s to 1.1 s, status from 3.9 s to 19 ms, and a new agent worktree from 7.1 min to 5.1 s.
 
