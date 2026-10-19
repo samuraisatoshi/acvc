@@ -2,11 +2,15 @@
 
 [English](README.md) · [Português](README.pt-BR.md)
 
-ACVC (Agent Code Variant Control) keeps the hypotheses you tried, the measurements you took, and which attempts are still undominated. Git keeps the variant you decide to record. It does not keep the attempts you abandoned on the way there.
+ACVC (Agent Code Variant Control) is where a coding agent keeps the attempts that should not become commits.
 
-This is for people who compare approaches: researchers, developers, and software engineers. An agent can run the same commands. A person can read the result with `--format text`, `acvc tui`, or `acvc web`.
+An agent tries many versions of the same change. Putting every failed try in Git fills the repository, and the next agent gets lost in that history. ACVC records each attempt as a hypothesis: the idea, the files, and the measurement. You see which attempts still compete. Git receives one tree, the one you approve.
 
-The design, the problems that motivated it, the methods, and the neighboring systems are written up in [PAPER.md](PAPER.md) ([português](PAPER.pt-BR.md)). That note is a system description. It is not a peer-reviewed article, and it does not report a user study.
+`acvc promote` copies that approved tree into a Git checkout that already exists. The other attempts stay in `.acvc`. ACVC does not merge branches and does not replace Git history.
+
+A person uses the same record. Researchers, developers, and software engineers compare approaches with the same commands. Read them with `--format text`, `acvc tui`, or `acvc web`. An agent calls the CLI or the MCP server `acvc mcp`.
+
+The longer description of the design is in [PAPER.md](PAPER.md) ([português](PAPER.pt-BR.md)). That note is a system description. It is not a peer-reviewed article, and it does not report a user study.
 
 ## Install
 
