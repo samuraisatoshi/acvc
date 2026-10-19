@@ -36,7 +36,7 @@ O segundo problema é a medição. Dois métodos de stitching, duas regras de in
 
 O terceiro problema é o motivo. Dominação não é decisão. Uma hipótese pode sair da fronteira porque outro ensaio completo a supera em tudo, enquanto ninguém disse por que a perdedora foi abandonada. O ACVC mantém essa lacuna visível. O status diz quem venceu e que o motivo não foi gravado. Uma rejeição é uma frase humana, gravada uma vez para aquela variante. Agentes esquecem sessões. Um armazenamento que só guarda vencedores esquece a razão de uma derrota.
 
-O container-use, do projeto Dagger, responde a um problema vizinho: um agente precisa de um container isolado e de um branch Git para que o trabalho em paralelo não colida com o checkout [11]. Isso é um ambiente de execução. Ele não nomeia uma premissa, não pontua uma campanha e não guarda uma fronteira não dominada. O ACVC não sobe um container. As duas ferramentas respondem a perguntas diferentes. A seção 6 lista os outros vizinhos.
+O container-use, do projeto Dagger, responde a um problema vizinho: um agente precisa de um container isolado e de um branch Git para que o trabalho em paralelo não colida com o checkout [11]. Isso é um ambiente de execução. Ele não nomeia uma premissa, não pontua uma campanha e não guarda uma fronteira não dominada. O ACVC não sobe um container. As duas ferramentas respondem a perguntas diferentes. A seção 6 lista os outros vizinhos. A seção 6.1 lê o Scion da Anthropic, que torna o commit barato num monorepo e deixa a escolha da tentativa fora desse commit [25].
 
 ## 3. Métodos
 
@@ -117,6 +117,7 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 | Git [1, 2] | Blobs, árvores e commits endereçados por conteúdo | O commit é uma decisão. Hipóteses abandonadas não são uma fronteira. |
 | Gitless [4] | Uma camada conceitual mais simples sobre o Git | Repara os conceitos do Git. Não acrescenta premissas nem ensaios. |
 | container-use [11] | Um container, uma worktree e um branch por agente, mais o histórico de comandos em Git notes | Isola a execução. Não pontua hipóteses nem compartilha blobs intactos numa campanha. |
+| Scion [25] | Um log de changesets no servidor, para um monorepo enorme: arquivos mudados contra o primeiro pai, blobs endereçados por conteúdo, blame e histórico derivados | Torna o landing e o checkout baratos. Uma tentativa falha que vira changeset continua sendo histórico. Não pontua uma hipótese. |
 | Variolite [5] | Variantes locais leves dentro do editor | Variantes são trechos para exploração. Não são uma campanha Merkle com fronteira. |
 | DVC [19] | Dados, modelos e pipelines, com hashes, sobre o Git | A execução do pipeline é o objeto. A aresta da hipótese e o conjunto não dominado de variantes de código não são. |
 | MLflow [9] | Parâmetros, métricas e artefatos de execuções | A execução é uma linha. A árvore de código não é uma hipótese Merkle, e a dominação não é o status. |
@@ -128,13 +129,122 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 | Jujutsu [24] | Um sistema de controle de versão compatível com Git, com outro modelo de trabalho | Continua sendo uma história de decisões. |
 | Linhas de produto de software [18] | Variantes de feature de um produto | Uma feature não é uma hipótese sob um esquema de métricas. |
 
+### 6.1 Scion
+
+Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema de controle de versão que substituiu o Git no monorepo deles [25]. As figuras abaixo recontam diagramas desse post. As medições são da Anthropic. Este repositório não as repetiu.
+
+Eles relatam a pressão que fez do Git o gargalo. O gráfico "Changes merged per day" imprime 30.401 merges em 9 de setembro de 2026. Em maio o mesmo monorepo estava perto de 2.500 por dia. A série passa de pull requests para change requests do Antique, a média de sete dias sobe ao longo de setembro, e o gráfico marca uma semana quieta no começo de agosto. O histórico do main sozinho tem quase 100 GB, e uma working copy comprimida passa de 25 GB. O CI faz da ordem de 25 milhões de checkouts por dia. Buscado de forma ingênua, isso passa de 600 PB de tráfego Git por dia. Os diretórios que guardam o Scion e o Antique acumularam 12.257 mudanças integradas de janeiro a setembro de 2026.
+
+O arranjo que eles estavam deixando é um cluster de mirrors Git. Jobs, ambientes de desenvolvimento, sandboxes de agente e jobs de pesquisa puxam por um cache de packfile, depois réplicas de mirror, depois primários, depois um upstream. Um snapshot de seed em blob storage alimenta um seed do nó, e os jobs também leem desse seed. No pico eles operavam várias centenas desses mirrors.
+
+```mermaid
+flowchart LR
+  subgraph jobs [Jobs]
+    ci[CI jobs]
+    dev[Ambientes de desenvolvimento]
+    agents[Sandboxes de agente]
+    research[Jobs de pesquisa]
+  end
+  subgraph cluster [Por cluster]
+    pack[Cache de packfile]
+    replicas[Réplicas de mirror]
+    primaries[Primários do mirror]
+  end
+  upstream[Upstream]
+  blobs[Blob storage: snapshot do seed]
+  seed[Seed do nó]
+  ci --> pack
+  dev --> pack
+  agents --> pack
+  research --> pack
+  pack --> replicas --> primaries --> upstream
+  replicas --> blobs --> seed
+  seed --> ci
+  seed --> dev
+  seed --> agents
+  seed --> research
+```
+
+O arranjo típico para escalar checkouts Git, como descrito em [25]. O desenho é nosso.
+
+Um changeset é uma entrada num log de escrita antecipada. A forma publicada guarda os metadados no Spanner: autor, datas, mensagem, pais, uma assinatura opcional, e a lista de mudanças de arquivo contra o primeiro pai. Cada mudança aponta para um blob endereçado por conteúdo no cloud storage: arquivo regular, deleção ou executável. A árvore raiz e as árvores aninhadas são derivadas pelo servidor. Elas não ficam gravadas no changeset. Os bytes do arquivo são imutáveis, comprimidos e deduplicados por hash. Blame, histórico de caminho e o grafo de commits são dados derivados a mais, calculados a partir dos pais. Os clientes são pressupostos online. O servidor cria o changeset, responde o histórico e faz o merge. O cliente guarda um cache limitado e materializa os arquivos que lhe pediram. Refs além do main, ou de um branch de release, são desencorajadas, porque todo servidor teria de concordar sobre elas. Não há packfile.
+
+```mermaid
+flowchart TD
+  parent[Changeset pai]
+  meta["Metadados do changeset: autor, mensagem, pais, mudanças de arquivo"]
+  blob[Cloud storage: bytes do arquivo por hash]
+  tree["Derivado pelo servidor: árvore raiz e árvores aninhadas"]
+  parent --> meta
+  meta -->|mudança de arquivo| blob
+  meta -.->|não fica no changeset| tree
+  tree --> blob
+```
+
+A forma de um changeset no Scion, como descrita em [25]. O desenho é nosso.
+
+O checkout publicado tem dois planos. O plano de controle é o mesmo para o Antique, as máquinas de desenvolvimento e o CI: upload, commit e land, contra o scion-server. Esse servidor guarda changesets, branches e árvores no Spanner, e o conteúdo dos arquivos no cloud storage. O plano de objetos é regional. As máquinas de desenvolvimento buscam árvores e conteúdo no scion-cache. Um job de CI ou de cluster fala com o scion-daemon no nó. O daemon nasce de um snapshot periódico e pergunta ao cache regional num miss. O cache pergunta ao scion-server num miss. Cada camada relatou taxa de acerto acima de 99 por cento. Eles relatam a frota usando cerca de 200 vezes menos CPU e memória do que os mirrors Git, e checkouts de CI passando de minutos para segundos.
+
+```mermaid
+flowchart LR
+  antique[Antique]
+  dev[Máquinas de desenvolvimento]
+  jobs[Jobs de CI e de cluster]
+  daemon[scion-daemon no nó]
+  cache[scion-cache na região]
+  server[scion-server]
+  spanner[Spanner: changesets, branches, árvores]
+  blobs2[Cloud storage: conteúdo dos arquivos]
+  snap[Snapshot periódico]
+  antique -->|upload, commit, land| server
+  dev -->|upload, commit, land| server
+  jobs -->|upload, commit, land| server
+  dev -->|árvores e conteúdo| cache
+  jobs --> daemon
+  snap -->|semeia o nó| daemon
+  daemon -->|miss| cache
+  cache -->|miss| server
+  server --> spanner
+  server --> blobs2
+```
+
+As camadas de checkout como descritas em [25]. O desenho é nosso. O original tem a legenda "Scion's checkout architecture."
+
+A figura de desempenho no post tem a legenda "Observed performance improvements on native Scion repos." O título do gráfico é "Everyday source control commands on the monorepo." Estes são os medianos impressos nele.
+
+| Comando | git | scn | Fator relatado |
+| --- | --- | --- | --- |
+| Pull latest, desenvolvedor | 87 s | 3,5 s | ×25 |
+| Checkout, desenvolvedor | 15 s | 1,1 s | ×14 |
+| Rebase, desenvolvedor | 13 s | 2,7 s | ×4,8 |
+| Status, desenvolvedor | 3,9 s | 19 ms | ×207 |
+| Commit, desenvolvedor | 1,4 s | 1,1 s | ×1,3 |
+| Diff, desenvolvedor | 407 ms | 67 ms | ×6,1 |
+| New worktree, agente | 7,1 min | 5,1 s | ×84 |
+| Pull latest, agente | 3,0 min | 9,0 s | ×20 |
+| Commit, agente | 18 s | 761 ms | ×24 |
+| Status, agente | 4,3 s | <0,2 s | ×20+ |
+| Tempo de source control por change request, agente | 34 min | 3,7 min | ×9,2, cerca de 11.000 horas de agente por dia |
+| Checkout no início de um job de compute | 175 s | 22 s | ×8,0, cerca de 85.000 horas de máquina por dia |
+| Checkout dentro de um job de CI | 31 s | 3,5 s | ×6,8, cerca de 195.000 horas de máquina por dia |
+
+A dispersão dentro desse gráfico é o ponto. Numa máquina de desenvolvimento, o commit passa de 1,4 s para 1,1 s. O status passa de 3,9 s para 19 ms. Uma worktree nova de agente passa de 7,1 min para 5,1 s. O tempo que some é o tempo de copiar e consultar um histórico do tamanho do monorepo. O tempo que mal se move é o ato local de gravar uma mudança. O Scion torna o trunk barato de ler e barato de receber. Ele deixa em aberto qual de várias tentativas medidas deve aterrar.
+
+O Scion e o ACVC recusam fazer cada cliente carregar o histórico inteiro para responder uma pergunta. No Scion a pergunta é ancestralidade, blame e o diff contra a base do merge, e o servidor responde. No ACVC a pergunta é quais medições completas ainda não foram superadas, e o executável responde a partir da campanha. A fronteira é derivada dos ensaios do jeito que o blame deles é derivado dos pais. A conferência dessa derivação está em [TLA.md](TLA.md). O agente não abre o log.
+
+O laço de reparo do post é onde os desenhos se separam. Eles abriram mão de um cadeado global na fila de merge, porque centenas de mudanças aterram enquanto os testes ainda correm, e reparam conflitos depois do merge. Um conflito textual num trunk só pode ser reparado assim. Duas hipóteses que vencem em números diferentes são uma comparação, e as duas ficam na fronteira. Aterrar as duas, ou aterrar a última, derruba a comparação.
+
+Os revisores deles passaram de ler cada linha para julgar a intenção, e para recusar uma mudança que fura uma regra do sistema. O ACVC guarda essa recusa. `reject` conserva a medição e grava o motivo. Uma hipótese que perde a comparação e não foi rejeitada continua visível como superseded, com o motivo por gravar.
+
+O ACVC não toma a outra metade do problema deles. Não serve 25 milhões de checkouts, não parte um histórico de 100 GB e não substitui o Git num monorepo. O post diz que o Scion é a ferramenta errada para um repositório comum, e que a exportação útil são perguntas do lado do servidor enquanto o Git continua sendo o modelo. Uma campanha é essa exportação no tamanho de uma pergunta. As tentativas ficam em `.acvc`. `promote` copia a árvore aprovada para um checkout que já existe.
+
 ## 7. Limites
 
-Não há estudo sobre se pesquisadores ou agentes registram premissas com honestidade. A fronteira só é tão boa quanto os ensaios. Um ensaio completo ainda pode ser a métrica errada. O ACVC não executa o código e não o isola; o container-use ou um shell comum faz isso. Windows está fora do modelo atual de identidade de arquivo, que usa metadados Unix. O paper e o software podem divergir; o executável é a autoridade sobre o comportamento.
+Não há estudo sobre se pesquisadores ou agentes registram premissas com honestidade. A fronteira só é tão boa quanto os ensaios. Um ensaio completo ainda pode ser a métrica errada. O ACVC não executa o código e não o isola; o container-use ou um shell comum faz isso. Windows está fora do modelo atual de identidade de arquivo, que usa metadados Unix. O paper e o software podem divergir; o executável é a autoridade sobre o comportamento. O ACVC não faz checkout de um monorepo de 100 GB e não responde blame para dezenas de milhões de jobs. Essa escala é o problema que o Scion relata [25]. Uma camada de cache não transforma uma campanha nesse sistema.
 
 ## 8. Conclusão
 
-O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores: por hash, com os bytes do arquivo escritos só quando o conteúdo é novo. O hash controla a hipótese. O Git controla a decisão de conservar uma árvore. A fronteira mostra quais medições completas ainda não foram superadas, e recusa tratar uma perda como um motivo que ninguém escreveu.
+O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores: por hash, com os bytes do arquivo escritos só quando o conteúdo é novo. O hash controla a hipótese. O Git controla a decisão de conservar uma árvore. A fronteira mostra quais medições completas ainda não foram superadas, e recusa tratar uma perda como um motivo que ninguém escreveu. Tornar o commit mais barato, como o Scion faz para um monorepo [25], deixa essa escolha onde ela estava: fora do commit.
 
 ## Referências
 
@@ -185,3 +295,5 @@ O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores
 [23] E. Dolstra, "The purely functional software deployment model," Ph.D. dissertation, Utrecht University, 2006.
 
 [24] M. von Zweigbergk e contribuidores, Jujutsu. https://github.com/jj-vcs/jj
+
+[25] Nick G. e o time de source control da Anthropic, "Redesigning source control at Anthropic," Anthropic Engineering, 13 de outubro de 2026, atualizado em 15 de outubro de 2026. https://www.anthropic.com/engineering/redesigning-source-control
