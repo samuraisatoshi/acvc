@@ -131,41 +131,19 @@ Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hi
 
 ### 6.1 Scion
 
-Em 13 de outubro de 2026 a Anthropic descreveu o Scion, o sistema que substituiu o Git no monorepo deles, em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. As contagens abaixo são tiradas desse post. Este repositório não as mediu, e não reproduz as figuras do post. Os diagramas ficam na página deles.
+Em 13 de outubro de 2026 a Anthropic descreveu o Scion em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. As contagens abaixo são deles. Este repositório não as mediu.
 
-Eles relatam merges subindo de cerca de 2.500 por dia em maio de 2026 para 30.401 em 9 de setembro de 2026. O histórico do main tem quase 100 GB. O CI faz da ordem de 25 milhões de checkouts por dia. O relato deles é que uma frota de mirrors Git deixou de bastar para clientes que estão online, e que o Scion responde o histórico a partir de um servidor. Uma mudança aterrada fica guardada como os arquivos que diferem do pai, com os bytes conservados por hash. Nos tempos de comando publicados, um commit de desenvolvedor passa de 1,4 s para 1,1 s, o status de 3,9 s para 19 ms, e uma worktree nova de agente de 7,1 min para 5,1 s.
+Agentes aterram mais mudanças do que um histórico feito para decisões humanas consegue responder barato. Eles relatam cerca de 2.500 merges por dia em maio de 2026 e 30.401 em 9 de setembro de 2026. O histórico do main tem quase 100 GB. O CI faz da ordem de 25 milhões de checkouts por dia. Nos tempos que publicaram, um commit de desenvolvedor passa de 1,4 s para 1,1 s, enquanto o status passa de 3,9 s para 19 ms. O custo que cresceu é ler e buscar o trunk. Gravar uma mudança mal se moveu.
 
-A dispersão é o ponto. O tempo que encolhe é o tempo de copiar e consultar um histórico do tamanho do monorepo. O tempo que mal se move é o ato local de gravar uma mudança. O Scion torna o trunk barato de ler e barato de receber. Ele deixa em aberto qual de várias tentativas medidas deve aterrar.
+O Scion é o servidor que eles construíram para esse trunk. Uma mudança aterrada são os arquivos que diferem do pai, e o servidor responde o histórico. O ACVC é um portão na frente de um landing. Uma tentativa é uma hipótese com uma medição. Ela fica em `.acvc` até o `promote` copiar uma árvore aprovada para um checkout que já existe. Este repositório não tem cliente Scion. A coluna conjunta é o que essa única árvore seria no servidor deles: um changeset. É uma costura, não um sistema entregue aqui.
 
-O Scion e o ACVC recusam fazer cada cliente carregar o histórico inteiro para responder uma pergunta. No Scion a pergunta é ancestralidade, blame e o diff contra a base do merge, e o servidor responde. No ACVC a pergunta é quais medições completas ainda não foram superadas, e o executável responde a partir da campanha. A fronteira é derivada dos ensaios do jeito que o blame deles é derivado dos pais. A conferência dessa derivação está em [TLA.md](TLA.md). O agente não abre o log.
+O portão reduz o log de changesets só quando tentativas medidas aterrariam de outro modo. Uma mudança que já é a decisão não precisa de campanha. A campanha não reduz o custo de checkout que eles relataram.
 
-O laço de reparo do post é onde os desenhos se separam. Eles abriram mão de um cadeado global na fila de merge, porque centenas de mudanças aterram enquanto os testes ainda correm, e reparam conflitos depois do merge. Um conflito textual num trunk só pode ser reparado assim. Duas hipóteses que vencem em números diferentes são uma comparação, e as duas ficam na fronteira. Aterrar as duas, ou aterrar a última, derruba a comparação.
-
-Os revisores deles passaram de ler cada linha para julgar a intenção, e para recusar uma mudança que fura uma regra do sistema. O ACVC guarda essa recusa. `reject` conserva a medição e grava o motivo. Uma hipótese que perde a comparação e não foi rejeitada continua visível como superseded, com o motivo por gravar.
-
-O ACVC não toma a outra metade do problema deles. Não serve 25 milhões de checkouts, não parte um histórico de 100 GB e não substitui o Git num monorepo. O post diz que o Scion é a ferramenta errada para um repositório comum, e que a exportação útil são perguntas do lado do servidor enquanto o Git continua sendo o modelo. Uma campanha é essa exportação no tamanho de uma pergunta. As tentativas ficam em `.acvc`. `promote` copia a árvore aprovada para um checkout que já existe.
-
-O ganho aparece quando as duas continuam unidas nessa única árvore. O agente edita num checkout que o servidor já sabe servir, esparso e buscado pelo objeto que o cliente pede. Cada versão que vale lembrar é uma hipótese: a premissa, os arquivos e a medição. A fronteira guarda toda tentativa que ninguém superou em todos os números. `reject` grava o motivo e deixa a medição em `.acvc`. `promote` copia a árvore aprovada para o checkout. O Scion então grava um changeset, os arquivos que diferem do primeiro pai, e aterra no main.
-
-```mermaid
-flowchart TD
-  tries["o agente tenta versões de uma mudança"]
-  campaign["ACVC: cada versão é uma hipótese com uma medição"]
-  frontier["fronteira: tentativas que ninguém superou em todos os números"]
-  aside[".acvc guarda o resto, inclusive um reject escrito"]
-  one["promote copia uma árvore aprovada"]
-  cs["um changeset Scion contra o primeiro pai"]
-  trunk["main"]
-  tries --> campaign --> frontier
-  frontier --> aside
-  frontier --> one --> cs --> trunk
-```
-
-A união, desenhada aqui. As caixas do Scion nomeiam papéis de [25]. As caixas da campanha são o ACVC. Este repositório não tem cliente Scion. `promote` hoje copia para um checkout Git. Essa mesma árvore única é o que um cliente Scion transformaria num changeset.
-
-O gráfico deles mostra o trunk absorvendo 30.401 merges em 9 de setembro de 2026. Uma campanha que tentou dez versões medidas e aprovou uma acrescentaria um changeset, e manteria as outras nove, com os números e qualquer motivo escrito, fora dessa conta. O Scion continua pagando o checkout barato e o landing barato dessa árvore. O ACVC continua respondendo qual das dez ainda competia. O blame de uma linha no main continua pergunta do Scion. O status de uma tentativa que perdeu continua pergunta do ACVC.
-
-Um conflito textual entre duas árvores aprovadas continua sendo o reparo do Scion depois do merge. Um par que vence em números diferentes fica na fronteira até alguém fazer `promote` de uma. A união não soma os fatores de velocidade que eles relataram a uma campanha. O ×84 de uma worktree nova de agente é o custo de um lugar para editar. O ganho da campanha é o histórico que esse lugar não guarda.
+| | Scion sozinho | ACVC sozinho | Os dois |
+| --- | --- | --- | --- |
+| Pergunta que responde | Quem mudou uma linha, e o diff do que aterrou. O servidor responde. | Quais medições completas ainda competem, e qual árvore foi aprovada. | O servidor responde o trunk. A campanha responde a busca. |
+| Para onde vai uma tentativa que não aterra | Fora do sistema que o post descreve. Uma mudança aterrada é um changeset. | Em `.acvc`, com os números. O Git não recebe nada até o `promote`. | Em `.acvc`. O trunk recebe a árvore aprovada como um changeset. |
+| O que deixa por fazer | Qual de várias tentativas medidas deve aterrar. | Um histórico de quase 100 GB, e dezenas de milhões de checkouts por dia. | A carga de checkout, que continua com o Scion. Uma tentativa não aprovada fica fora desse log. |
 
 ## 7. Limites
 
