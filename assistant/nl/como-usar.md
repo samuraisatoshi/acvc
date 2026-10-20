@@ -11,7 +11,7 @@ De stappen hieronder gebruiken de namen van de commando's. Een poging is een hyp
 7. Twee concrete metingen: `compare`.
 8. De hypothese stierf om een bekend motief: `reject --reason`. Zonder motief wijs je niet af. De lezing zegt al dat het motief niet is vastgelegd.
 9. De sessie verbruikte tokens en dat getal is bekend: `spend`. Schat niet.
-10. De variant die won gaat Git in met `promote` in een checkout die al bestaat.
+10. Gebruik `promote --dest` om de gekozen variant in een map te materialiseren, of `promote --git` om een commit in een bestaande Git-worktree te maken.
 
 Identificatieprefix: 8 tot 64 hexadecimale tekens, zonder dubbelzinnigheid.
 

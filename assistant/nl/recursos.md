@@ -1,6 +1,6 @@
 # Middelen
 
-Iemand die ACVC nog nooit zag, heeft één zin nodig vóór deze namen. ACVC bewaart de pogingen die geen commit mogen worden. Elke poging is het idee, de bestanden en de getallen. De pogingen die niemand op elk getal heeft verslagen, dingen nog mee. `promote` kopieert de goedgekeurde bestanden naar een Git-checkout die al bestaat. De namen hieronder zijn die van de commando's en de JSON.
+Iemand die ACVC nog nooit zag, heeft één zin nodig vóór deze namen. ACVC bewaart de pogingen die geen commit mogen worden. Elke poging is het idee, de bestanden en de getallen. De pogingen die niemand op elk getal heeft verslagen, dingen nog mee. `promote --dest` materialiseert de goedgekeurde bestanden in een map; `--git` maakt ook een commit in een bestaande Git-worktree. De namen hieronder zijn die van de commando's en de JSON.
 
 ## Wat een hypothese is
 
@@ -57,7 +57,7 @@ Schrijven:
 - `reject --reason "..."` — een expliciete daad. Het motief blijft in de graaf.
 - `spend --tokens N` — een apart boek. Het gaat niet in de hash, het is geen maat en het vergrendelt `record` niet. Nul tokens wordt geweigerd.
 - `materialize` — kopieert de hypothese naar een map.
-- `promote` — legt de winnende variant in een checkout die al bestaat, of in een map. Hij doet geen merge.
+- `promote` — `--dest` materialiseert de winnende variant in een map; `--git` vereist een Git-worktree en maakt een commit. Geen van beide modi doet een merge of verwijdert doelpaden die in de variant ontbreken.
 - `pack` — verdicht koude blobs. Hij verandert de lezing van status en record niet.
 
 Viewers, allemaal roepen ze het uitvoerbare bestand aan:

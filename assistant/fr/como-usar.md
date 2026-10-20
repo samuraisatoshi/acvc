@@ -11,7 +11,7 @@ Les étapes ci-dessous utilisent les noms des commandes. Une tentative est une h
 7. Deux mesures concrètes : `compare`.
 8. L'hypothèse est morte pour un motif connu : `reject --reason`. Sans motif, ne rejetez pas. La lecture dit déjà que le motif n'a pas été enregistré.
 9. La session a dépensé des jetons et ce nombre est connu : `spend`. N'estimez pas.
-10. La variante qui a gagné entre dans Git avec `promote` dans un checkout qui existe déjà.
+10. Utilisez `promote --dest` pour matérialiser la variante choisie dans un dossier, ou `promote --git` pour créer un commit dans une worktree Git existante.
 
 Préfixe d'identifiant : 8 à 64 caractères hexadécimaux, sans ambiguïté.
 

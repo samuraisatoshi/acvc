@@ -24,7 +24,7 @@ Two hypotheses, `a` and `b`. Two numbers: `m1`, where larger is better, and `m2`
 
 The shared operators live in [AcvcRules.tla](specs/frontier/AcvcRules.tla). A measurement dominates another when every number is at least as good and one number is strictly better. A hypothesis offers the complete measurements that are not strictly worse than another measurement of the same hypothesis. A rejected hypothesis offers nothing.
 
-`promote` is outside the model. Copying files into Git does not change who still competes.
+`promote` is outside the model. Materializing files with `--dest` or creating a commit with `--git` does not change who still competes.
 
 ## The actions
 
@@ -101,4 +101,4 @@ The numbers are the ones in the README and in `acvc assistant`. Residuals in cas
 
 ## Left out
 
-File hashes, the pack, the language of the sentences, the viewers, and anything about a remote. `promote` copies an approved tree into a Git checkout and does not move these states.
+File hashes, the pack, the language of the sentences, the viewers, and anything about a remote. `promote --dest` materializes an approved tree; `--git` also creates a commit. Neither mode moves these states.

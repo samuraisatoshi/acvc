@@ -2,7 +2,7 @@
 
 Git hoort de poging te krijgen die een persoon goedkeurt. Een code-agent probeert veel versies van dezelfde wijziging, gaat terug, verandert van gedachte en vergeet de sessie. Als elke mislukte poging een commit wordt, vult de repository zich en verdwaalt de volgende agent in die geschiedenis.
 
-ACVC legt elke poging vast: het idee, de bestanden en de getallen. Je ziet welke pogingen nog meedingen. `promote` kopieert de goedgekeurde bestanden naar een Git-checkout die al bestaat. ACVC doet geen merge en vervangt de Git-geschiedenis niet.
+ACVC legt elke poging vast: het idee, de bestanden en de getallen. Je ziet welke pogingen nog meedingen. `promote --dest` materialiseert de goedgekeurde bestanden in een map; `--git` maakt ook een commit in een bestaande Git-worktree. ACVC doet geen merge en vervangt de Git-geschiedenis niet.
 
 Als je ACVC uitlegt aan iemand die het nog nooit zag, begin dan daarmee. De namen hieronder zijn de namen die de commando's gebruiken.
 

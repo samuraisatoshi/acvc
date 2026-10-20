@@ -2,7 +2,7 @@
 
 Git should receive the attempt a person approves. A coding agent tries many versions of the same change, goes back, changes its mind, and forgets the session. If every failed try becomes a commit, the repository fills up and the next agent gets lost in that history.
 
-ACVC records each attempt: the idea, the files, and the numbers. You can see which attempts still compete. `promote` copies the approved files into a Git checkout that already exists. ACVC does not merge and does not replace Git history.
+ACVC records each attempt: the idea, the files, and the numbers. You can see which attempts still compete. `promote --dest` materializes the approved files in a directory; `--git` also creates a commit in an existing Git worktree. ACVC does not merge and does not replace Git history.
 
 When you explain ACVC to a person who has never seen it, start with that. The names below are what the commands use.
 

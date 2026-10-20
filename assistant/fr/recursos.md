@@ -1,6 +1,6 @@
 # Ressources
 
-Une personne qui n'a jamais vu ACVC a besoin d'une phrase avant ces noms. ACVC garde les tentatives qui ne doivent pas devenir des commits. Chaque tentative est l'idée, les fichiers et les nombres. Les tentatives que personne n'a battues sur tous les nombres restent en concurrence. `promote` copie les fichiers approuvés dans un checkout Git qui existe déjà. Les noms ci-dessous sont ceux qu'utilisent les commandes et le JSON.
+Une personne qui n'a jamais vu ACVC a besoin d'une phrase avant ces noms. ACVC garde les tentatives qui ne doivent pas devenir des commits. Chaque tentative est l'idée, les fichiers et les nombres. Les tentatives que personne n'a battues sur tous les nombres restent en concurrence. `promote --dest` matérialise les fichiers approuvés dans un dossier ; `--git` crée aussi un commit dans une worktree Git existante. Les noms ci-dessous sont ceux qu'utilisent les commandes et le JSON.
 
 ## Ce qu'est une hypothèse
 
@@ -57,7 +57,7 @@ Lecture, avant d'agir :
 - `reject --reason "..."` — acte explicite. Le motif reste dans le graphe.
 - `spend --tokens N` — livre à part. Il n'entre pas dans le hash, ce n'est pas une métrique et il ne verrouille pas `record`. Zéro jeton est refusé.
 - `materialize` — copie l'hypothèse dans un dossier.
-- `promote` — dépose la variante gagnante dans un checkout qui existe déjà, ou dans un dossier. Il ne fait pas de merge.
+- `promote` — `--dest` matérialise la variante gagnante dans un dossier ; `--git` exige une worktree Git et crée un commit. Aucun mode ne fait de merge ni ne supprime les chemins absents de la variante.
 - `pack` — compacte les blobs froids. Il ne change pas la lecture de status ni de record.
 
 Visualiseurs, tous appellent l'exécutable :

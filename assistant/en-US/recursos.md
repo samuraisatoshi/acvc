@@ -1,6 +1,6 @@
 # Resources
 
-A person who has never seen ACVC needs one sentence before these names. ACVC keeps the attempts that should not become commits. Each attempt is the idea, the files, and the numbers. The attempts nobody has beaten on every number still compete. `promote` copies the approved files into a Git checkout that already exists. The names below are what the commands and the JSON use.
+A person who has never seen ACVC needs one sentence before these names. ACVC keeps the attempts that should not become commits. Each attempt is the idea, the files, and the numbers. The attempts nobody has beaten on every number still compete. `promote --dest` materializes the approved files in a directory; `--git` also creates a commit in an existing Git worktree. The names below are what the commands and the JSON use.
 
 ## What a hypothesis is
 
@@ -57,7 +57,7 @@ Write:
 - `reject --reason "..."` — an explicit act. The motive stays in the graph.
 - `spend --tokens N` — a side ledger. It does not enter the hash, it is not a metric, and it does not lock `record`. Zero tokens is refused.
 - `materialize` — copies the hypothesis into a folder.
-- `promote` — deposits the winning variant into a checkout that already exists, or into a folder. It does not merge.
+- `promote` — `--dest` materializes the winning variant in a folder; `--git` requires a Git worktree and creates a commit. Neither mode merges or removes destination paths absent from the variant.
 - `pack` — compacts cold blobs. It does not change the reading of status or record.
 
 Viewers, all of them call the executable:

@@ -2,7 +2,7 @@
 
 Git powinien dostać próbę, którą osoba zatwierdza. Agent kodu próbuje wielu wersji tej samej zmiany, cofa się, zmienia zdanie i zapomina sesję. Jeśli każda nieudana próba staje się commitem, repozytorium się zapełnia, a następny agent gubi się w tej historii.
 
-ACVC zapisuje każdą próbę: pomysł, pliki i liczby. Widać, które próby wciąż konkurują. `promote` kopiuje zatwierdzone pliki do checkoutu Gita, który już istnieje. ACVC nie robi merge i nie zastępuje historii Gita.
+ACVC zapisuje każdą próbę: pomysł, pliki i liczby. Widać, które próby wciąż konkurują. `promote --dest` materializuje zatwierdzone pliki w katalogu; `--git` tworzy też commit w istniejącym drzewie roboczym Gita. ACVC nie robi merge i nie zastępuje historii Gita.
 
 Gdy tłumaczysz ACVC osobie, która go nigdy nie widziała, zacznij od tego. Nazwy poniżej to te, których używają polecenia.
 

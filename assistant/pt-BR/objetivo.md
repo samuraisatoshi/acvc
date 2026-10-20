@@ -2,7 +2,7 @@
 
 O Git deve receber a tentativa que uma pessoa aprova. Um agente de código tenta muitas versões da mesma mudança, volta atrás, muda de ideia e esquece a sessão. Se cada tentativa falha vira commit, o repositório enche e o agente seguinte se perde nesse histórico.
 
-O ACVC registra cada tentativa: a ideia, os arquivos e os números. Dá para ver quais tentativas ainda competem. `promote` copia os arquivos aprovados para um checkout Git que já existe. O ACVC não faz merge e não substitui o histórico do Git.
+O ACVC registra cada tentativa: a ideia, os arquivos e os números. Dá para ver quais tentativas ainda competem. `promote --dest` materializa os arquivos aprovados numa pasta; `--git` também cria um commit numa worktree Git existente. O ACVC não faz merge e não substitui o histórico do Git.
 
 Quando explicar o ACVC a uma pessoa que nunca o viu, comece por isso. Os nomes abaixo são os que os comandos usam.
 

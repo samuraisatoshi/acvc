@@ -24,7 +24,7 @@ Duas hipóteses, `a` e `b`. Dois números: `m1`, em que o maior é melhor, e `m2
 
 Os operadores comuns estão em [AcvcRules.tla](specs/frontier/AcvcRules.tla). Uma medição domina outra quando todo número é pelo menos tão bom e um número é estritamente melhor. Uma hipótese oferece as medições completas que não são estritamente piores que outra medição da mesma hipótese. Uma hipótese rejeitada não oferece nada.
 
-`promote` fica fora do modelo. Copiar arquivos para o Git não muda quem ainda compete.
+`promote` fica fora do modelo. Materializar arquivos com `--dest` ou criar um commit com `--git` não muda quem ainda compete.
 
 ## As ações
 
@@ -101,4 +101,4 @@ Os números são os do README e do `acvc assistant`. Os resíduos do caso A est�
 
 ## O que ficou de fora
 
-Hash dos arquivos, o pack, o idioma das frases, os visores e qualquer coisa de remoto. `promote` copia a árvore aprovada para um checkout Git e não move estes estados.
+Hash dos arquivos, o pack, o idioma das frases, os visores e qualquer coisa de remoto. `promote --dest` materializa uma árvore aprovada; `--git` também cria um commit. Nenhum modo move estes estados.

@@ -6,7 +6,7 @@ O ACVC (Agent Code Variant Control) é o lugar em que um agente de código guard
 
 Um agente testa muitas versões da mesma mudança. Colocar cada tentativa que falhou no Git enche o repositório, e o agente seguinte se perde nesse histórico. O ACVC registra cada tentativa como uma hipótese: a ideia, os arquivos e a medição. Você vê quais tentativas ainda competem. O Git recebe uma árvore, a que você aprova.
 
-`acvc promote` copia essa árvore aprovada para um checkout Git que já existe. As outras tentativas ficam em `.acvc`. O ACVC não faz merge de branches e não substitui o histórico do Git.
+`acvc promote --dest` materializa essa árvore aprovada numa pasta. `--git` exige uma worktree Git, materializa e adiciona os arquivos e cria um commit. As outras tentativas ficam em `.acvc`. Nenhum modo faz merge, limpa o destino ou remove caminhos ausentes da hipótese.
 
 Uma pessoa usa o mesmo registro. Pesquisadores, desenvolvedores e engenheiros de software comparam abordagens com os mesmos comandos. A leitura é `--format text`, `acvc tui` ou `acvc web`. Um agente chama a CLI ou o servidor MCP `acvc mcp`.
 
@@ -20,7 +20,7 @@ A regra de quais tentativas ainda competem foi conferida com o TLC. O modelo, a 
 - Uma **campanha** é uma pergunta, e os números com que você vai comparar as tentativas.
 - Uma **medição** são esses números escritos para uma tentativa. Os comandos chamam isso de ensaio, ou de score.
 - A **fronteira** são as tentativas que ninguém superou em todos os números. Duas tentativas podem continuar as duas.
-- **Promote** copia a tentativa que você aprova para um checkout Git que já existe. As outras ficam fora do Git.
+- **Promote** materializa a tentativa aprovada com `--dest`; `--git` também cria um commit numa worktree Git existente. As outras ficam fora do Git.
 
 ## Instalar
 
@@ -95,7 +95,7 @@ acvc --format text reject --variant <id> --reason "a série diverge no extremo"
 
 Se uma tentativa saiu da lista e você não a rejeitou, a leitura diz quem venceu e que o motivo não foi escrito.
 
-`promote` copia a tentativa que você aprova para um checkout Git que já existe. Esse é o commit do qual você estava afastando os experimentos. As outras tentativas ficam em `.acvc`.
+`promote --dest` materializa a tentativa aprovada numa pasta. `promote --git` faz o mesmo numa worktree Git existente, adiciona os arquivos e cria o commit do qual você estava afastando os experimentos. Nenhum modo remove do destino caminhos ausentes da hipótese. As outras tentativas ficam em `.acvc`.
 
 ```bash
 acvc --format text promote --variant <id> --git <checkout>
@@ -109,17 +109,17 @@ O [container-use](https://github.com/dagger/container-use) (Dagger) dá a um age
 
 O container-use cria um environment: um container Dagger, uma worktree e um branch. Os comandos rodam nesse container. As mudanças de arquivo caem nesse branch. O histórico de operações e o estado do container ficam em Git notes. Você inspeciona com `container-use log`, `diff` e `checkout`, e aceita o trabalho com `merge` (fica com os commits do environment) ou `apply` (deixa o diff preparado e escreve o seu commit). Um environment que falhou pode ser apagado. Vários agentes podem trabalhar ao mesmo tempo porque cada um tem o próprio container e o próprio branch.
 
-O ACVC começa com uma pergunta e uma primeira versão dos arquivos (`seed`): o que você acredita, o que está supondo, o que espera conseguir e os arquivos. As versões seguintes são `record`. A aresta diz que tipo de passo foi: `mutate` muda os arquivos, `revert` volta a uma ideia anterior, `revise_premise` muda a própria crença, `synthesize` junta duas ou mais tentativas. Aí você escreve os números. O Git recebe arquivos só quando você faz `promote` da tentativa que aprova.
+O ACVC começa com uma pergunta e uma primeira versão dos arquivos (`seed`): o que você acredita, o que está supondo, o que espera conseguir e os arquivos. As versões seguintes são `record`. A aresta diz que tipo de passo foi: `mutate` muda os arquivos, `revert` volta a uma ideia anterior, `revise_premise` muda a própria crença, `synthesize` junta duas ou mais tentativas. Aí você escreve os números. O Git recebe um commit só quando você executa `promote --git` para a tentativa aprovada.
 
 ### Comparação
 
 | Pergunta | ACVC | container-use |
 | --- | --- | --- |
 | O que é uma tentativa? | Uma versão dos arquivos, a frase que diz o que você acredita, e como ela se liga à versão anterior | Um environment: um container mais um branch Git |
-| Onde ficam as outras tentativas? | Em `.acvc`, até você copiar a que aprova para um checkout Git | Em branches de environment, com commits e Git notes |
+| Onde ficam as outras tentativas? | Em `.acvc`; só a aprovada é materializada com `--dest` ou gravada com `--git` | Em branches de environment, com commits e Git notes |
 | O que o histórico responde? | Quais medições ainda competem, e o motivo que você escreveu quando decidiu que uma tentativa acabou | Quais comandos rodaram, e o diff daquele branch |
 | Como se descarta? | `reject` com um motivo, ou a tentativa fica fora da lista do que ainda compete | Apaga o environment |
-| Como o trabalho escolhido entra no seu branch? | `promote --git` copia esses arquivos para um checkout que já existe | `merge` conserva os commits do environment, ou `apply` prepara o diff |
+| Como o trabalho escolhido entra no seu branch? | `promote --git` materializa e adiciona esses arquivos numa worktree existente e cria um commit | `merge` conserva os commits do environment, ou `apply` prepara o diff |
 | Quem executa o código? | Você. O ACVC guarda a árvore e os números que você informa | O agente executa comandos dentro do container |
 | O que isola a execução? | Nada. O workspace é um diretório que você já tem | O container e a worktree |
 | Para quem serve | Um pesquisador ou um engenheiro comparando abordagens medidas, com ou sem agente | Agentes em paralelo que não podem mexer no seu checkout |

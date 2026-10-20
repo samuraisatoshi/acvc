@@ -11,7 +11,7 @@ Kroki poniżej używają nazw poleceń. Hipoteza to jedna wersja plików i zdani
 7. Dwa konkretne pomiary: `compare`.
 8. Hipoteza umarła ze znanego motywu: `reject --reason`. Bez motywu nie odrzucaj. Odczyt już mówi, że motyw nie został zapisany.
 9. Sesja zużyła tokeny i ta liczba jest znana: `spend`. Nie szacuj.
-10. Wariant, który wygrał, wchodzi do Gita przez `promote` w checkoucie, który już istnieje.
+10. Użyj `promote --dest`, aby zmaterializować wybrany wariant w katalogu, albo `promote --git`, aby utworzyć commit w istniejącym drzewie roboczym Gita.
 
 Przedrostek identyfikatora: od 8 do 64 znaków szesnastkowych, bez niejednoznaczności.
 

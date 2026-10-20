@@ -1,6 +1,6 @@
 # Zasoby
 
-Osoba, która nigdy nie widziała ACVC, potrzebuje jednego zdania przed tymi nazwami. ACVC trzyma próby, które nie powinny stać się commitami. Każda próba to pomysł, pliki i liczby. Próby, których nikt nie pokonał na każdej liczbie, wciąż konkurują. `promote` kopiuje zatwierdzone pliki do checkoutu Gita, który już istnieje. Nazwy poniżej to te, których używają polecenia i JSON.
+Osoba, która nigdy nie widziała ACVC, potrzebuje jednego zdania przed tymi nazwami. ACVC trzyma próby, które nie powinny stać się commitami. Każda próba to pomysł, pliki i liczby. Próby, których nikt nie pokonał na każdej liczbie, wciąż konkurują. `promote --dest` materializuje zatwierdzone pliki w katalogu; `--git` tworzy też commit w istniejącym drzewie roboczym Gita. Nazwy poniżej to te, których używają polecenia i JSON.
 
 ## Czym jest hipoteza
 
@@ -57,7 +57,7 @@ Zapis:
 - `reject --reason "..."` — jawny czyn. Motyw zostaje w grafie.
 - `spend --tokens N` — osobna księga. Nie wchodzi do hasha, nie jest miarą i nie blokuje `record`. Zero tokenów jest odrzucane.
 - `materialize` — kopiuje hipotezę do folderu.
-- `promote` — składa zwycięski wariant w checkoucie, który już istnieje, albo w folderze. Nie robi merge.
+- `promote` — `--dest` materializuje zwycięski wariant w katalogu; `--git` wymaga drzewa roboczego Gita i tworzy commit. Żaden tryb nie robi merge ani nie usuwa z miejsca docelowego ścieżek nieobecnych w wariancie.
 - `pack` — zagęszcza zimne bloby. Nie zmienia odczytu status ani record.
 
 Podglądy, wszystkie wołają program:

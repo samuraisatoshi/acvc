@@ -11,7 +11,7 @@ Os passos abaixo usam os nomes dos comandos. Uma tentativa é uma hipótese. Uma
 7. Duas medidas concretas: `compare`.
 8. A hipótese morreu por um motivo conhecido: `reject --reason`. Sem motivo, não rejeite. A leitura já diz que o motivo não foi gravado.
 9. A sessão gastou tokens e esse número é conhecido: `spend`. Não estime.
-10. A variante que ficou vencedora entra no Git com `promote` num checkout que já existe.
+10. Use `promote --dest` para materializar a variante escolhida numa pasta, ou `promote --git` para criar um commit numa worktree Git existente.
 
 Prefixo de identificador: 8 a 64 caracteres hexadecimais, sem ambiguidade.
 

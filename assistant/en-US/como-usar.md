@@ -11,7 +11,7 @@ The steps below use the command names. An attempt is a hypothesis. A measurement
 7. Two concrete measurements: `compare`.
 8. The hypothesis died for a known motive: `reject --reason`. Without a motive, do not reject. The reading already says the motive was not recorded.
 9. The session spent tokens and that number is known: `spend`. Do not estimate.
-10. The variant that won enters Git with `promote` into a checkout that already exists.
+10. Use `promote --dest` to materialize the selected variant in a folder, or `promote --git` to create a commit in an existing Git worktree.
 
 Identifier prefix: 8 to 64 hexadecimal characters, unambiguous.
 
