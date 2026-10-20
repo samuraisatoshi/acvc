@@ -1,189 +1,346 @@
-# ACVC: hipóteses controladas por hash, e a decisão no Git
+# ACVC: memória de hipóteses para trabalho experimental em código
 
-Samuraisatoshi  
-2026  
-Correspondência: samuraisatoshi@cryptoworld.8shield.net
-
-Esta é uma descrição do sistema de software neste repositório. Não é um artigo com revisão por pares. Não relata estudo com usuários nem benchmark. A implementação é a fonte das afirmações sobre comportamento.
-
-## Se você ainda não viu o ACVC
-
-Um agente tenta muitas versões da mesma mudança. Colocar cada tentativa falha no Git enche o repositório, e o agente seguinte se perde nesse histórico. O ACVC registra cada tentativa: a ideia, os arquivos e a medição. Você vê quais tentativas ainda competem. O Git recebe uma árvore, a que você aprova, pelo `acvc promote`, num checkout que já existe. O ACVC não faz merge e não substitui o Git.
-
-O resto desta nota usa os nomes precisos. Uma hipótese é uma tentativa. Um ensaio é uma medição. A fronteira são as tentativas que ninguém superou em todos os números. Duas tentativas podem continuar as duas.
+Para quem ainda não conhece o ACVC: um agente produz tentativas, mede resultados
+e abandona caminhos. O ACVC preserva essa exploração fora do histórico Git.
+`acvc promote --dest` materializa os arquivos escolhidos; `--git` também cria um
+commit no checkout indicado.
 
 ## Resumo
 
-O ACVC (Agent Code Variant Control) é um armazenamento local de hipóteses sobre um corpo de código. Uma pessoa ou um agente pode experimentar muitas variantes. Cada variante tem premissa, pressupostos, intenção, relação com os pais e uma árvore de arquivos. A árvore é uma árvore de Merkle: um nó guarda o hash do filho, não os bytes do filho. Um arquivo que não mudou não é gravado de novo. O Git continua sendo o lugar em que a pessoa deposita a variante que decidiu conservar. A campanha nomeia as métricas. Um ensaio é uma medição completa. A fronteira guarda todo ensaio completo que nenhuma outra hipótese supera em todas as métricas. Uma perda na fronteira não é uma rejeição. A rejeição é um ato separado, e carrega um motivo.
+Agentes de código exploram alternativas, voltam atrás e modificam hipóteses
+durante uma sessão. O Git registra estados que alguém decidiu conservar, mas um
+commit não informa quais alternativas ainda competiam, como foram medidas ou
+por que uma delas foi abandonada [1, 2, 4].
 
-O desenho toma o armazenamento de objetos endereçados por conteúdo do Git [1, 2] e aponta para outro propósito. O hash do Git controla um snapshot que alguém decidiu registrar. O hash do ACVC controla uma hipótese que pode nunca ser essa decisão.
+O ACVC registra esse processo como uma campanha de hipóteses. Cada hipótese
+combina uma premissa, seus pressupostos, uma intenção, sua relação com os pais e
+uma árvore de arquivos. Ensaios acrescentam medições sem alterar sua identidade.
+A fronteira mantém as medições completas que não foram dominadas; uma rejeição
+permanece um ato separado e exige motivo explícito.
 
-## 1. O que é este trabalho
+O armazenamento é local e endereçado por conteúdo. Árvores de Merkle evitam
+gravar novamente arquivos idênticos [12], enquanto o Git continua responsável
+pela variante que será conservada. A regra da fronteira possui um modelo
+TLA+/TLC no repositório. Esta descrição não apresenta estudo com usuários nem
+avaliação de escala em grandes monorepositórios.
 
-Uma campanha é uma pergunta nomeada com um conjunto fixo de métricas. Cada métrica aponta para menor ou para maior. A primeira árvore de uma campanha é um seed. As árvores seguintes são records. A aresta diz que tipo de passo foi: `mutate` altera a árvore na mesma família de premissa, `revert` volta a uma ideia anterior, `revise_premise` substitui um pressuposto que falhou, e `synthesize` tem dois ou mais pais. A identidade de uma variante é um hash BLAKE3 [3] sobre uma codificação canônica do hash da árvore, dos pais, da aresta, da afirmação, dos pressupostos, da intenção e do agente. O nome da campanha, o relógio, as medições e qualquer gasto de tokens ficam fora dessa identidade. Pontuar uma variante não cria outra variante.
+## 1. Problema e escopo
 
-O armazenamento é um diretório `.acvc` ao lado do trabalho: um log append-only de blobs e árvores, um pack de blobs que já assentaram, e um índice SQLite com busca textual nas premissas. Quem lê usa o executável `acvc`. Não abre o banco.
+### 1.1 O que o commit não registra
 
-Quando uma variante é a que deve entrar na história, `promote` copia essa árvore para um checkout Git que já existe. As outras variantes ficam em `.acvc`.
+Um agente pode produzir muitas versões antes de chegar a uma mudança útil. Se
+cada tentativa vira commit, o histórico da decisão se mistura ao histórico da
+exploração. Se apenas a tentativa escolhida vira commit, desaparecem a premissa
+das demais, suas medições e o motivo do abandono. Estudos sobre programação
+exploratória e notebooks descrevem formas semelhantes de desordem [5–7].
 
-## 2. Motivação e os problemas que inspiraram o trabalho
+O problema tratado pelo ACVC não é recuperar uma versão antiga. É preservar a
+relação entre uma afirmação sobre o código, os arquivos que a materializam e a
+evidência usada para compará-la com outras afirmações.
 
-Três problemas se encontram.
+### 1.2 A pergunta do sistema
 
-O primeiro é para que serve o Git. O Git é um sistema de arquivos endereçável por conteúdo, com um grafo de commits por cima [1, 2]. Um commit é uma decisão registrada: esta árvore, estes pais, esta mensagem, esta pessoa. Perez De Rosso e Jackson mostraram que vários conceitos do Git não atingem os propósitos que os usuários de fato levam até ele [4]. A programação exploratória acrescenta um propósito para o qual o Git não foi construído. Cientistas de dados mantêm análises antigas vivas copiando arquivos, comentando código e segurando versões sem uso no mesmo buffer, porque um commit é pesado e definitivo demais para um pensamento que ainda se move [5]. Notebooks acumulam essa desordem; a história da exploração e a história que se publicaria são objetos diferentes [6, 7]. Um agente que experimenta dezenas de hipóteses numa sessão torna o desajuste mais nítido. A sessão acaba. Os commits feitos são as poucas árvores que alguém concordou em conservar. As premissas abandonadas somem, ou ficam enterradas num branch que ninguém pontua.
+Depois de várias tentativas, quais hipóteses ainda competem e por quê? A resposta
+precisa sobreviver à sessão que produziu as tentativas, sem transformar o Git
+num diário de experimentos.
 
-O segundo problema é a medição. Dois métodos de stitching, duas regras de integração ou dois armazenamentos atrás de uma API de restaurante não se ordenam por um único número. Um pode ser mais preciso e mais lento. A comparação multiobjetivo guarda o conjunto não dominado: os máximos de um conjunto de vetores [8]. Rastreadores de experimento como MLflow e Sacred registram execuções, parâmetros e métricas de experimentos computacionais [9, 10]. Eles tomam a execução como objeto. Aqui o objeto é a hipótese, e a execução é um ensaio preso a ela. Um ensaio que omite uma métrica está incompleto e fica fora da fronteira. Métricas não são misturadas entre ensaios para inventar uma melhor pontuação.
+### 1.3 Limite de responsabilidade
 
-O terceiro problema é o motivo. Dominação não é decisão. Uma hipótese pode sair da fronteira porque outro ensaio completo a supera em tudo, enquanto ninguém disse por que a perdedora foi abandonada. O ACVC mantém essa lacuna visível. O status diz quem venceu e que o motivo não foi gravado. Uma rejeição é uma frase humana, gravada uma vez para aquela variante. Agentes esquecem sessões. Um armazenamento que só guarda vencedores esquece a razão de uma derrota.
+O ACVC não executa testes, não cria ambientes isolados, não faz merge e não
+substitui o Git. Ele recebe arquivos e medições produzidos por ferramentas
+externas. Quando uma hipótese é escolhida, `promote` materializa seus arquivos
+num destino ou cria um commit numa worktree Git, conforme o modo solicitado.
 
-O container-use, do projeto Dagger, responde a um problema vizinho: um agente precisa de um container isolado e de um branch Git para que o trabalho em paralelo não colida com o checkout [11]. Isso é um ambiente de execução. Ele não nomeia uma premissa, não pontua uma campanha e não guarda uma fronteira não dominada. O ACVC não sobe um container. As duas ferramentas respondem a perguntas diferentes. A seção 6 lista os outros vizinhos. A seção 6.1 lê o Scion da Anthropic, que torna o commit barato num monorepo e deixa a escolha da tentativa fora desse commit [25].
+## 2. Modelo conceitual
 
-## 3. Métodos
+Uma **campanha** representa uma pergunta comparável. Ela declara previamente as
+métricas e a direção de cada uma: `higher` quando valores maiores são melhores,
+`lower` quando valores menores são melhores.
 
-### 3.1 Controle por hash, a partir do Git
+Uma **hipótese** reúne:
 
-O Git não guarda uma cópia nova do projeto a cada commit. Guarda objetos endereçados pelo hash do conteúdo. Um blob são os bytes de um arquivo. Uma árvore é uma lista de nomes, modos e hashes de blobs ou de outras árvores. Um commit guarda o hash de uma árvore, não os arquivos. Se um arquivo não mudou, a árvore nova repete o hash antigo do blob. Prefixos iguais de um diretório são compartilhados. Comparação e armazenamento seguem o hash. Os bytes do arquivo são lidos quando o hash falta, não porque uma versão nova foi declarada [1, 2]. A construção de Merkle é a forma mais antiga da mesma ideia: um pai autentica os filhos pelo hash dos hashes, de modo que uma subárvore intacta é um único valor [12].
+- premissa e pressupostos escritos em linguagem humana;
+- intenção do experimento e identidade do agente;
+- árvore de arquivos;
+- pais e relação com esses pais.
 
-O ACVC usa essa estrutura de controle para hipóteses.
+As relações são `seed`, `mutate`, `revert`, `revise_premise` e `synthesize`.
+Uma campanha possui uma origem. Uma mutação parte da hipótese corrente ou de um
+pai informado; uma revisão referencia pelo hash a hipótese cuja premissa está
+sendo revista; uma síntese tem dois ou mais pais. Como a relação entra na
+identidade, uma mutação e uma revisão da mesma árvore continuam sendo hipóteses
+distintas.
 
-Um arquivo entra no armazenamento como blob, etiquetado e hasheado com BLAKE3 [3]. Um diretório é um objeto árvore: nomes em ordem, cada um com modo, tipo e hash. O objeto árvore não contém o arquivo. Contém o hash que já nomeia o arquivo. A variante não contém a árvore. Contém o hash da árvore, mais a premissa e os hashes dos pais. A identidade é o hash desse registro canônico.
+Um **ensaio** mede uma hipótese. Pode ser completo ou incompleto e não participa
+da identidade da hipótese. Um novo ensaio não apaga os anteriores.
 
-Gravar uma mudança percorre o workspace e compara cada caminho com o índice da árvore pai. Um caminho limpo contribui o hash que já tem. Os bytes dele não são lidos e o blob não é escrito de novo. Só um caminho sujo ou novo é hasheado num blob novo. Uma subárvore igual não é carregada quando duas variantes são comparadas. O teste do desenho é o mesmo teste que o armazenamento de objetos do Git satisfaz: um irmão que não mudou não faz parte da escrita.
+Uma **rejeição** registra uma decisão e seu motivo. Ela não decorre
+automaticamente de uma medição pior. Essa separação impede que o sistema invente
+uma justificativa que ninguém forneceu.
 
-Isso é o contrário de copiar o projeto para uma pasta por ideia, e o contrário de colocar o arquivo inteiro dentro do registro da hipótese. O hash é o controle. Os bytes existem uma vez, sob esse hash.
+## 3. Semântica da fronteira
 
-Duas consequências seguem. Primeiro, uma campanha pode guardar muitas variantes de uma árvore grande sem copiar os arquivos intactos. Segundo, a premissa pode mudar com o hash da árvore estável, ou a árvore pode mudar com o texto da premissa estável. São hashes diferentes, porque a árvore e a afirmação entram no hash da variante. Uma medição não entra. A mesma variante pode carregar vários ensaios. O ensaio tem o próprio hash (o hash da variante, um nonce e o mapa de métricas). Pontuar não bifurca o código.
+Uma medição só entra na fronteira quando contém todas as métricas declaradas.
+Medições incompletas continuam no histórico, mas não participam da comparação.
 
-O hash histórico do Git foi SHA-1, depois acompanhado de SHA-256 no projeto Git. O ACVC usa BLAKE3 em todo objeto que cria. A ideia emprestada é o modelo de objetos, não a escolha da função.
+Uma medição domina outra quando não é pior em nenhuma métrica e é melhor em pelo
+menos uma [8, 16, 17]. A fronteira contém todas as medições completas que
+nenhuma outra domina. Duas alternativas podem permanecer simultaneamente: uma
+pode ser mais rápida enquanto a outra é mais precisa. Métricas de ensaios
+diferentes nunca são combinadas para produzir uma pontuação fictícia.
 
-### 3.2 A hipótese
+Dentro da mesma hipótese, um ensaio completo estritamente pior deixa de ser seu
+representante. Na campanha, permanecem todos os representantes não dominados.
 
-Um seed não tem pais. É a origem da campanha, e há uma origem. Uma mutação tem a variante atual do workspace como pai, a menos que quem chama nomeie outro. Revisar uma premissa registra qual pressuposto foi substituído; se quem chama não o nomeia, o pai é a afirmação revisada. Uma síntese nomeia pelo menos dois pais. A aresta faz parte do hash, então uma mutação e uma revisão de premissa da mesma árvore são variantes diferentes.
+O estado JSON usa quatro valores estáveis:
 
-A afirmação, os pressupostos e a intenção são strings na identidade. Não são comentários ao lado de um commit. O recall busca essas strings. O índice textual é o SQLite FTS5 [13].
+- `on_frontier`: existe uma medição completa não dominada;
+- `superseded`: outra hipótese apresenta uma medição dominante;
+- `rejected`: alguém registrou explicitamente o encerramento e seu motivo;
+- `unmeasured`: ainda não existe ensaio completo.
 
-### 3.3 Campanha, ensaios e fronteira
+Sair da fronteira não equivale a morrer. Sem rejeição, a leitura pode mostrar
+quem venceu e em qual métrica, mas deve declarar que o motivo não foi registrado.
 
-A campanha é um esquema: nomes de métrica e uma direção, menor ou maior. Um ensaio está completo quando carrega todos os nomes. A fronteira é o conjunto de ensaios completos que não são estritamente dominados. A dominação usa os máximos clássicos de um conjunto de vetores [8]: um ensaio domina outro quando não é pior em nenhuma métrica e é melhor em pelo menos uma. Dois ensaios que trocam precisão por custo permanecem. Dentro de uma variante, um ensaio completo estritamente pior é descartado. Na campanha, todo ensaio completo não dominado que restar é informado. A fronteira não escolhe um único vencedor e não preenche uma métrica faltante com outro ensaio.
+## 4. Identidade e armazenamento
 
-O spend, um livro-caixa lateral de tokens, é append-only e não é métrica. Não entra no hash da variante e não move a fronteira.
+### 4.1 Controle por hash
 
-### 3.4 Rejeição
+O Git guarda blobs, árvores e commits endereçados pelo conteúdo [1, 2]. Uma
+árvore referencia hashes; não contém novamente os bytes de cada arquivo. O ACVC
+aplica o mesmo princípio a hipóteses, usando BLAKE3 [3].
 
-A dominação não escreve rejeição. `reject` guarda um motivo para uma variante. Até esse motivo existir, uma variante que saiu da fronteira é descrita como superada, com o vencedor e a métrica, e o texto diz que o motivo não foi gravado. Os valores de status no JSON são códigos fixos (`on_frontier`, `superseded`, `rejected`, `unmeasured`). A prosa segue o idioma do computador.
+A identidade de uma hipótese é o hash de uma representação canônica que inclui
+árvore, pais, relação, premissa, pressupostos, revisão, intenção e agente. Nome
+da campanha, data, medições, consumo de tokens e caminho do workspace ficam fora
+desse hash. Assim, pontuar uma hipótese não cria outra hipótese.
 
-A revisão explícita de premissa se inspira no hábito, na filosofia da ciência, de tratar um pressuposto que falhou como mudança de hipótese, e não como edição silenciosa [14]. O software não testa falseabilidade. Só recusa deixar essa mudança escondida numa mutação comum: a aresta é outra, e o hash segue.
+### 4.2 Árvores e escrita incremental
 
-### 3.5 O que não entra no hash
+Os arquivos formam uma árvore de Merkle [12]. Um arquivo entra como blob; um
+diretório referencia nomes, modos, tipos e hashes. Na gravação, um caminho limpo
+reutiliza seu hash. Apenas caminhos novos ou alterados exigem leitura e novo
+blob. Subárvores idênticas podem ser comparadas pelo hash.
 
-O relógio, o nome da campanha, o arranjo do pack e o caminho do workspace não fazem parte da identidade da variante. Mover uma campanha de um diretório para outro não renomeia a variante. Duas campanhas só podem guardar o mesmo hash de variante se guardarem a mesma hipótese; a campanha é um rótulo no índice, não um campo no hash.
+O armazenamento fica em `.acvc/`. Na escrita normal, blobs e árvores novos são
+anexados a `objects.log`. `pack` move blobs frios para `objects.pack` e reescreve
+o log quente; árvores permanecem no log. O SQLite guarda campanhas, variantes,
+pais, ensaios, rejeições, gastos e o índice textual FTS5 [13]. Interfaces não
+devem abrir esses arquivos diretamente; o contrato público é o executável.
 
-### 3.6 A costura com o Git
+A varredura ignora diretórios fixos, como `.git`, `.acvc`, `target` e
+`node_modules`, e aceita exclusões em `.acvcignore`. O `.gitignore` não define a
+identidade de uma hipótese.
 
-`promote` materializa a árvore escolhida num checkout Git que quem chama já tem. O ACVC não faz commit, não reescreve história e não substitui o remoto. O Git continua significando o que significava: o registro do que uma pessoa escolheu conservar [1]. A busca fica no armazenamento por hash até essa escolha.
+## 5. Fluxo operacional
 
-## 4. Literatura que sustenta o desenho
+Uma sessão começa com leitura:
 
-O modelo de objetos é o do Git, como documentado por Chacon e Straub [1] e como construído por Torvalds em 2005 [2]: blobs, árvores e hashes como nomes dos objetos. Merkle dá a razão de uma árvore de hashes detectar uma folha alterada sem guardar a folha no pai [12]. BLAKE3 é o hash concreto [3].
+1. `context` apresenta a campanha e suas relações;
+2. `frontier` mostra o que ainda compete;
+3. `why`, `recall`, `compare` e `file-diff` explicam hipóteses existentes.
 
-A crítica de usar o commit como unidade de exploração é empírica e conceitual. O Variolite estudou cientistas de dados versionando trechos por cópia e comentário porque o controle de versão convencional briga com uma alternativa de vida curta [5]. Rule, Tabard e Hollan separaram exploração e explicação em notebooks [6]. Head, Hohman, Barik, Drucker e DeLine mostraram como a história do notebook vira uma desordem que o autor administra à mão [7]. Perez De Rosso e Jackson argumentaram que a dificuldade do Git é em parte um desajuste entre conceitos e propósitos, e redesenharam os conceitos no Gitless [4]. O ACVC não redesenha o Git. Recusa colocar a busca dentro dos conceitos do Git.
+Quando a campanha não existe, o usuário declara as métricas e registra a origem
+com `seed`. Depois de alterar arquivos, usa `record` para criar uma hipótese
+ligada ao pai. `score` acrescenta uma medição real; `reject` encerra uma hipótese
+somente quando existe um motivo conhecido.
 
-Modelos de proveniência, em particular o W3C PROV [15], descrevem entidades, atividades e agentes em geral. O ACVC é uma instância estreita: uma árvore de código, uma hipótese, um ensaio e uma string de agente. Não se apresenta como formato de intercâmbio de proveniência.
+O consumo de tokens é um livro-caixa lateral feito por `spend`. Ele não é
+métrica, orçamento ou parte da identidade e deve ser observado, não estimado.
 
-O manual de Pareto é a fonte econômica da fronteira não dominada [16]. O algoritmo de que o ACVC depende é o dos máximos de um conjunto de vetores [8]. A síntese de Deb sobre otimização multiobjetivo é o enquadramento moderno de manual [17]. Os sistemas de rastreamento de experimento mostraram que execuções devem ser consultáveis [9, 10]. O ACVC prende a execução consultável a uma hipótese endereçada por conteúdo, em vez de a um arquivo de parâmetros numa linha de banco.
+Ao final, `promote --dest` materializa os arquivos da hipótese numa pasta.
+`promote --git` exige uma worktree Git, materializa e adiciona esses arquivos e
+cria um commit. Nenhum dos modos limpa o destino ou remove caminhos ausentes da
+hipótese. A operação não faz merge nem reescreve o histórico de hipóteses.
 
-O relato de Popper sobre conjectura e refutação é inspiração só para `revise_premise` [14]. Linhas de produto orientadas a features também falam em variantes [18]. Essas variantes são features de uma família de produto. Uma variante ACVC é uma hipótese sob teste. As palavras colidem; os objetos não.
+## 6. Interfaces e fonte de verdade
 
-## 5. O que torna o projeto interessante
+A CLI define o contrato do produto. A saída padrão é JSON; `--format text`
+produz frases para pessoas. Os valores de estado permanecem estáveis entre
+idiomas.
 
-O movimento interessante é a divisão de trabalho com o Git, usando o próprio truque do Git. O Git mostrou que uma versão pode ser o hash de uma árvore, e que uma árvore pode ser hashes de arquivos, de modo que um arquivo intacto não é escrito de novo. O ACVC conserva essa economia e muda o substantivo. O hash nomeia uma hipótese. Os bytes do arquivo ficam no armazenamento de blobs, compartilhados entre hipóteses. O Git recebe uma árvore só como depósito.
+O servidor MCP e a página web delegam comandos ao executável corrente; os
+visores de editor executam o binário configurado. A TUI chama diretamente o
+mesmo núcleo de aplicação. Essas interfaces não mantêm outra implementação de
+identidade, fronteira ou armazenamento.
 
-Quatro consequências são incomuns juntas.
+Quando documentação e executável discordarem, o executável é a autoridade
+comportamental. `acvc assistant` expõe o contrato operacional instalado.
 
-A fronteira pode conter mais de uma hipótese viva. Um stitching mais rápido e um stitching mais limpo permanecem se nenhum domina estritamente o outro.
+## 7. Evidência disponível
 
-Uma perda não é uma morte. O sistema pode dizer quem venceu sem inventar um motivo. O motivo aparece só quando uma pessoa o escreve.
+O repositório contém um modelo TLA+/TLC para a regra da fronteira. Essa evidência
+se limita às propriedades do modelo nos estados explorados; não demonstra
+usabilidade, adoção ou desempenho industrial.
 
-Um agente pode emitir muitas variantes numa sessão sem um commit por palpite. A sessão pode ser reconstruída a partir de premissas e ensaios depois que a conversa acabou.
+Os exemplos exercitam campanhas com uma e várias métricas, medições
+incomparáveis, rejeição e promoção. Demonstram o fluxo esperado, mas não
+constituem estudo controlado.
 
-O mesmo armazenamento serve a um pesquisador humano comparando regras de integração e a um engenheiro comparando um armazenamento SQL com um banco de documentos. Os comandos não mudam. As métricas mudam.
+| Afirmação | Evidência disponível | Não estabelecido |
+| --- | --- | --- |
+| A fronteira preserva alternativas não dominadas | Modelo TLA+/TLC e testes | Compreensão por usuários novos |
+| A identidade é estável para o mesmo conteúdo canônico | Definição e implementação | Desempenho em repositórios extremos |
+| Interfaces compartilham o executável | Arquitetura declarada | Ausência futura de divergência |
+| Hipóteses ajudam a próxima sessão | Casos de uso do projeto | Ganho em estudo longitudinal |
 
-## 6. Projetos equivalentes e vizinhos
+## 8. Relação com outros sistemas
 
-Nenhum destes é um substituto. Cada um possui um propósito. O ACVC possui a hipótese pontuada e os blobs compartilhados. Onde um projeto já guarda conteúdo por hash, a diferença é o que o hash pode significar.
+Os sistemas abaixo atuam em etapas vizinhas e podem parecer substitutos. A
+comparação delimita responsabilidades: controlar versões, isolar execuções e
+rastrear experimentos não equivalem a preservar hipóteses concorrentes.
 
 | Projeto | O que guarda | Onde para, em relação ao ACVC |
 | --- | --- | --- |
-| Git [1, 2] | Blobs, árvores e commits endereçados por conteúdo | O commit é uma decisão. Hipóteses abandonadas não são uma fronteira. |
-| Gitless [4] | Uma camada conceitual mais simples sobre o Git | Repara os conceitos do Git. Não acrescenta premissas nem ensaios. |
-| container-use [11] | Um container, uma worktree e um branch por agente, mais o histórico de comandos em Git notes | Isola a execução. Não pontua hipóteses nem compartilha blobs intactos numa campanha. |
-| Scion [25] | Um log de changesets no servidor, para um monorepo enorme: arquivos mudados contra o primeiro pai, blobs endereçados por conteúdo, blame e histórico derivados | Barateia colocar uma mudança no histórico e fazer o checkout. Uma tentativa que falhou, se entrar como changeset, continua no histórico. Não pontua uma hipótese. |
-| Variolite [5] | Variantes locais leves dentro do editor | Variantes são trechos para exploração. Não são uma campanha Merkle com fronteira. |
-| DVC [19] | Dados, modelos e pipelines, com hashes, sobre o Git | A execução do pipeline é o objeto. A aresta da hipótese e o conjunto não dominado de variantes de código não são. |
-| MLflow [9] | Parâmetros, métricas e artefatos de execuções | A execução é uma linha. A árvore de código não é uma hipótese Merkle, e a dominação não é o status. |
-| Sacred [10] | Configuração, fonte e resultados de experimentos computacionais | Escrituração de uma execução. Sem aresta de revisão de premissa, sem árvore de blobs compartilhada entre hipóteses. |
-| Weights & Biases [20] | Rastreamento de experimentos hospedado | A mesma família do MLflow: execuções e gráficos, não um hash local de uma hipótese. |
-| Jupyter [21] | Um notebook narrativo e suas saídas | A história é o notebook. Subárvores iguais não são compartilhadas por hash entre análises alternativas. |
-| Unison [22] | Uma linguagem de programação endereçada por conteúdo | O código é guardado por hash. O hash nomeia uma definição, não uma hipótese medida numa campanha. |
-| Nix [23] | Builds reproduzíveis endereçados pelo hash de uma derivação | O hash controla um build. Não registra qual premissa ainda não foi superada. |
-| Jujutsu [24] | Um sistema de controle de versão compatível com Git, com outro modelo de trabalho | Continua sendo uma história de decisões. |
-| Linhas de produto de software [18] | Variantes de feature de um produto | Uma feature não é uma hipótese sob um esquema de métricas. |
+| Git [1, 2] | Blobs, árvores e commits endereçados por conteúdo | O commit registra uma decisão; hipóteses abandonadas não formam uma fronteira. |
+| Gitless [4] | Camada conceitual sobre o Git | Reorganiza conceitos do Git, sem premissas ou ensaios. |
+| container-use [11] | Container, worktree e branch por agente, com comandos em Git notes | Isola execução; não pontua hipóteses. |
+| Scion [25] | Changesets e blobs endereçados por conteúdo num servidor para monorepo | Barateia histórico e checkout; não mantém uma fronteira de hipóteses medidas. |
+| Variolite [5] | Variantes leves dentro do editor | Explora trechos, sem campanha Merkle ou fronteira. |
+| DVC [19] | Dados, modelos e pipelines sobre o Git | A execução do pipeline é central; não há aresta de hipótese nem fronteira de código. |
+| MLflow [9] | Parâmetros, métricas e artefatos de execuções | A execução é central; a árvore não é uma hipótese Merkle. |
+| Sacred [10] | Configuração, fonte e resultados | Registra execução, sem revisão de premissa ou fronteira. |
+| Weights & Biases [20] | Experimentos e gráficos hospedados | Rastreia execuções, não um hash local de hipótese. |
+| Jupyter [21] | Notebook narrativo e saídas | Não compartilha subárvores por hash entre alternativas. |
+| Unison [22] | Definições de linguagem endereçadas por conteúdo | O hash nomeia uma definição, não uma hipótese medida. |
+| Nix [23] | Builds reproduzíveis por derivação | O hash controla build, não premissa e fronteira. |
+| Jujutsu [24] | Controle de versão compatível com Git | Mantém uma história de mudanças, não uma campanha experimental. |
+| Linhas de produto [18] | Variantes de features | Uma feature não é hipótese sob um esquema de métricas. |
 
-### 6.1 Scion
+### 8.1 Scion e ACVC: da exploração ao histórico
 
-Em 13 de outubro de 2026 a Anthropic descreveu o Scion em [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) [25]. Os números abaixo saem desse post. Este repositório não os mediu.
+O [Scion](https://www.anthropic.com/engineering/redesigning-source-control) é um sistema interno da Anthropic para um monorepo grande e uma carga elevada de
+mudanças produzidas por agentes [25]. Seu modelo cliente-servidor trata
+changesets, consultas e checkouts esparsos. Os números publicados — inclusive
+30.401 merges em 9 de setembro de 2026, histórico de quase 100 GB e `status` de
+19 ms — pertencem ao relato da Anthropic; este repositório não os mediu.
 
-O problema é o volume. Agentes produzem mais mudanças do que um histórico pensado para pessoas consegue consultar sem ficar caro. O post relata cerca de 2.500 merges por dia em maio de 2026 e 30.401 no dia 9 de setembro de 2026. O histórico de `main` tem quase 100 GB. A integração contínua faz checkout do repositório da ordem de 25 milhões de vezes por dia. Nos tempos que publicaram, um commit de desenvolvedor passa de 1,4 s para 1,1 s, e `status` passa de 3,9 s para 19 ms. O que encareceu foi ler e buscar o repositório. O tempo de registrar uma mudança quase não se moveu.
+O Scion aparece porque também discute source control para agentes e conteúdo por
+hash. O objeto central, porém, é outro: o Scion administra changesets do
+monorepo; o ACVC administra hipóteses experimentais, medições e rejeições. Essa
+diferença permite uma composição em vez de uma escolha entre produtos.
 
-O Scion é o servidor que eles puseram no lugar do Git nesse monorepo. O que entra no histórico é o conjunto de arquivos diferentes do pai. Quem pergunta o passado pergunta ao servidor. O ACVC fica antes dessa entrada. Cada tentativa é uma hipótese com uma medição, e permanece em `.acvc`. `promote` copia a árvore pedida para um checkout que já existe. Não pergunta se essa árvore ainda está na fronteira, e não pergunta se quem chamou é uma pessoa ou um agente. A fronteira informa a escolha. A escolha é de quem tem permissão para executar o comando. Quem chama pode ser um agente, pequeno ou um modelo grande, ou uma pessoa. Um agente que só registra e mede já participa do processo. O mesmo binário atende o terminal e o `acvc mcp`.
+O ACVC pode ocupar o plano de exploração. Agentes registram alternativas,
+acrescentam ensaios e mantêm fora do histórico principal as hipóteses ainda não
+escolhidas. A fronteira reduz o conjunto que exige decisão sem apagar resultados
+dominados ou rejeitados. O Scion pode ocupar o plano de integração: depois da
+escolha, recebe o changeset, sustenta consultas históricas, blame, checkouts
+esparsos e o volume de leitura do monorepo.
 
-Os dois fluxos usam esses mesmos comandos. Este repositório não tem cliente do Scion, e não mede qual fluxo um time escolhe. Se o checkout fosse o Scion, a árvore copiada seria uma mudança no histórico deles, um changeset.
+O valor conjunto está nessa passagem. O ACVC preserva a evidência que explica
+por que uma mudança foi escolhida; o Scion torna barata a operação sobre o
+histórico que recebeu essa mudança. Quando várias tentativas iriam para `main`,
+o ACVC pode evitar que a exploração inteira vire histórico. Quando uma tentativa
+já é a decisão, ela pode seguir diretamente ao source control. Em ambos os
+casos, o Scion resolve escala de repositório sem precisar decidir qual hipótese
+venceu, e o ACVC organiza a decisão sem precisar resolver checkout ou blame em
+escala extrema.
 
-Máquina a máquina. Um agente registra as versões e as medições. A fronteira é calculada a partir dessas medições. O mesmo agente, ou outro, lê a fronteira e chama `promote` quando a regra dele aponta uma árvore. As outras tentativas ficam em `.acvc`. Quando mais de uma hipótese continua sem ser superada, a campanha não escolhe. A regra é de quem chama o comando. O comando é o mesmo para um script curto e para um modelo grande.
+Essa composição ainda é arquitetural, não uma integração entregue por este
+repositório. O ACVC atual sabe materializar arquivos e criar commits Git; não há
+cliente Scion. Um uso conjunto precisa de uma camada externa que transforme a
+hipótese promovida em changeset do Scion. A seção 8.4 mostra onde essa passagem
+entra no fluxo e quais responsabilidades permanecem separadas.
 
-Máquina a máquina, com uma pessoa no meio. Os agentes continuam registrando e medindo, e continuam lendo uma fronteira que o programa calculou. A pessoa é quem chama `promote` ou `reject`. Uma rejeição é uma frase passada ao comando. Quem a escreve é a pessoa ou o agente que passa o argumento. O programa não inventa essa frase.
+### 8.2 container-use: isolamento de execuções
+
+O [container-use](https://github.com/dagger/container-use) é um servidor MCP e
+uma CLI baseada em Dagger [11]. Ele cria um ambiente isolado por agente, com
+container e branch Git, e registra comandos da execução. Seu objetivo é evitar
+colisão entre trabalhos paralelos.
+
+Ele responde onde a execução ocorreu, quais comandos rodaram e quais arquivos
+mudaram. O ACVC responde o que a tentativa afirmava, como foi medida e se ainda
+pertence à fronteira. Um fluxo pode usar container-use na execução e ACVC na
+memória comparável entre execuções.
+
+### 8.3 Rastreadores, notebooks e proveniência
+
+MLflow, Sacred, DVC e Weights & Biases associam execuções a parâmetros, dados,
+artefatos ou métricas [9, 10, 19, 20]. Notebooks preservam código, narrativa e
+saídas [6, 7, 21]. O W3C PROV oferece um modelo geral de entidades, atividades e
+agentes [15]. O recorte do ACVC é estreito: liga uma premissa humana a uma árvore
+de código, à sua linhagem e a uma comparação multiobjetivo.
+
+### 8.4 Fluxo da composição
+
+O ACVC fica antes da entrada no histórico. A fronteira informa a escolha;
+`promote` não escolhe a hipótese. Conforme o modo, ele materializa seus arquivos
+ou cria um commit Git. A autorização e a regra de escolha pertencem a quem chama
+o comando, seja uma pessoa, um script ou um agente. Num ambiente com Scion, uma
+camada externa converte a saída promovida em changeset; essa última etapa não é
+implementada pelo ACVC atual.
 
 ```mermaid
 flowchart TB
   subgraph auto ["Máquina a máquina"]
     direction LR
-    a1["um agente registra versões e medições"] --> f1["a fronteira é calculada"]
-    f1 --> p1["um agente aplica uma regra"]
-    p1 --> g1["promote copia uma árvore"]
-    p1 --> r1["o resto fica em .acvc"]
-    g1 --> s1["um changeset em main"]
+    a1["agente registra e mede"] --> f1["ACVC calcula a fronteira"]
+    f1 --> p1["agente aplica sua regra"]
+    p1 --> g1["promote --dest materializa arquivos"]
+    p1 --> r1["demais tentativas ficam em .acvc"]
+    g1 --> x1["integração externa cria changeset"]
+    x1 --> s1["Scion registra a decisão"]
   end
-  subgraph humano ["Máquina a máquina, com uma pessoa no meio"]
+  subgraph humano ["Pessoa na decisão"]
     direction LR
-    a2["um agente registra versões e medições"] --> f2["a fronteira é calculada"]
-    f2 --> h2["uma pessoa lê a fronteira"]
-    h2 --> g2["promote ou reject"]
-    h2 --> r2["o resto fica em .acvc"]
-    g2 --> s2["um changeset em main"]
+    a2["agente registra e mede"] --> f2["ACVC calcula a fronteira"]
+    f2 --> h2["pessoa lê a fronteira"]
+    h2 --> g2["promote --dest ou reject"]
+    h2 --> r2["demais tentativas ficam em .acvc"]
+    g2 --> x2["integração externa cria changeset"]
+    x2 --> s2["Scion registra a decisão"]
   end
 ```
 
-Eles se encontram de um jeito que encurta o histórico só quando várias tentativas medidas iriam para `main` sem isso. Uma mudança que já é a decisão escolhida não precisa de uma campanha. A campanha também não deixa mais barato o checkout que o post mediu.
-
 | | Só o Scion | Só o ACVC | Os dois juntos |
 | --- | --- | --- | --- |
-| A pergunta | Quem alterou uma linha, e o que diferiu no que entrou no histórico. A resposta vem do servidor. | Quais medições completas ainda não foram superadas, e qual árvore o `promote` copiou. | O servidor responde pelo histórico de `main`. A campanha responde pela busca que ainda não foi copiada. |
-| A tentativa que não entra | O post não descreve um lugar para ela. O que entra no histórico é um changeset. | Fica em `.acvc`, com os números. O Git não recebe cópia até o `promote`. | Fica em `.acvc`. `main` recebe só a árvore que o `promote` copiou, como um changeset. |
-| O que fica de fora | A escolha de qual tentativa medida deve entrar, quando há várias. | Um histórico de quase 100 GB, e dezenas de milhões de checkouts por dia. | O custo do checkout, que continua com o Scion. A tentativa que não foi copiada fica fora desse histórico. |
+| Pergunta | Quem mudou uma linha e o que entrou no histórico? | Quais medições completas ainda competem? | O Scion responde pelo histórico; o ACVC, pela busca anterior. |
+| Tentativa não promovida | O post não define um repositório experimental separado. | Fica em `.acvc`, com medições. | Fica em `.acvc`; uma integração externa envia ao Scion apenas a decisão promovida. |
+| Ganho da composição | Histórico e checkout escaláveis. | Seleção explicável entre hipóteses medidas. | A decisão conserva sua evidência sem transferir toda a exploração ao histórico operacional. |
+| Fora do escopo | Escolher entre tentativas medidas. | Checkout e blame de monorepo extremo. | A escolha continua externa; o custo do checkout continua com o Scion. |
 
-## 7. Limites
+## 9. Limitações
 
-Não há estudo sobre se pesquisadores ou agentes registram premissas com honestidade. A fronteira só é tão boa quanto os ensaios. Um ensaio completo ainda pode ser a métrica errada. O ACVC não executa o código e não o isola; o container-use ou um shell comum faz isso. Windows está fora do modelo atual de identidade de arquivo, que usa metadados Unix. O paper e o software podem divergir; o executável é a autoridade sobre o comportamento. O ACVC não faz checkout de um monorepo de 100 GB e não responde blame para dezenas de milhões de jobs. Essa escala é o problema que o Scion relata [25]. Uma camada de cache não transforma uma campanha nesse sistema.
+### 9.1 Validade dos registros
 
-## 8. Conclusão
+O sistema não verifica a honestidade de uma premissa nem se a métrica representa
+o objetivo real. Uma medição completa pode ser irrelevante. A fronteira organiza
+a evidência fornecida; não garante sua qualidade.
 
-O ACVC é uma campanha de hipóteses guardada do jeito que o Git guarda árvores: por hash, com os bytes do arquivo escritos só quando o conteúdo é novo. O hash controla a hipótese. O Git controla a decisão de conservar uma árvore. A fronteira mostra quais medições completas ainda não foram superadas, e recusa tratar uma perda como um motivo que ninguém escreveu. Tornar o commit mais barato, como o Scion faz para um monorepo [25], deixa essa escolha onde ela estava: fora do commit.
+### 9.2 Execução e isolamento
+
+O ACVC não executa código, captura automaticamente o ambiente ou isola
+processos. Shells, containers e CI continuam responsáveis por isso.
+
+### 9.3 Portabilidade e escala
+
+O modelo atual de identidade usa metadados Unix; Windows está fora do escopo
+documentado. Também não há avaliação para checkouts de centenas de gigabytes ou
+dezenas de milhões de operações. Cache não transforma uma campanha em sistema
+de source control para monorepos.
+
+### 9.4 Evolução do contrato
+
+Software e descrição podem divergir. O executável instalado e `acvc assistant`
+devem ser consultados antes de operar ou explicar o produto.
+
+## 10. Conclusão
+
+O ACVC preserva uma parte da exploração que o commit escolhido não contém: a
+premissa de cada alternativa, sua árvore, linhagem, medições e o motivo de uma
+rejeição. A fronteira mantém mais de uma alternativa quando objetivos entram em
+conflito, sem transformar dominância em decisão.
+
+O Git continua responsável pela mudança conservada. O ACVC permanece ao lado
+dele como memória experimental local. A contribuição central não é outro merge,
+mas um objeto explícito para a hipótese que antecede o commit.
 
 ## Referências
 
 [1] S. Chacon and B. Straub, *Pro Git*, 2nd ed. Apress, 2014. "Git Internals — Git Objects." https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
 
-[2] L. Torvalds e os contribuidores do Git, Git, 2005–. https://git-scm.com/ O desenho de 2005 é um armazenamento de objetos endereçável por conteúdo: blobs e árvores nomeados por hash, commits nomeando o hash de uma árvore.
+[2] L. Torvalds e os contribuidores do Git, Git, 2005–. https://git-scm.com/
 
 [3] J. O'Connor, J.-P. Aumasson, S. Neves, and Z. Wilcox-O'Hearn, "BLAKE3: one function, fast everywhere," 2020. https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
 
